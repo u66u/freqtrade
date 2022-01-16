@@ -429,9 +429,17 @@ class Telegram(RPCHandler):
                 if len(r['filled_buys']) > 1:
                     for x in range(len(r['filled_buys'])):
                         lines.append("*Buy #"+str(x+1)+":* ("+str(arrow.get(r['filled_buys'][x].order_filled_date).humanize())+")")
-                        lines.append("*Amount:* "+str(r['filled_buys'][x].amount))
-                        lines.append("*Price:* "+str(r['filled_buys'][x].price))
-                        lines.append("*Average:* "+str(r['filled_buys'][x].average))
+                        lines.append("*Buy Amount:* "+str(r['filled_buys'][x].amount))
+                        lines.append("*Average Buy Price:* "+str(r['filled_buys'][x].average))
+                        if x > 0:
+                            sumA = 0
+                            sumB = 0
+                            for y in range(x):
+                                sumA += (r['filled_buys'][y].amount * r['filled_buys'][y].average)
+                                sumB += r['filled_buys'][y].amount
+                            prev_avg_price = sumA/sumB
+                            minus_on_buy = (r['filled_buys'][x].average - prev_avg_price)/prev_avg_price
+                            lines.append("*Minus on Buy:* "+str(minus_on_buy)
 
                 # Filter empty lines using list-comprehension
                 messages.append("\n".join([line for line in lines if line]).format(**r))
