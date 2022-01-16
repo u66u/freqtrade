@@ -439,7 +439,7 @@ class Telegram(RPCHandler):
                                 sumB += r['filled_buys'][y].amount
                             prev_avg_price = sumA/sumB
                             minus_on_buy = (r['filled_buys'][x].average - prev_avg_price)/prev_avg_price
-                            lines.append("*Minus on Buy:* "+str(minus_on_buy))
+                            lines.append("*Minus on Buy:* {:.2%}".format(minus_on_buy))
 
                 # Filter empty lines using list-comprehension
                 messages.append("\n".join([line for line in lines if line]).format(**r))
