@@ -396,13 +396,13 @@ class Telegram(RPCHandler):
             messages = []
             for r in results:
                 r['open_date_hum'] = arrow.get(r['open_date']).humanize()
-                r['num_buys'] = len(r['filled_buys'])
+                r['num_buys'] = len(r['filled_buys']) if r['filled_buys'][0]['cost'] else ""
                 lines = [
                     "*Trade ID:* `{trade_id}` `(since {open_date_hum})`",
                     "*Current Pair:* {pair}",
                     "*Amount:* `{amount} ({stake_amount} {base_currency})`",
                     "*Buy Tag:* `{buy_tag}`" if r['buy_tag'] else "",
-                    "*# Buys:* `{num_buys}`" if r['filled_buys'] else "",
+                    "*Number of Buy(s):* `{num_buys}`" if r['num_buys'] else "",
                     "*Open Rate:* `{open_rate:.8f}`",
                     "*Close Rate:* `{close_rate}`" if r['close_rate'] else "",
                     "*Current Rate:* `{current_rate:.8f}`",
@@ -425,6 +425,13 @@ class Telegram(RPCHandler):
                         lines.append("*Open Order:* `{open_order}` - `{sell_order_status}`")
                     else:
                         lines.append("*Open Order:* `{open_order}`")
+
+                if len(r['filled_buys']) > 1:
+                    for x in range(len(r['filled_buys'])):
+                        lines.append("*Buy #"+x+":*")
+                        lines.append("*Amount:* "+r['filled_buys'][x]['amount'])
+                        lines.append("*Price:* "+r['filled_buys'][x]['price'])
+                        lines.append("*Average:* "+r['filled_buys'][x]['average'])
 
                 # Filter empty lines using list-comprehension
                 messages.append("\n".join([line for line in lines if line]).format(**r))

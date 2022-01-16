@@ -284,7 +284,7 @@ class LocalTrade():
     def to_json(self) -> Dict[str, Any]:
         filled_buys = self.select_filled_orders('buy')
         buys_json = dict()
-        if len(filled_buys) > 1:
+        if len(filled_buys) > 0:
             for x in range(len(filled_buys)):
                 buy = dict(
                     cost=filled_buys[x].cost,
