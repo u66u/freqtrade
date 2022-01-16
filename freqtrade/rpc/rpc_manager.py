@@ -85,9 +85,9 @@ class RPCManager:
         timeframe = config['timeframe']
         exchange_name = config['exchange']['name']
         strategy_name = config.get('strategy', '')
-        pos_adjust_enabled = 'False'
+        pos_adjust_enabled = 'Off'
         if config['position_adjustment_enable']:
-            pos_adjust_enabled = 'True'
+            pos_adjust_enabled = 'On'
         self.send_msg({
             'type': RPCMessageType.STARTUP,
             'status': f'*Exchange:* `{exchange_name}`\n'
@@ -96,7 +96,7 @@ class RPCManager:
                       f'*{"Trailing " if trailing_stop else ""}Stoploss:* `{stoploss}`\n'
                       f'*Timeframe:* `{timeframe}`\n'
                       f'*Strategy:* `{strategy_name}`\n'
-                      f'*Pos. adjust enabled:* `{pos_adjust_enabled}`\n'
+                      f'*Position adjustment:* `{pos_adjust_enabled}`\n'
         })
         self.send_msg({
             'type': RPCMessageType.STARTUP,

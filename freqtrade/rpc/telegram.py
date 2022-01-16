@@ -396,11 +396,13 @@ class Telegram(RPCHandler):
             messages = []
             for r in results:
                 r['open_date_hum'] = arrow.get(r['open_date']).humanize()
+                r['num_buys'] = len(r['filled_buys'])
                 lines = [
                     "*Trade ID:* `{trade_id}` `(since {open_date_hum})`",
                     "*Current Pair:* {pair}",
                     "*Amount:* `{amount} ({stake_amount} {base_currency})`",
                     "*Buy Tag:* `{buy_tag}`" if r['buy_tag'] else "",
+                    "*# Buys:* `{num_buys}`" if r['filled_buys'] else "",
                     "*Open Rate:* `{open_rate:.8f}`",
                     "*Close Rate:* `{close_rate}`" if r['close_rate'] else "",
                     "*Current Rate:* `{current_rate:.8f}`",
