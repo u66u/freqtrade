@@ -226,6 +226,9 @@ class RPC:
                         trade.pair, refresh=False, side="sell")
                 except (PricingError, ExchangeError):
                     current_rate = NAN
+
+                filled_buys = trade.select_filled_orders('buy')
+                count_of_buys = len(filled_buys)
                 trade_profit = trade.calc_profit(current_rate)
                 profit_str = f'{trade.calc_profit_ratio(current_rate):.2%}'
                 if self._fiat_converter:
@@ -244,13 +247,14 @@ class RPC:
                                           and trade.close_rate_requested is None) else '')
                                + ('**' if (trade.close_rate_requested is not None) else ''),
                     shorten_date(arrow.get(trade.open_date).humanize(only_distance=True)),
-                    profit_str
+                    profit_str,
+                    str(count_of_buys)
                 ])
             profitcol = "Profit"
             if self._fiat_converter:
                 profitcol += " (" + fiat_display_currency + ")"
 
-            columns = ['ID', 'Pair', 'Since', profitcol]
+            columns = ['ID', 'Pair', 'Since', profitcol, 'Buys']
             return trades_list, columns, fiat_profit_sum
 
     def _rpc_daily_profit(
