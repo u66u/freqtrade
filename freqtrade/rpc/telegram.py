@@ -428,7 +428,7 @@ class Telegram(RPCHandler):
 
                 if len(r['filled_buys']) > 1:
                     for x in range(len(r['filled_buys'])):
-                        lines.append("*Buy #"+str(x)+":*")
+                        lines.append("*Buy #"+str(x+1)+":* ("+str(arrow.get(r['filled_buys'][x].order_filled_date).humanize())+")")
                         lines.append("*Amount:* "+str(r['filled_buys'][x].amount))
                         lines.append("*Price:* "+str(r['filled_buys'][x].price))
                         lines.append("*Average:* "+str(r['filled_buys'][x].average))
