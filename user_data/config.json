@@ -107,6 +107,5 @@
     "db_url": "sqlite:///tradesv3.sqlite",
     "user_data_dir" : "user_data",
     "strategy": "SampleStrategy",
-    "strategy_path": "user_data/strategies",
-    "position_adjustment_enable": true
+    "strategy_path": "user_data/strategies"
 }
