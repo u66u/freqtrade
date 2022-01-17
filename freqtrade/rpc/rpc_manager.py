@@ -85,9 +85,7 @@ class RPCManager:
         timeframe = config['timeframe']
         exchange_name = config['exchange']['name']
         strategy_name = config.get('strategy', '')
-        pos_adjust_enabled = 'Off'
-        if config['position_adjustment_enable']:
-            pos_adjust_enabled = 'On'
+        pos_adjust_enabled = 'On' if config['position_adjustment_enable'] else 'Off'
         self.send_msg({
             'type': RPCMessageType.STARTUP,
             'status': f'*Exchange:* `{exchange_name}`\n'
