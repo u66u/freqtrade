@@ -104,7 +104,7 @@
     "internals": {
         "process_throttle_secs": 2
     },
-    "db_url": "sqlite:///tradesv3.sqlite",
+    "db_url": "sqlite:///user_data/tradesv3.sqlite",
     "user_data_dir" : "user_data",
     "strategy": "SampleStrategy",
     "strategy_path": "user_data/strategies"
