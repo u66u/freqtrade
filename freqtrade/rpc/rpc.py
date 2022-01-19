@@ -226,9 +226,6 @@ class RPC:
                         trade.pair, refresh=False, side="sell")
                 except (PricingError, ExchangeError):
                     current_rate = NAN
-
-                filled_buys = trade.select_filled_orders('buy')
-                count_of_buys = len(filled_buys)
                 trade_profit = trade.calc_profit(current_rate)
                 profit_str = f'{trade.calc_profit_ratio(current_rate):.2%}'
                 if self._fiat_converter:
@@ -241,7 +238,6 @@ class RPC:
                         profit_str += f" ({fiat_profit:.2f})"
                         fiat_profit_sum = fiat_profit if isnan(fiat_profit_sum) \
                             else fiat_profit_sum + fiat_profit
-
                 detail_trade = [
                     trade.id,
                     trade.pair + ('*' if (trade.open_order_id is not None
@@ -250,21 +246,20 @@ class RPC:
                     shorten_date(arrow.get(trade.open_date).humanize(only_distance=True)),
                     profit_str
                 ]
-
                 if self._config.get('position_adjustment_enable', False):
-                    detail_trade.append(str(count_of_buys))
-
+                    filled_buys = trade.select_filled_orders('buy')
+                    detail_trade.append(str(len(filled_buys)))
                 trades_list.append(detail_trade)
             profitcol = "Profit"
             if self._fiat_converter:
                 profitcol += " (" + fiat_display_currency + ")"
 
             if self._config.get('position_adjustment_enable', False):
-                columns = ['ID', 'Pair', 'Since', profitcol, 'Buys']
+                columns = ['ID', 'Pair', 'Since', profitcol, '# Buys']
             else:
                 columns = ['ID', 'Pair', 'Since', profitcol]
             return trades_list, columns, fiat_profit_sum
-
+            
     def _rpc_daily_profit(
             self, timescale: int,
             stake_currency: str, fiat_display_currency: str) -> Dict[str, Any]:
