@@ -429,19 +429,24 @@ class Telegram(RPCHandler):
                 if len(r['filled_buys']) > 1:
                     for x in range(len(r['filled_buys'])):
                         if x == 0:
+                            lines.append("  ")
                             lines.append("*Buy #"+str(x+1)+":*")
+                            lines.append("*Buy Amount:* "+str(r['filled_buys'][x].amount))
+                            lines.append("*Average Buy Price:* "+str(r['filled_buys'][x].average))
                         else:
+                            lines.append("  ")
                             sumA = 0
                             sumB = 0
                             for y in range(x):
                                 sumA += (r['filled_buys'][y].amount * r['filled_buys'][y].average)
                                 sumB += r['filled_buys'][y].amount
                             prev_avg_price = sumA/sumB
+                            price_to_1st_buy = (r['filled_buys'][x].average - r['filled_buys'][0].average)/r['filled_buys'][0].average
                             minus_on_buy = (r['filled_buys'][x].average - prev_avg_price)/prev_avg_price
                             lines.append("*Buy #"+str(x+1)+":* ("+str(arrow.get(r['filled_buys'][x].order_filled_date).humanize())+
-                                         ", at {:.2%} profit)".format(minus_on_buy))
-                        lines.append("*Buy Amount:* "+str(r['filled_buys'][x].amount))
-                        lines.append("*Average Buy Price:* "+str(r['filled_buys'][x].average))
+                                         ", at {:.2%} avg profit)".format(minus_on_buy))
+                            lines.append("*Buy Amount:* "+str(r['filled_buys'][x].amount))
+                            lines.append("*Average Buy Price:* "+str(r['filled_buys'][x].average)+" ({:.2%} from 1st buy)".format(price_to_1st_buy))
 
                 # Filter empty lines using list-comprehension
                 messages.append("\n".join([line for line in lines if line]).format(**r))
