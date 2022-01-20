@@ -401,14 +401,21 @@ class Telegram(RPCHandler):
                     "*Trade ID:* `{trade_id}` `(since {open_date_hum})`",
                     "*Current Pair:* {pair}",
                     "*Amount:* `{amount} ({stake_amount} {base_currency})`",
-                    "*Buy Tag:* `{buy_tag}`" if r['buy_tag'] else "",
-                    "*Number of Buy(s):* `{num_buys}`" if r['num_buys'] else "",
+                    "*Buy Tag:* `{buy_tag}`" if r['buy_tag'] else ""
+                ]
+
+                if r['position_adjustment_enable']:
+                    r['max_buy_position_adjustment'] += 1
+                    lines.append("*Number of Buy(s):* `{num_buys}/{max_buy_position_adjustment}`")
+
+                lines.extend([
                     "*Open Rate:* `{open_rate:.8f}`",
-                    "*Close Rate:* `{close_rate}`" if r['close_rate'] else "",
+                    "*Close Rate:* `{close_rate:.8f}`" if r['close_rate'] else "",
                     "*Current Rate:* `{current_rate:.8f}`",
                     ("*Current Profit:* " if r['is_open'] else "*Close Profit: *")
                     + "`{profit_ratio:.2%}`",
-                ]
+                ])
+
                 if (r['stop_loss_abs'] != r['initial_stop_loss_abs']
                         and r['initial_stop_loss_ratio'] is not None):
                     # Adding initial stoploss only if it is different from stoploss
@@ -432,7 +439,7 @@ class Telegram(RPCHandler):
                             lines.append("  ")
                             lines.append("*Buy #"+str(x+1)+":*")
                             lines.append("*Buy Amount:* "+str(r['filled_buys'][x].amount))
-                            lines.append("*Average Buy Price:* "+str(r['filled_buys'][x].average))
+                            lines.append("*Average Buy Price:* "+str(r['filled_buys'][x].average:.8f))
                         else:
                             lines.append("  ")
                             sumA = 0
@@ -446,7 +453,7 @@ class Telegram(RPCHandler):
                             lines.append("*Buy #"+str(x+1)+":* ("+str(arrow.get(r['filled_buys'][x].order_filled_date).humanize())+
                                          ", at {:.2%} avg profit)".format(minus_on_buy))
                             lines.append("*Buy Amount:* "+str(r['filled_buys'][x].amount))
-                            lines.append("*Average Buy Price:* "+str(r['filled_buys'][x].average)+" ({:.2%} from 1st buy)".format(price_to_1st_buy))
+                            lines.append("*Average Buy Price:* "+str(r['filled_buys'][x].average:.8f)+" ({:.2%} from 1st buy)".format(price_to_1st_buy))
 
                 # Filter empty lines using list-comprehension
                 messages.append("\n".join([line for line in lines if line]).format(**r))

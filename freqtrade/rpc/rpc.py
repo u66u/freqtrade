@@ -211,6 +211,8 @@ class RPC:
                         order['type'], order['side'], order['remaining']
                     ) if order else None,
                 ))
+                trade_dict['position_adjustment_enable'] = self._config['position_adjustment_enable']
+                trade_dict['max_buy_position_adjustment'] = self._config['max_buy_position_adjustment']
                 results.append(trade_dict)
             return results
 
