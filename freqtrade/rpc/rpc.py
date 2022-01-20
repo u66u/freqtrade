@@ -250,7 +250,7 @@ class RPC:
                     profit_str
                 ]
                 if self._config.get('position_adjustment_enable', False):
-                    max_buy = self._config.max_buy_position_adjustment + 1
+                    max_buy = self._config['max_buy_position_adjustment'] + 1
                     filled_buys = trade.select_filled_orders('buy')
                     detail_trade.append(f"{len(filled_buys)}/{max_buy}")
                 trades_list.append(detail_trade)
