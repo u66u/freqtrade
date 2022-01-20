@@ -455,7 +455,7 @@ class Telegram(RPCHandler):
                                          ", at {:.2%} avg profit)".format(minus_on_buy))
                             lines.append("*Buy Amount:* {} ({:.8f} {})".format(r['filled_buys'][x].amount, r['filled_buys'][x].cost, r['base_currency']))
                             lines.append("*Average Buy Price:* {} ({:.2%} from 1st buy rate)".format(r['filled_buys'][x].average, price_to_1st_buy))
-                            lines.append("*Order filled at:* {} ({})".format(r['filled_buys'][x].order_filled_date, arrow.get(r['filled_buys'][x].order_filled_date - r['filled_buys'][x-1].order_filled_date).humanize()))
+                            lines.append("*Order filled at:* {} ()".format(r['filled_buys'][x].order_filled_date))
 
                 # Filter empty lines using list-comprehension
                 messages.append("\n".join([line for line in lines if line]).format(**r))
