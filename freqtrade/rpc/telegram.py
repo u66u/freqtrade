@@ -452,7 +452,7 @@ class Telegram(RPCHandler):
                             prev_avg_price = sumA/sumB
                             price_to_1st_buy = (r['filled_buys'][x].average - r['filled_buys'][0].average)/r['filled_buys'][0].average
                             minus_on_buy = (r['filled_buys'][x].average - prev_avg_price)/prev_avg_price
-                            lines.append("*Buy #{}:* (, at {:.2%} avg profit)".format(x+1,minus_on_buy))
+                            lines.append("*Buy #{}:* (at {:.2%} avg profit)".format(x+1,minus_on_buy))
                             lines.append("*Buy Amount:* {} ({:.8f} {})".format(r['filled_buys'][x].amount, r['filled_buys'][x].cost, r['base_currency']))
                             lines.append("*Average Buy Price:* {} ({:.2%} from 1st buy rate)".format(r['filled_buys'][x].average, price_to_1st_buy))
                             duration_between_buys = current_buy_datetime - arrow.get(r['filled_buys'][x-1].order_filled_date)
