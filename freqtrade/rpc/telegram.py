@@ -438,8 +438,8 @@ class Telegram(RPCHandler):
                         if x == 0:
                             lines.append("  ")
                             lines.append("*Buy #"+str(x+1)+":*")
-                            lines.append("*Buy Amount:* "+str(r['filled_buys'][x].amount))
-                            lines.append("*Average Buy Price:* "+str(r['filled_buys'][x].average))
+                            lines.append("*Buy Amount:* {:.8f}".format(r['filled_buys'][x].amount)+" ({0} {1})".format(r['filled_buys'][x].cost), r['base_currency'])
+                            lines.append("*Average Buy Price:* {:.8f}".format(r['filled_buys'][x].average))
                         else:
                             lines.append("  ")
                             sumA = 0
@@ -452,8 +452,8 @@ class Telegram(RPCHandler):
                             minus_on_buy = (r['filled_buys'][x].average - prev_avg_price)/prev_avg_price
                             lines.append("*Buy #"+str(x+1)+":* ("+str(arrow.get(r['filled_buys'][x].order_filled_date).humanize())+
                                          ", at {:.2%} avg profit)".format(minus_on_buy))
-                            lines.append("*Buy Amount:* "+str(r['filled_buys'][x].amount))
-                            lines.append("*Average Buy Price:* "+str(r['filled_buys'][x].average)+" ({:.2%} from 1st buy)".format(price_to_1st_buy))
+                            lines.append("*Buy Amount:* {:.8f}".format(r['filled_buys'][x].amount)+" ({0} {1})".format(r['filled_buys'][x].cost), r['base_currency'])
+                            lines.append("*Average Buy Price:* {:.8f} ({:.2%} from 1st buy rate)".format(r['filled_buys'][x].average, price_to_1st_buy))
 
                 # Filter empty lines using list-comprehension
                 messages.append("\n".join([line for line in lines if line]).format(**r))
