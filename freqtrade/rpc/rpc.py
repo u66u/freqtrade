@@ -212,8 +212,9 @@ class RPC:
                         order['type'], order['side'], order['remaining']
                     ) if order else None,
                 ))
-                trade_dict['position_adjustment_enable'] = self._config['position_adjustment_enable']
-                trade_dict['max_buy_position_adjustment'] = self._config['max_buy_position_adjustment']
+                cp_cfg = self._config
+                trade_dict['position_adjustment_enable'] = cp_cfg['position_adjustment_enable']
+                trade_dict['max_buy_position_adjustment'] = cp_cfg['max_buy_position_adjustment']
                 results.append(trade_dict)
             return results
 
@@ -266,7 +267,7 @@ class RPC:
             else:
                 columns = ['ID', 'Pair', 'Since', profitcol]
             return trades_list, columns, fiat_profit_sum
-            
+
     def _rpc_daily_profit(
             self, timescale: int,
             stake_currency: str, fiat_display_currency: str) -> Dict[str, Any]:

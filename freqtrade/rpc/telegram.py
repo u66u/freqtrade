@@ -369,6 +369,48 @@ class Telegram(RPCHandler):
         else:
             return "\N{CROSS MARK}"
 
+    def _prepare_buy_details(self, filled_trades, base_currency):
+        """
+        Prepare details of trade with buy adjustment enabled
+        """
+        lines = []
+        for x in range(len(filled_trades)):
+            current_buy_datetime = arrow.get(filled_trades[x].order_filled_date)
+            lines.append("  ")
+            if x == 0:
+                lines.append("*Buy #{}:*".format(x+1))
+                lines.append("*Buy Amount:* {} ({:.8f} {})"
+                             .format(filled_trades[x].amount, filled_trades[x].cost, base_currency))
+                lines.append("*Average Buy Price:* {}".format(filled_trades[x].average))
+                lines.append("*Order filled at:* {} UTC"
+                             .format(current_buy_datetime.format('YYYY-MM-DD HH:mm:ss')))
+            else:
+                sumA = 0
+                sumB = 0
+                for y in range(x):
+                    sumA += (filled_trades[y].amount * filled_trades[y].average)
+                    sumB += filled_trades[y].amount
+                prev_avg_price = sumA/sumB
+                price_to_1st_buy = (filled_trades[x].average - filled_trades[0].average) \
+                    / filled_trades[0].average
+                minus_on_buy = (filled_trades[x].average - prev_avg_price)/prev_avg_price
+                dur_buys = current_buy_datetime - arrow.get(filled_trades[x-1].order_filled_date)
+                days = dur_buys.days
+                hours, remainder = divmod(dur_buys.seconds, 3600)
+                minutes, seconds = divmod(remainder, 60)
+                lines.append("*Buy #{}:* at {:.2%} avg profit".format(x+1, minus_on_buy))
+                lines.append("({})".format(current_buy_datetime
+                                           .humanize(granularity=["day", "hour", "minute"])))
+                lines.append("*Buy Amount:* {} ({:.8f} {})"
+                             .format(filled_trades[x].amount, filled_trades[x].cost, base_currency))
+                lines.append("*Average Buy Price:* {} ({:.2%} from 1st buy rate)"
+                             .format(filled_trades[x].average, price_to_1st_buy))
+                lines.append("*Order filled at:* {} UTC"
+                             .format(current_buy_datetime.format('YYYY-MM-DD HH:mm:ss')))
+                lines.append("({} day(s) {} hour(s) {} minute(s) {} second(s) from previous buy)"
+                             .format(days, hours, minutes, seconds))
+        return lines
+
     @authorized_only
     def _status(self, update: Update, context: CallbackContext) -> None:
         """
@@ -434,31 +476,8 @@ class Telegram(RPCHandler):
                         lines.append("*Open Order:* `{open_order}`")
 
                 if len(r['filled_buys']) > 1:
-                    for x in range(len(r['filled_buys'])):
-                        current_buy_datetime = arrow.get(r['filled_buys'][x].order_filled_date)
-                        if x == 0:
-                            lines.append("  ")
-                            lines.append("*Buy #{}:*".format(x+1))
-                            lines.append("*Buy Amount:* {} ({:.8f} {})".format(r['filled_buys'][x].amount, r['filled_buys'][x].cost, r['base_currency']))
-                            lines.append("*Average Buy Price:* {}".format(r['filled_buys'][x].average))
-                            lines.append("*Order filled at:* {} UTC".format(current_buy_datetime.format('YYYY-MM-DD HH:mm:ss')))
-                        else:
-                            lines.append("  ")
-                            sumA = 0
-                            sumB = 0
-                            for y in range(x):
-                                sumA += (r['filled_buys'][y].amount * r['filled_buys'][y].average)
-                                sumB += r['filled_buys'][y].amount
-                            prev_avg_price = sumA/sumB
-                            price_to_1st_buy = (r['filled_buys'][x].average - r['filled_buys'][0].average)/r['filled_buys'][0].average
-                            minus_on_buy = (r['filled_buys'][x].average - prev_avg_price)/prev_avg_price
-                            lines.append("*Buy #{}:* (at {:.2%} avg profit)".format(x+1,minus_on_buy))
-                            lines.append("*Buy Amount:* {} ({:.8f} {})".format(r['filled_buys'][x].amount, r['filled_buys'][x].cost, r['base_currency']))
-                            lines.append("*Average Buy Price:* {} ({:.2%} from 1st buy rate)".format(r['filled_buys'][x].average, price_to_1st_buy))
-                            duration_between_buys = current_buy_datetime - arrow.get(r['filled_buys'][x-1].order_filled_date)
-                            lines.append("*Order filled at:* {} UTC".format(current_buy_datetime.format('YYYY-MM-DD HH:mm:ss')))
-                            lines.append("({})".format(current_buy_datetime.humanize(granularity=["day", "hour", "minute"])))
-                            lines.append("({} from previous buy)".format(duration_between_buys))
+                    lines_detail = self._prepare_buy_details(r['filled_buys'], r['base_currency'])
+                    lines.extend(lines_detail)
 
                 # Filter empty lines using list-comprehension
                 messages.append("\n".join([line for line in lines if line]).format(**r))
