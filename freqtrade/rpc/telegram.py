@@ -452,7 +452,9 @@ class Telegram(RPCHandler):
 
                 lines.extend([
                     "*Open Rate:* `{open_rate:.8f}`",
+                    "*Open Date:* `{open_date}`",
                     "*Close Rate:* `{close_rate:.8f}`" if r['close_rate'] else "",
+                    "*Close Date:* `{close_date}`" if r['close_date'] else "",
                     "*Current Rate:* `{current_rate:.8f}`",
                     ("*Current Profit:* " if r['is_open'] else "*Close Profit: *")
                     + "`{profit_ratio:.2%}`",
