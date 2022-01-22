@@ -21,7 +21,7 @@ from telegram.ext import CallbackContext, CallbackQueryHandler, CommandHandler, 
 from telegram.utils.helpers import escape_markdown
 
 from freqtrade.__init__ import __version__
-from freqtrade.constants import DUST_PER_COIN
+from freqtrade.constants import DATETIME_PRINT_FORMAT, DUST_PER_COIN
 from freqtrade.enums import RPCMessageType
 from freqtrade.exceptions import OperationalException
 from freqtrade.misc import chunks, plural, round_coin_value
