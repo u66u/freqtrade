@@ -382,8 +382,6 @@ class Telegram(RPCHandler):
                 lines.append("*Buy Amount:* {} ({:.8f} {})"
                              .format(filled_trades[x].amount, filled_trades[x].cost, base_currency))
                 lines.append("*Average Buy Price:* {}".format(filled_trades[x].average))
-                lines.append("*Order filled at:* {} UTC"
-                             .format(current_buy_datetime.format('YYYY-MM-DD HH:mm:ss')))
             else:
                 sumA = 0
                 sumB = 0
