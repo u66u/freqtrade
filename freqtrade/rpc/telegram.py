@@ -405,7 +405,7 @@ class Telegram(RPCHandler):
                              .format(cur_buy_amount, filled_trades[x]["cost"], base_currency))
                 lines.append("*Average Buy Price:* {} ({:.2%} from 1st buy rate)"
                              .format(cur_buy_average, price_to_1st_buy))
-                lines.append("*Order filled at:* {}".format(current_buy_datetime))
+                lines.append("*Order filled at:* {}".format(filled_trades[x]["order_filled_date"]))
                 lines.append("({}d {}h {}m {}s from previous buy)"
                              .format(days, hours, minutes, seconds))
         return lines
