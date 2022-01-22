@@ -283,7 +283,7 @@ class LocalTrade():
 
     def to_json(self) -> Dict[str, Any]:
         filled_buys = self.select_filled_orders('buy')
-        logger.info(filled_buys)
+
         return {
             'trade_id': self.id,
             'pair': self.pair,
