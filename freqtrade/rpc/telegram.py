@@ -375,24 +375,24 @@ class Telegram(RPCHandler):
         """
         lines = []
         for x in range(len(filled_trades)):
-            current_buy_datetime = arrow.get(filled_trades[x].order_filled_date)
+            current_buy_datetime = arrow.get(filled_trades[x]["order_filled_date"])
             lines.append("  ")
             if x == 0:
                 lines.append("*Buy #{}:*".format(x+1))
                 lines.append("*Buy Amount:* {} ({:.8f} {})"
-                             .format(filled_trades[x].amount, filled_trades[x].cost, base_currency))
-                lines.append("*Average Buy Price:* {}".format(filled_trades[x].average))
+                             .format(filled_trades[x]["amount"], filled_trades[x]["cost"], base_currency))
+                lines.append("*Average Buy Price:* {}".format(filled_trades[x]["average"]))
             else:
                 sumA = 0
                 sumB = 0
                 for y in range(x):
-                    sumA += (filled_trades[y].amount * filled_trades[y].average)
-                    sumB += filled_trades[y].amount
+                    sumA += (filled_trades[y]["amount"] * filled_trades[y]["average"])
+                    sumB += filled_trades[y]["amount"]
                 prev_avg_price = sumA/sumB
-                price_to_1st_buy = (filled_trades[x].average - filled_trades[0].average) \
-                    / filled_trades[0].average
-                minus_on_buy = (filled_trades[x].average - prev_avg_price)/prev_avg_price
-                dur_buys = current_buy_datetime - arrow.get(filled_trades[x-1].order_filled_date)
+                price_to_1st_buy = (filled_trades[x]["average"] - filled_trades[0]["average"]) \
+                    / filled_trades[0]["average"]
+                minus_on_buy = (filled_trades[x]["average"] - prev_avg_price)/prev_avg_price
+                dur_buys = current_buy_datetime - arrow.get(filled_trades[x-1]["order_filled_date"])
                 days = dur_buys.days
                 hours, remainder = divmod(dur_buys.seconds, 3600)
                 minutes, seconds = divmod(remainder, 60)
@@ -400,9 +400,9 @@ class Telegram(RPCHandler):
                 lines.append("({})".format(current_buy_datetime
                                            .humanize(granularity=["day", "hour", "minute"])))
                 lines.append("*Buy Amount:* {} ({:.8f} {})"
-                             .format(filled_trades[x].amount, filled_trades[x].cost, base_currency))
+                             .format(filled_trades[x]["amount"], filled_trades[x]["cost"], base_currency))
                 lines.append("*Average Buy Price:* {} ({:.2%} from 1st buy rate)"
-                             .format(filled_trades[x].average, price_to_1st_buy))
+                             .format(filled_trades[x]["average"], price_to_1st_buy))
                 lines.append("*Order filled at:* {} UTC"
                              .format(current_buy_datetime.format('YYYY-MM-DD HH:mm:ss')))
                 lines.append("({} day(s) {} hour(s) {} minute(s) {} second(s) from previous buy)"
