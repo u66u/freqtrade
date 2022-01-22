@@ -283,6 +283,17 @@ class LocalTrade():
 
     def to_json(self) -> Dict[str, Any]:
         filled_buys = self.select_filled_orders('buy')
+        buys_json = dict()
+        if len(filled_buys) > 0:
+            for x in range(len(filled_buys)):
+                buy = dict(
+                    cost=filled_buys[x].cost,
+                    amount=filled_buys[x].amount,
+                    price=filled_buys[x].price,
+                    average=filled_buys[x].average,
+                    order_filled_date=filled_buys[x].order_filled_date
+                )
+                buys_json[x] = buy
 
         return {
             'trade_id': self.id,
@@ -347,7 +358,7 @@ class LocalTrade():
             'max_rate': self.max_rate,
 
             'open_order_id': self.open_order_id,
-            'filled_buys': filled_buys,
+            'filled_buys': buys_json,
         }
 
     @staticmethod
