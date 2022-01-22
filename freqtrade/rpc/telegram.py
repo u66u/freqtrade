@@ -388,13 +388,13 @@ class Telegram(RPCHandler):
                 sumA = 0
                 sumB = 0
                 for y in range(x):
-                    sumA += (filled_trades[y]["amount"] * filled_trades[y]["average"])
-                    sumB += filled_trades[y]["amount"]
+                    sumA += (filled_trades[str(y)]["amount"] * filled_trades[str(y)]["average"])
+                    sumB += filled_trades[str(y)]["amount"]
                 prev_avg_price = sumA/sumB
-                price_to_1st_buy = (cur_buy_average - filled_trades[0]["average"]) \
-                    / filled_trades[0]["average"]
+                price_to_1st_buy = (cur_buy_average - filled_trades["0"]["average"]) \
+                    / filled_trades["0"]["average"]
                 minus_on_buy = (cur_buy_average - prev_avg_price)/prev_avg_price
-                dur_buys = current_buy_datetime - arrow.get(filled_trades[x-1]["order_filled_date"])
+                dur_buys = current_buy_datetime - arrow.get(filled_trades[str(x-1)]["order_filled_date"])
                 days = dur_buys.days
                 hours, remainder = divmod(dur_buys.seconds, 3600)
                 minutes, seconds = divmod(remainder, 60)
