@@ -287,13 +287,14 @@ class LocalTrade():
         if len(filled_buys) > 0:
             for x in range(len(filled_buys)):
                 buy = dict(
-                    cost=filled_buys[x].cost,
+                    cost=filled_buys[x].cost if filled_buys[x].cost else 0.0,
                     amount=filled_buys[x].amount,
                     price=filled_buys[x].price,
-                    average=filled_buys[x].average,
-                    order_filled_date=filled_buys[x].order_filled_date.strftime(DATETIME_PRINT_FORMAT)
+                    average=round(filled_buys[x].average,8) if filled_buys[x].average else 0.0,
+                    order_filled_date=filled_buys[x].order_filled_date.strftime(DATETIME_PRINT_FORMAT)\
+                                      if filled_buys[x].order_filled_date else None
                 )
-                buys_json[x] = buy
+                buys_json[str(x)] = buy
 
         return {
             'trade_id': self.id,
