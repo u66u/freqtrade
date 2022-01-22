@@ -291,7 +291,7 @@ class LocalTrade():
                     amount=filled_buys[x].amount,
                     price=filled_buys[x].price,
                     average=filled_buys[x].average,
-                    order_filled_date=filled_buys[x].order_filled_date
+                    order_filled_date=filled_buys[x].order_filled_date.strftime(DATETIME_PRINT_FORMAT)
                 )
                 buys_json[x] = buy
 
