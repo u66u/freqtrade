@@ -214,7 +214,7 @@ class RPC:
                 ))
                 cp_cfg = self._config
                 trade_dict['position_adjustment_enable'] = cp_cfg['position_adjustment_enable']
-                trade_dict['max_buy_position_adjustment'] = cp_cfg['max_buy_position_adjustment']
+                # trade_dict['max_buy_position_adjustment'] = cp_cfg['max_buy_position_adjustment']
                 results.append(trade_dict)
             return results
 
