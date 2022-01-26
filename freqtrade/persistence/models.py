@@ -308,9 +308,9 @@ class LocalTrade():
         filled_sells = []
         if len(filled_orders) > 0:
             for x in range(len(filled_orders)):
-                if filled_orders[x].ft_order_side == 'buy'
+                if filled_orders[x].ft_order_side == 'buy':
                     filled_buys.append(filled_orders[x].to_json())
-                else if filled_orders[x].ft_order_side == 'sell'
+                else if filled_orders[x].ft_order_side == 'sell':
                     filled_sells.append(filled_orders[x].to_json())
 
         return {
