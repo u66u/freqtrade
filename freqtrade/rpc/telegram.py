@@ -449,9 +449,8 @@ class Telegram(RPCHandler):
                 ]
 
                 if r['position_adjustment_enable']:
-                    # r['max_buy_position_adjustment'] += 1
-                    # lines.append("*Number of Buy(s):* `{num_buys}/{max_buy_position_adjustment}`")
-                    lines.append("*Number of Buy(s):* `{num_buys}`")
+                    r['max_entry_position_adjustment'] += 1
+                    lines.append("*Number of Buy(s):* `{num_buys}/{max_entry_position_adjustment}`")
 
                 lines.extend([
                     "*Open Rate:* `{open_rate:.8f}`",
@@ -1410,7 +1409,7 @@ class Telegram(RPCHandler):
         if val['position_adjustment_enable']:
             pa_info = (
                 f"*Position adjustment:* On\n"
-                f"*Max buy position adjustment:* `{val['max_buy_position_adjustment']}`\n"
+                f"*Max buy position adjustment:* `{val['max_entry_position_adjustment']}`\n"
             )
         else:
             pa_info = "*Position adjustment:* Off\n"

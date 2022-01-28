@@ -138,8 +138,8 @@ class RPC:
             'state': str(botstate),
             'runmode': config['runmode'].value,
             'position_adjustment_enable': config.get('position_adjustment_enable', False),
-            'max_buy_position_adjustment': (config['max_buy_position_adjustment']
-                                            if config['max_buy_position_adjustment'] != float('inf')
+            'max_entry_position_adjustment': (config['max_entry_position_adjustment']
+                                            if config['max_entry_position_adjustment'] != float('inf')
                                             else -1)
         }
         return val
@@ -214,7 +214,7 @@ class RPC:
                 ))
                 cp_cfg = self._config
                 trade_dict['position_adjustment_enable'] = cp_cfg['position_adjustment_enable']
-                # trade_dict['max_buy_position_adjustment'] = cp_cfg['max_buy_position_adjustment']
+                trade_dict['max_entry_position_adjustment'] = cp_cfg['max_entry_position_adjustment']
                 results.append(trade_dict)
             return results
 
@@ -254,7 +254,7 @@ class RPC:
                     profit_str
                 ]
                 if self._config.get('position_adjustment_enable', False):
-                    max_buy = self._config['max_buy_position_adjustment'] + 1
+                    max_buy = self._config['max_entry_position_adjustment'] + 1
                     filled_buys = trade.select_filled_orders('buy')
                     detail_trade.append(f"{len(filled_buys)}/{max_buy}")
                 trades_list.append(detail_trade)
