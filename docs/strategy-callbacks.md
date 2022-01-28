@@ -611,7 +611,7 @@ class DigDeeperStrategy(IStrategy):
     # ... populate_* methods
     
     # Example specific variables
-    max_buy_position_adjustment = 3
+    max_entry_position_adjustment = 3
     # This number is explained a bit further down
     max_dca_multiplier = 5.5
     
@@ -652,6 +652,8 @@ class DigDeeperStrategy(IStrategy):
         if last_candle['close'] < previous_candle['close']:
             return None
 
+        filled_buys = trade.select_filled_orders('buy')
+        count_of_buys = trade.nr_of_successful_buys
         # Allow up to 3 additional increasingly larger buys (4 in total)
         # Initial buy is 1x
         # If that falls to -5% profit, we buy 1.25x more, average profit should increase to roughly -2.2%

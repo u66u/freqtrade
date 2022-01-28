@@ -382,10 +382,10 @@ class Backtesting:
         # Check if we need to adjust our current positions
         if self.strategy.position_adjustment_enable:
             check_adjust_buy = True
-            if self.strategy.max_buy_position_adjustment > -1:
+            if self.strategy.max_entry_position_adjustment > -1:
                 filled_buys = trade.select_filled_orders('buy')
                 count_of_buys = len(filled_buys)
-                check_adjust_buy = (count_of_buys <= self.strategy.max_buy_position_adjustment)
+                check_adjust_buy = (count_of_buys <= self.strategy.max_entry_position_adjustment)
             if check_adjust_buy:
                 trade = self._get_adjust_trade_entry_for_candle(trade, sell_row)
 
