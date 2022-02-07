@@ -104,3 +104,5 @@ target/
 !user_data/config-telegram.json
 !user_data/config-exchange.json
 !user_data/config-whitelist-mc-busd.json
+!user_data/config-whitelist-futures-binance*
+!user_data/config-exchange-ftx-futures.json

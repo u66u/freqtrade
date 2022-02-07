@@ -1,0 +1,34 @@
+{
+    "exchange": {
+        "name": "ftx",
+        "key": "1",
+        "secret": "2",
+        // "password": "3", // for kucoin
+        "ccxt_config": {"enableRateLimit": true},
+        "ccxt_async_config": {
+            "enableRateLimit": true,
+            "rateLimit": 100
+        },
+        "pair_whitelist": [
+            ".*PERP/.*"
+        ],
+        "pair_blacklist": [
+            // Exchange
+            "(BNB|KCS)/.*",
+            ".*/USD",
+            ".*-([0123456789])+",
+            // Major
+            // "(BTC|ETH)/.*",
+            //Hyped
+            "(DOGE|SHIB)/.*",
+            // Leverage
+            ".*(_PREMIUM|BEAR|BULL|DOWN|HALF|HEDGE|UP|[1235][SL])/.*",
+            // Fiat
+            "(AUD|BRZ|CAD|CHF|EUR|GBP|HKD|IDRT|JPY|NGN|RUB|SGD|TRY|UAH|USD|ZAR)/.*",
+            // Stable
+            "(BUSD|CUSDT|DAI|PAX|PAXG|SUSD|TUSD|USDC|USDT|VAI)/.*",
+            // FAN
+            "(ACM|AFA|ALA|ALL|APL|ASR|ATM|BAR|CAI|CITY|FOR|GAL|GOZ|IBFK|JUV|LAZIO|LEG|LOCK-1|NAVI|NMR|NOV|OG|PFL|PORTO|PSG|ROUSH|SANTOS|STV|TH|TRA|UCH|UFC|YBO)/.*",
+        ]
+    }
+}
