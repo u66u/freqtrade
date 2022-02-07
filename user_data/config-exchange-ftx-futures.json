@@ -17,10 +17,6 @@
             "(BNB|KCS)/.*",
             ".*/USD",
             ".*-([0123456789])+",
-            // Major
-            // "(BTC|ETH)/.*",
-            //Hyped
-            "(DOGE|SHIB)/.*",
             // Leverage
             ".*(_PREMIUM|BEAR|BULL|DOWN|HALF|HEDGE|UP|[1235][SL])/.*",
             // Fiat
