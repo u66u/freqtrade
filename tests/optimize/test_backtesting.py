@@ -21,6 +21,8 @@ from freqtrade.data.dataprovider import DataProvider
 from freqtrade.data.history import get_timerange
 from freqtrade.enums import RunMode, SellType
 from freqtrade.exceptions import DependencyException, OperationalException
+from freqtrade.exchange.exchange import timeframe_to_next_date
+from freqtrade.misc import get_strategy_run_id
 from freqtrade.optimize.backtesting import Backtesting
 from freqtrade.persistence import LocalTrade
 from freqtrade.resolvers import StrategyResolver
@@ -649,6 +651,7 @@ def test_backtest_one(default_conf, fee, mocker, testdatadir) -> None:
                              timerange=timerange)
     processed = backtesting.strategy.advise_all_indicators(data)
     min_date, max_date = get_timerange(processed)
+
     result = backtesting.backtest(
         processed=deepcopy(processed),
         start_date=min_date,
@@ -740,6 +743,46 @@ def test_processed(default_conf, mocker, testdatadir) -> None:
         assert col in cols
 
 
+def test_backtest_dataprovider_analyzed_df(default_conf, fee, mocker, testdatadir) -> None:
+    default_conf['use_sell_signal'] = False
+    mocker.patch('freqtrade.exchange.Exchange.get_fee', fee)
+    mocker.patch("freqtrade.exchange.Exchange.get_min_pair_stake_amount", return_value=0.00001)
+    patch_exchange(mocker)
+    backtesting = Backtesting(default_conf)
+    backtesting._set_strategy(backtesting.strategylist[0])
+    timerange = TimeRange('date', None, 1517227800, 0)
+    data = history.load_data(datadir=testdatadir, timeframe='5m', pairs=['UNITTEST/BTC'],
+                             timerange=timerange)
+    processed = backtesting.strategy.advise_all_indicators(data)
+    min_date, max_date = get_timerange(processed)
+
+    global count
+    count = 0
+
+    def tmp_confirm_entry(pair, current_time, **kwargs):
+        dp = backtesting.strategy.dp
+        df, _ = dp.get_analyzed_dataframe(pair, backtesting.strategy.timeframe)
+        current_candle = df.iloc[-1].squeeze()
+        assert current_candle['buy'] == 1
+
+        candle_date = timeframe_to_next_date(backtesting.strategy.timeframe, current_candle['date'])
+        assert candle_date == current_time
+        # These asserts don't properly raise as they are nested,
+        # therefore we increment count and assert for that.
+        global count
+        count = count + 1
+
+    backtesting.strategy.confirm_trade_entry = tmp_confirm_entry
+    backtesting.backtest(
+        processed=deepcopy(processed),
+        start_date=min_date,
+        end_date=max_date,
+        max_open_trades=10,
+        position_stacking=False,
+    )
+    assert count == 5
+
+
 def test_backtest_pricecontours_protections(default_conf, fee, mocker, testdatadir) -> None:
     # While this test IS a copy of test_backtest_pricecontours, it's needed to ensure
     # results do not carry-over to the next run, which is not given by using parametrize.
@@ -762,6 +805,8 @@ def test_backtest_pricecontours_protections(default_conf, fee, mocker, testdatad
     # While buy-signals are unrealistic, running backtesting
     # over and over again should not cause different results
     for [contour, numres] in tests:
+        # Debug output for random test failure
+        print(f"{contour}, {numres}")
         assert len(simple_backtest(default_conf, contour, mocker, testdatadir)['results']) == numres
 
 
@@ -1357,3 +1402,13 @@ def test_backtest_start_multi_strat_caching(default_conf, mocker, caplog, testda
 
     for line in exists:
         assert log_has(line, caplog)
+
+
+def test_get_strategy_run_id(default_conf_usdt):
+    default_conf_usdt.update({
+        'strategy': 'StrategyTestV2',
+        'max_open_trades': float('inf')
+        })
+    strategy = StrategyResolver.load_strategy(default_conf_usdt)
+    x = get_strategy_run_id(strategy)
+    assert isinstance(x, str)

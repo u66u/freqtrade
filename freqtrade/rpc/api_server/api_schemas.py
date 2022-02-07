@@ -279,6 +279,7 @@ class ForceBuyPayload(BaseModel):
     pair: str
     price: Optional[float]
     ordertype: Optional[OrderTypeValues]
+    stakeamount: Optional[float]
 
 
 class ForceSellPayload(BaseModel):
@@ -383,3 +384,8 @@ class BacktestResponse(BaseModel):
 class SysInfo(BaseModel):
     cpu_pct: List[float]
     ram_pct: float
+
+
+class Health(BaseModel):
+    last_process: datetime
+    last_process_ts: int

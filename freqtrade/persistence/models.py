@@ -172,6 +172,7 @@ class Order(_DECL_BASE):
             'cost': self.cost if self.cost else 0,
             'filled': self.filled,
             'ft_order_side': self.ft_order_side,
+            'is_open': self.ft_is_open,
             'order_date': self.order_date.strftime(DATETIME_PRINT_FORMAT)
             if self.order_date else None,
             'order_timestamp': int(self.order_date.replace(
@@ -181,11 +182,12 @@ class Order(_DECL_BASE):
             'order_filled_timestamp': int(self.order_filled_date.replace(
                 tzinfo=timezone.utc).timestamp() * 1000) if self.order_filled_date else None,
             'order_type': self.order_type,
+            'pair': self.ft_pair,
             'price': self.price,
             'remaining': self.remaining,
             'status': self.status,
         }
-        
+
     @staticmethod
     def update_orders(orders: List['Order'], order: Dict[str, Any]):
         """
@@ -304,14 +306,14 @@ class LocalTrade():
 
     def to_json(self) -> Dict[str, Any]:
         filled_orders = self.select_filled_orders()
-        filled_buys = []
-        filled_sells = []
+        filled_entries = []
+        filled_exits = []
         if len(filled_orders) > 0:
-            for x in range(len(filled_orders)):
-                if filled_orders[x].ft_order_side == 'buy':
-                    filled_buys.append(filled_orders[x].to_json())
-                elif filled_orders[x].ft_order_side == 'sell':
-                    filled_sells.append(filled_orders[x].to_json())
+            for order in filled_orders:
+                if order.ft_order_side == 'buy':
+                    filled_entries.append(order.to_json())
+                if order.ft_order_side == 'sell':
+                    filled_exits.append(order.to_json())
 
         return {
             'trade_id': self.id,
@@ -376,8 +378,8 @@ class LocalTrade():
             'max_rate': self.max_rate,
 
             'open_order_id': self.open_order_id,
-            'filled_buys': filled_buys,
-            'filled_sells': filled_sells,
+            'filled_entry_orders': filled_entries,
+            'filled_exit_orders': filled_exits,
         }
 
     @staticmethod
@@ -602,26 +604,27 @@ class LocalTrade():
         return float(f"{profit_ratio:.8f}")
 
     def recalc_trade_from_orders(self):
-        # We need at least 2 orders for averaging amounts and rates.
-        if len(self.orders) < 2:
+        # We need at least 2 entry orders for averaging amounts and rates.
+        if len(self.select_filled_orders('buy')) < 2:
             # Just in case, still recalc open trade value
             self.recalc_open_trade_value()
             return
 
         total_amount = 0.0
         total_stake = 0.0
-        for temp_order in self.orders:
-            if (temp_order.ft_is_open or
-                    (temp_order.ft_order_side != 'buy') or
-                    (temp_order.status not in NON_OPEN_EXCHANGE_STATES)):
+        for o in self.orders:
+            if (o.ft_is_open or
+                    (o.ft_order_side != 'buy') or
+                    (o.status not in NON_OPEN_EXCHANGE_STATES)):
                 continue
 
-            tmp_amount = temp_order.amount
-            if temp_order.filled is not None:
-                tmp_amount = temp_order.filled
-            if tmp_amount > 0.0 and temp_order.average is not None:
+            tmp_amount = o.amount
+            tmp_price = o.average or o.price
+            if o.filled is not None:
+                tmp_amount = o.filled
+            if tmp_amount > 0.0 and tmp_price is not None:
                 total_amount += tmp_amount
-                total_stake += temp_order.average * tmp_amount
+                total_stake += tmp_price * tmp_amount
 
         if total_amount > 0:
             self.open_rate = total_stake / total_amount

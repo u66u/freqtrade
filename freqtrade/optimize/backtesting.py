@@ -275,15 +275,19 @@ class Backtesting:
             # Trim startup period from analyzed dataframe
             df_analyzed = processed[pair] = pair_data = trim_dataframe(
                 df_analyzed, self.timerange, startup_candles=self.required_startup)
+            # Update dataprovider cache
+            self.dataprovider._set_cached_df(pair, self.timeframe, df_analyzed)
+
+            # Create a copy of the dataframe before shifting, that way the buy signal/tag
+            # remains on the correct candle for callbacks.
+            df_analyzed = df_analyzed.copy()
+
             # To avoid using data from future, we use buy/sell signals shifted
             # from the previous candle
             df_analyzed.loc[:, 'buy'] = df_analyzed.loc[:, 'buy'].shift(1)
             df_analyzed.loc[:, 'sell'] = df_analyzed.loc[:, 'sell'].shift(1)
             df_analyzed.loc[:, 'buy_tag'] = df_analyzed.loc[:, 'buy_tag'].shift(1)
             df_analyzed.loc[:, 'exit_tag'] = df_analyzed.loc[:, 'exit_tag'].shift(1)
-
-            # Update dataprovider cache
-            self.dataprovider._set_cached_df(pair, self.timeframe, df_analyzed)
 
             df_analyzed = df_analyzed.drop(df_analyzed.head(1).index)
 
@@ -383,8 +387,7 @@ class Backtesting:
         if self.strategy.position_adjustment_enable:
             check_adjust_buy = True
             if self.strategy.max_entry_position_adjustment > -1:
-                filled_buys = trade.select_filled_orders('buy')
-                count_of_buys = len(filled_buys)
+                count_of_buys = trade.nr_of_successful_buys
                 check_adjust_buy = (count_of_buys <= self.strategy.max_entry_position_adjustment)
             if check_adjust_buy:
                 trade = self._get_adjust_trade_entry_for_candle(trade, sell_row)
@@ -469,11 +472,13 @@ class Backtesting:
     def _enter_trade(self, pair: str, row: Tuple, stake_amount: Optional[float] = None,
                      trade: Optional[LocalTrade] = None) -> Optional[LocalTrade]:
 
+        current_time = row[DATE_IDX].to_pydatetime()
+        entry_tag = row[BUY_TAG_IDX] if len(row) >= BUY_TAG_IDX + 1 else None
         # let's call the custom entry price, using the open price as default price
         propose_rate = strategy_safe_wrapper(self.strategy.custom_entry_price,
                                              default_retval=row[OPEN_IDX])(
-            pair=pair, current_time=row[DATE_IDX].to_pydatetime(),
-            proposed_rate=row[OPEN_IDX])  # default value is the open rate
+            pair=pair, current_time=current_time,
+            proposed_rate=row[OPEN_IDX], entry_tag=entry_tag)  # default value is the open rate
 
         # Move rate to within the candle's low/high rate
         propose_rate = min(max(propose_rate, row[LOW_IDX]), row[HIGH_IDX])
@@ -490,8 +495,9 @@ class Backtesting:
 
             stake_amount = strategy_safe_wrapper(self.strategy.custom_stake_amount,
                                                  default_retval=stake_amount)(
-                pair=pair, current_time=row[DATE_IDX].to_pydatetime(), current_rate=propose_rate,
-                proposed_stake=stake_amount, min_stake=min_stake_amount, max_stake=max_stake_amount)
+                pair=pair, current_time=current_time, current_rate=propose_rate,
+                proposed_stake=stake_amount, min_stake=min_stake_amount, max_stake=max_stake_amount,
+                entry_tag=entry_tag)
 
         stake_amount = self.wallets.validate_stake_amount(pair, stake_amount, min_stake_amount)
 
@@ -506,27 +512,28 @@ class Backtesting:
         if not pos_adjust:
             if not strategy_safe_wrapper(self.strategy.confirm_trade_entry, default_retval=True)(
                     pair=pair, order_type=order_type, amount=stake_amount, rate=propose_rate,
-                    time_in_force=time_in_force, current_time=row[DATE_IDX].to_pydatetime()):
+                    time_in_force=time_in_force, current_time=current_time,
+                    entry_tag=entry_tag):
                 return None
 
         if stake_amount and (not min_stake_amount or stake_amount > min_stake_amount):
             amount = round(stake_amount / propose_rate, 8)
             if trade is None:
                 # Enter trade
-                has_buy_tag = len(row) >= BUY_TAG_IDX + 1
                 trade = LocalTrade(
                     pair=pair,
                     open_rate=propose_rate,
-                    open_date=row[DATE_IDX].to_pydatetime(),
+                    open_date=current_time,
                     stake_amount=stake_amount,
                     amount=amount,
                     fee_open=self.fee,
                     fee_close=self.fee,
                     is_open=True,
-                    buy_tag=row[BUY_TAG_IDX] if has_buy_tag else None,
+                    buy_tag=entry_tag,
                     exchange='backtesting',
                     orders=[]
                 )
+            trade.adjust_stop_loss(trade.open_rate, self.strategy.stoploss, initial=True)
 
             order = Order(
                 ft_is_open=False,
@@ -536,6 +543,9 @@ class Backtesting:
                 side="buy",
                 order_type="market",
                 status="closed",
+                order_date=current_time,
+                order_filled_date=current_time,
+                order_update_date=current_time,
                 price=propose_rate,
                 average=propose_rate,
                 amount=amount,

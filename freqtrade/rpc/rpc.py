@@ -10,6 +10,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 import arrow
 import psutil
 from dateutil.relativedelta import relativedelta
+from dateutil.tz import tzlocal
 from numpy import NAN, inf, int64, mean
 from pandas import DataFrame
 
@@ -138,9 +139,10 @@ class RPC:
             'state': str(botstate),
             'runmode': config['runmode'].value,
             'position_adjustment_enable': config.get('position_adjustment_enable', False),
-            'max_entry_position_adjustment': (config['max_entry_position_adjustment']
-                                            if config['max_entry_position_adjustment'] != float('inf')
-                                            else -1)
+            'max_entry_position_adjustment': (
+                config.get('max_entry_position_adjustment', -1)
+                if config.get('max_entry_position_adjustment') != float('inf')
+                else -1)
         }
         return val
 
@@ -249,14 +251,16 @@ class RPC:
                     trade.id,
                     trade.pair + ('*' if (trade.open_order_id is not None
                                           and trade.close_rate_requested is None) else '')
-                               + ('**' if (trade.close_rate_requested is not None) else ''),
+                    + ('**' if (trade.close_rate_requested is not None) else ''),
                     shorten_date(arrow.get(trade.open_date).humanize(only_distance=True)),
                     profit_str
                 ]
                 if self._config.get('position_adjustment_enable', False):
-                    max_buy = self._config['max_entry_position_adjustment'] + 1
-                    filled_buys = trade.select_filled_orders('buy')
-                    detail_trade.append(f"{len(filled_buys)}/{max_buy}")
+                    max_buy_str = ''
+                    if self._config.get('max_entry_position_adjustment', -1) > 0:
+                        max_buy_str = f"/{self._config['max_entry_position_adjustment'] + 1}"
+                    filled_buys = trade.nr_of_successful_buys
+                    detail_trade.append(f"{filled_buys}{max_buy_str}")
                 trades_list.append(detail_trade)
             profitcol = "Profit"
             if self._fiat_converter:
@@ -715,8 +719,8 @@ class RPC:
             self._freqtrade.wallets.update()
             return {'result': f'Created sell order for trade {trade_id}.'}
 
-    def _rpc_forcebuy(self, pair: str, price: Optional[float],
-                      order_type: Optional[str] = None) -> Optional[Trade]:
+    def _rpc_forcebuy(self, pair: str, price: Optional[float], order_type: Optional[str] = None,
+                      stake_amount: Optional[float] = None) -> Optional[Trade]:
         """
         Handler for forcebuy <asset> <price>
         Buys a pair trade at the given or current price
@@ -741,14 +745,15 @@ class RPC:
             if not self._freqtrade.strategy.position_adjustment_enable:
                 raise RPCException(f'position for {pair} already open - id: {trade.id}')
 
-        # gen stake amount
-        stakeamount = self._freqtrade.wallets.get_trade_stake_amount(pair)
+        if not stake_amount:
+            # gen stake amount
+            stake_amount = self._freqtrade.wallets.get_trade_stake_amount(pair)
 
         # execute buy
         if not order_type:
             order_type = self._freqtrade.strategy.order_types.get(
                 'forcebuy', self._freqtrade.strategy.order_types['buy'])
-        if self._freqtrade.execute_entry(pair, stakeamount, price,
+        if self._freqtrade.execute_entry(pair, stake_amount, price,
                                          ordertype=order_type, trade=trade):
             Trade.commit()
             trade = Trade.get_trades([Trade.is_open.is_(True), Trade.pair == pair]).first()
@@ -1003,7 +1008,7 @@ class RPC:
 
     @staticmethod
     def _rpc_analysed_history_full(config, pair: str, timeframe: str,
-                                   timerange: str) -> Dict[str, Any]:
+                                   timerange: str, exchange) -> Dict[str, Any]:
         timerange_parsed = TimeRange.parse_timerange(timerange)
 
         _data = load_data(
@@ -1018,7 +1023,7 @@ class RPC:
         from freqtrade.data.dataprovider import DataProvider
         from freqtrade.resolvers.strategy_resolver import StrategyResolver
         strategy = StrategyResolver.load_strategy(config)
-        strategy.dp = DataProvider(config, exchange=None, pairlists=None)
+        strategy.dp = DataProvider(config, exchange=exchange, pairlists=None)
 
         df_analyzed = strategy.analyze_ticker(_data[pair], {'pair': pair})
 
@@ -1036,4 +1041,12 @@ class RPC:
         return {
             "cpu_pct": psutil.cpu_percent(interval=1, percpu=True),
             "ram_pct": psutil.virtual_memory().percent
+        }
+
+    def _health(self) -> Dict[str, Union[str, int]]:
+        last_p = self._freqtrade.last_process
+        return {
+            'last_process': str(last_p),
+            'last_process_loc': last_p.astimezone(tzlocal()).strftime(DATETIME_PRINT_FORMAT),
+            'last_process_ts': int(last_p.timestamp()),
         }

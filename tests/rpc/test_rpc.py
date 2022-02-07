@@ -108,6 +108,14 @@ def test_rpc_trade_status(default_conf, ticker, fee, mocker) -> None:
         'stoploss_entry_dist_ratio': -0.10448878,
         'open_order': None,
         'exchange': 'binance',
+        'filled_entry_orders': [{
+            'amount': 91.07468123, 'average': 1.098e-05,
+            'cost': 0.0009999999999054, 'filled': 91.07468123, 'ft_order_side': 'buy',
+            'order_date': ANY, 'order_timestamp': ANY, 'order_filled_date': ANY,
+            'order_filled_timestamp': ANY, 'order_type': 'limit', 'price': 1.098e-05,
+            'is_open': False, 'pair': 'ETH/BTC',
+            'remaining': ANY, 'status': ANY}],
+        'filled_exit_orders': []
     }
 
     mocker.patch('freqtrade.exchange.Exchange.get_rate',
@@ -175,6 +183,14 @@ def test_rpc_trade_status(default_conf, ticker, fee, mocker) -> None:
         'stoploss_entry_dist_ratio': -0.10448878,
         'open_order': None,
         'exchange': 'binance',
+        'filled_entry_orders': [{
+            'amount': 91.07468123, 'average': 1.098e-05,
+            'cost': 0.0009999999999054, 'filled': 91.07468123, 'ft_order_side': 'buy',
+            'order_date': ANY, 'order_timestamp': ANY, 'order_filled_date': ANY,
+            'order_filled_timestamp': ANY, 'order_type': 'limit', 'price': 1.098e-05,
+            'is_open': False, 'pair': 'ETH/BTC',
+            'remaining': ANY, 'status': ANY}],
+        'filled_exit_orders': []
     }
 
 
@@ -214,10 +230,20 @@ def test_rpc_status_table(default_conf, ticker, fee, mocker) -> None:
     result, headers, fiat_profit_sum = rpc._rpc_status_table(default_conf['stake_currency'], 'USD')
     assert "Since" in headers
     assert "Pair" in headers
+    assert len(result[0]) == 4
     assert 'instantly' == result[0][2]
     assert 'ETH/BTC' in result[0][1]
     assert '-0.41% (-0.06)' == result[0][3]
     assert '-0.06' == f'{fiat_profit_sum:.2f}'
+
+    rpc._config['position_adjustment_enable'] = True
+    rpc._config['max_entry_position_adjustment'] = 3
+    result, headers, fiat_profit_sum = rpc._rpc_status_table(default_conf['stake_currency'], 'USD')
+    assert "# Buys" in headers
+    assert len(result[0]) == 5
+    # 4th column should be 1/4 - as 1 order filled (a total of 4 is possible)
+    # 3 on top of the initial one.
+    assert result[0][4] == '1/4'
 
     mocker.patch('freqtrade.exchange.Exchange.get_rate',
                  MagicMock(side_effect=ExchangeError("Pair 'ETH/BTC' not available")))
@@ -1102,9 +1128,14 @@ def test_rpcforcebuy(mocker, default_conf, ticker, fee, limit_buy_order_open) ->
     with pytest.raises(RPCException,
                        match=r'Wrong pair selected. Only pairs with stake-currency.*'):
         rpc._rpc_forcebuy('LTC/ETH', 0.0001)
-    pair = 'XRP/BTC'
+
+    # Test with defined stake_amount
+    pair = 'LTC/BTC'
+    trade = rpc._rpc_forcebuy(pair, 0.0001, order_type='limit', stake_amount=0.05)
+    assert trade.stake_amount == 0.05
 
     # Test not buying
+    pair = 'XRP/BTC'
     freqtradebot = get_patched_freqtradebot(mocker, default_conf)
     freqtradebot.config['stake_amount'] = 0
     patch_get_signal(freqtradebot)
@@ -1261,3 +1292,13 @@ def test_rpc_edge_enabled(mocker, edge_conf) -> None:
     assert ret[0]['Winrate'] == 0.66
     assert ret[0]['Expectancy'] == 1.71
     assert ret[0]['Stoploss'] == -0.02
+
+
+def test_rpc_health(mocker, default_conf) -> None:
+    mocker.patch('freqtrade.rpc.telegram.Telegram', MagicMock())
+
+    freqtradebot = get_patched_freqtradebot(mocker, default_conf)
+    rpc = RPC(freqtradebot)
+    result = rpc._health()
+    assert result['last_process'] == '1970-01-01 00:00:00+00:00'
+    assert result['last_process_ts'] == 0
