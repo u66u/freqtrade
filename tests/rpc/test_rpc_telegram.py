@@ -260,8 +260,8 @@ def test_telegram_status_multi_entry(default_conf, update, mocker, fee) -> None:
     telegram._status(update=update, context=MagicMock())
     assert msg_mock.call_count == 4
     msg = msg_mock.call_args_list[0][0][0]
-    assert re.search(r'Number of Buy.*2', msg)
-    assert re.search(r'Average Buy Price', msg)
+    assert re.search(r'Number of Entries.*2', msg)
+    assert re.search(r'Average Entry Price', msg)
     assert re.search(r'Order filled at', msg)
     assert re.search(r'Close Date:', msg) is None
     assert re.search(r'Close Profit:', msg) is None
@@ -1260,7 +1260,8 @@ def test_forcebuy_no_pair(default_conf, update, mocker) -> None:
     assert msg_mock.call_args_list[0][1]['msg'] == 'Which pair?'
     # assert msg_mock.call_args_list[0][1]['callback_query_handler'] == 'forcebuy'
     keyboard = msg_mock.call_args_list[0][1]['keyboard']
-    assert reduce(lambda acc, x: acc + len(x), keyboard, 0) == 4
+    # One additional button - cancel
+    assert reduce(lambda acc, x: acc + len(x), keyboard, 0) == 5
     update = MagicMock()
     update.callback_query = MagicMock()
     update.callback_query.data = 'XRP/USDT'
