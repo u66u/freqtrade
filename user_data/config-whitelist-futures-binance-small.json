@@ -4,6 +4,7 @@
             "ETH/USDT",
             "BCH/USDT",
             "XRP/USDT",
+            "EOS/USDT",
             "LTC/USDT",
             "TRX/USDT",
             "ETC/USDT",
@@ -97,7 +98,6 @@
             "ICP/USDT",
             "BAKE/USDT",
             "GTC/USDT",
-            "KEEP/USDT",
             "TLM/USDT",
             "IOTX/USDT",
             "AUDIO/USDT",
@@ -110,14 +110,14 @@
             "AR/USDT",
             "KLAY/USDT",
             "ARPA/USDT",
-            "NU/USDT",
             "CTSI/USDT",
             "LPT/USDT",
             "ENS/USDT",
             "PEOPLE/USDT",
             "ANT/USDT",
             "ROSE/USDT",
-            "EOS/USDT"
+            "FLOW/USDT",
+            "IMX/USDT"
         ],
     }
 }
