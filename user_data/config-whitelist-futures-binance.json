@@ -130,7 +130,9 @@
             "NU/USDT",
             "CTSI/USDT",
             "LPT/USDT",
-            "ENS/USDT"
+            "ENS/USDT",
+            "FLOW/USDT",
+            "IMX/USDT"
         ],
     }
 }
