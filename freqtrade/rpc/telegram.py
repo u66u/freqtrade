@@ -493,10 +493,6 @@ class Telegram(RPCHandler):
                     r['orders'], r['base_currency'], r['is_open'])
                 lines.extend(lines_detail if lines_detail else "")
 
-                if len(r['filled_buys']) > 1:
-                    lines_detail = self._prepare_buy_details(r['filled_buys'], r['base_currency'])
-                    lines.extend(lines_detail)
-
                 # Filter empty lines using list-comprehension
                 messages.append("\n".join([line for line in lines if line]).format(**r))
 
