@@ -105,9 +105,4 @@ target/
 !config_examples/config_ftx.example.json
 !config_examples/config_full.example.json
 !config_examples/config_kraken.example.json
-!user_data/config.json
-!user_data/config-telegram.json
-!user_data/config-exchange.json
-!user_data/config-whitelist-mc-busd.json
-!user_data/config-whitelist-futures-binance*
-!user_data/config-exchange-ftx-futures.json
+!user_data/config*

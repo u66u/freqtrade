@@ -1,0 +1,25 @@
+{
+    "telegram": {
+        "enabled": true,
+        "keyboard": [
+            ["/profit","/trades","/status table"],
+            ["/daily","/logs","/show_config","/whitelist"],
+            ["/help","/start","/performance"]
+        ],
+        "notification_settings": {
+            "status": "silent",
+            "warning": "on",
+            "startup": "silent",
+            "buy": "off",
+            "sell": "off",
+            "buy_cancel": "silent",
+            "sell_cancel": "silent",
+            "buy_fill": "silent",
+            "sell_fill": "silent",
+            "protection_trigger": "off",
+            "protection_trigger_global": "on"
+        },
+        "reload": true,
+        "balance_dust_level": 0.01
+    }
+}
