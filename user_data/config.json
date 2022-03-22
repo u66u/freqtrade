@@ -6,7 +6,7 @@
     "tradable_balance_ratio": 0.99,
     "fiat_display_currency": "USD",
     "dry_run": true,
-    "dry_run_wallet": 400,
+    "dry_run_wallet": 70,
     "cancel_open_orders_on_exit": false,
     "unfilledtimeout": {
         "buy": 60,
@@ -14,7 +14,7 @@
         "unit": "seconds"
     },
     "order_types": {
-        "buy": "limit",
+        "buy": "market",
         "sell": "market",
         "forcesell": "market",
         "emergencysell": "market",
@@ -44,7 +44,7 @@
         // {"method": "StaticPairList"}, // Uncomment if you want to use static list
         {
             "method": "VolumePairList",
-            "number_assets": 80,
+            "number_assets": 100,
             "sort_key": "quoteVolume",
         },
         {"method": "AgeFilter", "min_days_listed": 30},
