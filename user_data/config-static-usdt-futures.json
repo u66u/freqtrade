@@ -45,7 +45,7 @@
         {"method": "StaticPairList"},
     ],
     "exchange": {
-        "name": "binance-usdtm",
+        "name": "binanceusdm",
         "key": "1",
         "secret": "2",
         "ccxt_config": {"enableRateLimit": true},
