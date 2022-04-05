@@ -14,7 +14,7 @@ from pandas import DataFrame
 
 from freqtrade import constants
 from freqtrade.configuration import TimeRange, validate_config_consistency
-from freqtrade.constants import DATETIME_PRINT_FORMAT
+from freqtrade.constants import DATETIME_PRINT_FORMAT, LongShort
 from freqtrade.data import history
 from freqtrade.data.btanalysis import find_existing_backtest_stats, trade_list_to_dataframe
 from freqtrade.data.converter import trim_dataframe, trim_dataframes
@@ -339,14 +339,14 @@ class Backtesting:
                 if col in df_analyzed.columns:
                     df_analyzed.loc[:, col] = df_analyzed.loc[:, col].replace(
                         [nan], [0 if not tag_col else None]).shift(1)
-                else:
+                elif not df_analyzed.empty:
                     df_analyzed.loc[:, col] = 0 if not tag_col else None
 
             df_analyzed = df_analyzed.drop(df_analyzed.head(1).index)
 
             # Convert from Pandas to list for performance reasons
             # (Looping Pandas is slow.)
-            data[pair] = df_analyzed[headers].values.tolist()
+            data[pair] = df_analyzed[headers].values.tolist() if not df_analyzed.empty else []
         return data
 
     def _get_close_rate(self, sell_row: Tuple, trade: LocalTrade, sell: ExitCheckTuple,
@@ -555,7 +555,7 @@ class Backtesting:
                     current_time=sell_candle_time):
                 return None
 
-            trade.sell_reason = sell.exit_reason
+            trade.exit_reason = sell.exit_reason
 
             # Checks and adds an exit tag, after checking that the length of the
             # sell_row has the length for an exit tag column
@@ -564,7 +564,7 @@ class Backtesting:
                 and sell_row[EXIT_TAG_IDX] is not None
                 and len(sell_row[EXIT_TAG_IDX]) > 0
             ):
-                trade.sell_reason = sell_row[EXIT_TAG_IDX]
+                trade.exit_reason = sell_row[EXIT_TAG_IDX]
 
             self.order_id_counter += 1
             order = Order(
@@ -635,7 +635,7 @@ class Backtesting:
 
     def get_valid_price_and_stake(
         self, pair: str, row: Tuple, propose_rate: float, stake_amount: Optional[float],
-        direction: str, current_time: datetime, entry_tag: Optional[str],
+        direction: LongShort, current_time: datetime, entry_tag: Optional[str],
         trade: Optional[LocalTrade], order_type: str
     ) -> Tuple[float, float, float, float]:
 
@@ -643,7 +643,9 @@ class Backtesting:
             propose_rate = strategy_safe_wrapper(self.strategy.custom_entry_price,
                                                  default_retval=propose_rate)(
                 pair=pair, current_time=current_time,
-                proposed_rate=propose_rate, entry_tag=entry_tag)  # default value is the open rate
+                proposed_rate=propose_rate, entry_tag=entry_tag,
+                side=direction,
+            )  # default value is the open rate
             # We can't place orders higher than current high (otherwise it'd be a stop limit buy)
             # which freqtrade does not support in live.
             if direction == "short":
@@ -694,7 +696,7 @@ class Backtesting:
 
         return propose_rate, stake_amount_val, leverage, min_stake_amount
 
-    def _enter_trade(self, pair: str, row: Tuple, direction: str,
+    def _enter_trade(self, pair: str, row: Tuple, direction: LongShort,
                      stake_amount: Optional[float] = None,
                      trade: Optional[LocalTrade] = None) -> Optional[LocalTrade]:
 
@@ -810,7 +812,7 @@ class Backtesting:
                     sell_row = data[pair][-1]
 
                     trade.close_date = sell_row[DATE_IDX].to_pydatetime()
-                    trade.sell_reason = ExitType.FORCE_SELL.value
+                    trade.exit_reason = ExitType.FORCE_SELL.value
                     trade.close(sell_row[OPEN_IDX], show_msg=False)
                     LocalTrade.close_bt_trade(trade)
                     # Deepcopy object to have wallets update correctly
@@ -827,7 +829,7 @@ class Backtesting:
         self.rejected_trades += 1
         return False
 
-    def check_for_trade_entry(self, row) -> Optional[str]:
+    def check_for_trade_entry(self, row) -> Optional[LongShort]:
         enter_long = row[LONG_IDX] == 1
         exit_long = row[ELONG_IDX] == 1
         enter_short = self._can_short and row[SHORT_IDX] == 1

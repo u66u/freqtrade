@@ -339,7 +339,7 @@ class IStrategy(ABC, HyperStrategyMixin):
         return self.stoploss
 
     def custom_entry_price(self, pair: str, current_time: datetime, proposed_rate: float,
-                           entry_tag: Optional[str], **kwargs) -> float:
+                           entry_tag: Optional[str], side: str, **kwargs) -> float:
         """
         Custom entry price logic, returning the new entry price.
 
@@ -351,6 +351,7 @@ class IStrategy(ABC, HyperStrategyMixin):
         :param current_time: datetime object, containing the current datetime
         :param proposed_rate: Rate, calculated based on pricing settings in exit_pricing.
         :param entry_tag: Optional entry_tag (buy_tag) if provided with the buy signal.
+        :param side: 'long' or 'short' - indicating the direction of the proposed trade
         :param **kwargs: Ensure to keep this here so updates to this won't break your strategy.
         :return float: New entry price value if provided
         """
@@ -396,7 +397,7 @@ class IStrategy(ABC, HyperStrategyMixin):
         :param current_rate: Rate, calculated based on pricing settings in exit_pricing.
         :param current_profit: Current profit (as ratio), calculated based on current_rate.
         :param **kwargs: Ensure to keep this here so updates to this won't break your strategy.
-        :return: To execute exit, return a string with custom sell reason or True. Otherwise return
+        :return: To execute exit, return a string with custom exit reason or True. Otherwise return
         None or False.
         """
         return None
@@ -420,7 +421,7 @@ class IStrategy(ABC, HyperStrategyMixin):
         :param current_rate: Rate, calculated based on pricing settings in exit_pricing.
         :param current_profit: Current profit (as ratio), calculated based on current_rate.
         :param **kwargs: Ensure to keep this here so updates to this won't break your strategy.
-        :return: To execute exit, return a string with custom sell reason or True. Otherwise return
+        :return: To execute exit, return a string with custom exit reason or True. Otherwise return
         None or False.
         """
         return self.custom_sell(pair, trade, current_time, current_rate, current_profit, **kwargs)
@@ -876,7 +877,7 @@ class IStrategy(ABC, HyperStrategyMixin):
                        and self.min_roi_reached(trade=trade, current_profit=current_profit,
                                                 current_time=current_time))
 
-        sell_signal = ExitType.NONE
+        exit_signal = ExitType.NONE
         custom_reason = ''
         # use provided rate in backtesting, not high/low.
         current_rate = rate
@@ -887,14 +888,14 @@ class IStrategy(ABC, HyperStrategyMixin):
             pass
         elif self.use_sell_signal and not enter:
             if exit_:
-                sell_signal = ExitType.SELL_SIGNAL
+                exit_signal = ExitType.SELL_SIGNAL
             else:
                 trade_type = "exit_short" if trade.is_short else "sell"
                 custom_reason = strategy_safe_wrapper(self.custom_exit, default_retval=False)(
                     pair=trade.pair, trade=trade, current_time=current_time,
                     current_rate=current_rate, current_profit=current_profit)
                 if custom_reason:
-                    sell_signal = ExitType.CUSTOM_SELL
+                    exit_signal = ExitType.CUSTOM_SELL
                     if isinstance(custom_reason, str):
                         if len(custom_reason) > CUSTOM_EXIT_MAX_LENGTH:
                             logger.warning(f'Custom {trade_type} reason returned from '
@@ -903,23 +904,23 @@ class IStrategy(ABC, HyperStrategyMixin):
                             custom_reason = custom_reason[:CUSTOM_EXIT_MAX_LENGTH]
                     else:
                         custom_reason = None
-            if sell_signal in (ExitType.CUSTOM_SELL, ExitType.SELL_SIGNAL):
+            if exit_signal in (ExitType.CUSTOM_SELL, ExitType.SELL_SIGNAL):
                 logger.debug(f"{trade.pair} - Sell signal received. "
-                             f"sell_type=ExitType.{sell_signal.name}" +
+                             f"exit_type=ExitType.{exit_signal.name}" +
                              (f", custom_reason={custom_reason}" if custom_reason else ""))
-                return ExitCheckTuple(exit_type=sell_signal, exit_reason=custom_reason)
+                return ExitCheckTuple(exit_type=exit_signal, exit_reason=custom_reason)
 
         # Sequence:
         # Exit-signal
         # ROI (if not stoploss)
         # Stoploss
         if roi_reached and stoplossflag.exit_type != ExitType.STOP_LOSS:
-            logger.debug(f"{trade.pair} - Required profit reached. sell_type=ExitType.ROI")
+            logger.debug(f"{trade.pair} - Required profit reached. exit_type=ExitType.ROI")
             return ExitCheckTuple(exit_type=ExitType.ROI)
 
         if stoplossflag.exit_flag:
 
-            logger.debug(f"{trade.pair} - Stoploss hit. sell_type={stoplossflag.exit_type}")
+            logger.debug(f"{trade.pair} - Stoploss hit. exit_type={stoplossflag.exit_type}")
             return stoplossflag
 
         # This one is noisy, commented out...
@@ -988,11 +989,11 @@ class IStrategy(ABC, HyperStrategyMixin):
         if ((sl_higher_long or sl_lower_short) and
                 (not self.order_types.get('stoploss_on_exchange') or self.config['dry_run'])):
 
-            sell_type = ExitType.STOP_LOSS
+            exit_type = ExitType.STOP_LOSS
 
             # If initial stoploss is not the same as current one then it is trailing.
             if trade.initial_stop_loss != trade.stop_loss:
-                sell_type = ExitType.TRAILING_STOP_LOSS
+                exit_type = ExitType.TRAILING_STOP_LOSS
                 logger.debug(
                     f"{trade.pair} - HIT STOP: current price at "
                     f"{((high if trade.is_short else low) or current_rate):.6f}, "
@@ -1007,7 +1008,7 @@ class IStrategy(ABC, HyperStrategyMixin):
                 logger.debug(f"{trade.pair} - Trailing stop saved "
                              f"{new_stoploss:.6f}")
 
-            return ExitCheckTuple(exit_type=sell_type)
+            return ExitCheckTuple(exit_type=exit_type)
 
         return ExitCheckTuple(exit_type=ExitType.NONE)
 

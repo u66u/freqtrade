@@ -18,13 +18,19 @@ You can use the quick summary as checklist. Please refer to the detailed section
   * New `side` argument to callbacks without trade object
     * [`custom_stake_amount`](#custom-stake-amount)
     * [`confirm_trade_entry`](#confirm_trade_entry)
+    * [`custom_entry_price`](#custom_entry_price)
   * [Changed argument name in `confirm_trade_exit`](#confirm_trade_exit)
 * Dataframe columns:
   * [`buy` -> `enter_long`](#populate_buy_trend)
   * [`sell` -> `exit_long`](#populate_sell_trend)
   * [`buy_tag` -> `enter_tag` (used for both long and short trades)](#populate_buy_trend)
   * [New column `enter_short` and corresponding new column `exit_short`](#populate_sell_trend)
-* trade-object now has the following new properties: `is_short`, `enter_side`, `exit_side` and `trade_direction`.
+* trade-object now has the following new properties:
+  * `is_short`
+  * `enter_side`
+  * `exit_side`
+  * `trade_direction`
+  * renamed: `sell_reason` -> `exit_reason`
 * [Renamed `trade.nr_of_successful_buys` to `trade.nr_of_successful_entries` (mostly relevant for `adjust_trade_position()`)](#adjust-trade-position-changes)
 * Introduced new [`leverage` callback](strategy-callbacks.md#leverage-callback).
 * Informative pairs can now pass a 3rd element in the Tuple, defining the candle type.
@@ -40,7 +46,7 @@ You can use the quick summary as checklist. Please refer to the detailed section
 
 ### `populate_buy_trend`
 
-In `populate_buy_trend()` - you will want to change the columns you assign from `'buy`' to `'enter_long`, as well as the method name from `populate_buy_trend` to `populate_entry_trend`.
+In `populate_buy_trend()` - you will want to change the columns you assign from `'buy`' to `'enter_long'`, as well as the method name from `populate_buy_trend` to `populate_entry_trend`.
 
 ```python hl_lines="1 9"
 def populate_buy_trend(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
@@ -77,7 +83,7 @@ Please refer to the [Strategy documentation](strategy-customization.md#entry-sig
 ### `populate_sell_trend`
 
 Similar to `populate_buy_trend`, `populate_sell_trend()` will be renamed to `populate_exit_trend()`.
-We'll also change the column from `"sell"` to `"exit_long"`.
+We'll also change the column from `'sell'` to `'exit_long'`.
 
 ``` python hl_lines="1 9"
 def populate_sell_trend(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
@@ -220,6 +226,26 @@ class AwesomeStrategy(IStrategy):
                            rate: float, time_in_force: str, exit_reason: str,
                            current_time: datetime, **kwargs) -> bool:
     return True
+```
+
+### `custom_entry_price`
+
+New string argument `side` - which can be either `"long"` or `"short"`.
+
+``` python hl_lines="3"
+class AwesomeStrategy(IStrategy):
+    def custom_entry_price(self, pair: str, current_time: datetime, proposed_rate: float,
+                           entry_tag: Optional[str], **kwargs) -> float:
+      return proposed_rate
+```
+
+After:
+
+``` python hl_lines="3"
+class AwesomeStrategy(IStrategy):
+    def custom_entry_price(self, pair: str, current_time: datetime, proposed_rate: float,
+                           entry_tag: Optional[str], side: str, **kwargs) -> float:
+      return proposed_rate
 ```
 
 ### Adjust trade position changes

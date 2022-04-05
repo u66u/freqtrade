@@ -205,7 +205,7 @@ Edit the method `populate_entry_trend()` in your strategy file to update your en
 
 It's important to always return the dataframe without removing/modifying the columns `"open", "high", "low", "close", "volume"`, otherwise these fields would contain something unexpected.
 
-This method will also define a new column, `"enter_long"`, which needs to contain 1 for entries, and 0 for "no action". `enter_long` column is a mandatory column that must be set even if the strategy is shorting only.
+This method will also define a new column, `"enter_long"` (`"enter_short"` for shorts), which needs to contain 1 for entries, and 0 for "no action". `enter_long` is a mandatory column that must be set even if the strategy is shorting only.
 
 Sample from `user_data/strategies/sample_strategy.py`:
 
@@ -268,7 +268,7 @@ Please note that the sell-signal is only used if `use_sell_signal` is set to tru
 
 It's important to always return the dataframe without removing/modifying the columns `"open", "high", "low", "close", "volume"`, otherwise these fields would contain something unexpected.
 
-This method will also define a new column, `"exit_long"`, which needs to contain 1 for sells, and 0 for "no action".
+This method will also define a new column, `"exit_long"` (`"exit_short"` for shorts), which needs to contain 1 for exits, and 0 for "no action".
 
 Sample from `user_data/strategies/sample_strategy.py`:
 
@@ -898,7 +898,7 @@ Stoploss values returned from `custom_stoploss` must specify a percentage relati
 !!! Note
     Providing invalid input to `stoploss_from_open()` may produce "CustomStoploss function did not return valid stoploss" warnings.
     This may happen if `current_profit` parameter is below specified `open_relative_stop`. Such situations may arise when closing trade
-    is blocked by `confirm_trade_exit()` method. Warnings can be solved by never blocking stop loss sells by checking `sell_reason` in
+    is blocked by `confirm_trade_exit()` method. Warnings can be solved by never blocking stop loss sells by checking `exit_reason` in
     `confirm_trade_exit()`, or by using `return stoploss_from_open(...) or 1` idiom, which will request to not change stop loss when
     `current_profit < open_relative_stop`.
 

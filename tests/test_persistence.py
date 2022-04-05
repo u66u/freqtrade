@@ -493,7 +493,7 @@ def test_update_limit_order(fee, caplog, limit_buy_order_usdt, limit_sell_order_
 
     caplog.clear()
     trade.open_order_id = 'something'
-    time_machine.move_to("2022-03-31 21:45:00 +00:00")
+    time_machine.move_to("2022-03-31 21:45:05 +00:00")
     oobj = Order.parse_from_ccxt_object(exit_order, 'ADA/USDT', exit_side)
     trade.update_trade(oobj)
 
@@ -1255,7 +1255,7 @@ def test_migrate_new(mocker, default_conf, fee, caplog):
     assert trade.min_rate is None
     assert trade.stop_loss == 0.0
     assert trade.initial_stop_loss == 0.0
-    assert trade.sell_reason is None
+    assert trade.exit_reason is None
     assert trade.strategy is None
     assert trade.timeframe == '5m'
     assert trade.stoploss_order_id == 'stop_order_id222'
@@ -1590,7 +1590,8 @@ def test_to_json(fee):
                       'profit_pct': None,
                       'profit_abs': None,
                       'sell_reason': None,
-                      'sell_order_status': None,
+                      'exit_reason': None,
+                      'exit_order_status': None,
                       'stop_loss_abs': None,
                       'stop_loss_ratio': None,
                       'stop_loss_pct': None,
@@ -1676,7 +1677,8 @@ def test_to_json(fee):
                       'open_rate_requested': None,
                       'open_trade_value': 12.33075,
                       'sell_reason': None,
-                      'sell_order_status': None,
+                      'exit_reason': None,
+                      'exit_order_status': None,
                       'strategy': None,
                       'buy_tag': 'buys_signal_001',
                       'enter_tag': 'buys_signal_001',
@@ -2195,7 +2197,7 @@ def test_Trade_object_idem():
         'get_open_trades_without_assigned_fees',
         'get_open_order_trades',
         'get_trades',
-        'get_sell_reason_performance',
+        'get_exit_reason_performance',
         'get_enter_tag_performance',
         'get_mix_tag_performance',
 

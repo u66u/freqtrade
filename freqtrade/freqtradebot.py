@@ -7,12 +7,13 @@ import traceback
 from datetime import datetime, time, timezone
 from math import isclose
 from threading import Lock
-from typing import Any, Dict, List, Literal, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 from schedule import Scheduler
 
 from freqtrade import __version__, constants
 from freqtrade.configuration import validate_config_consistency
+from freqtrade.constants import LongShort
 from freqtrade.data.converter import order_book_to_dataframe
 from freqtrade.data.dataprovider import DataProvider
 from freqtrade.edge import Edge
@@ -590,7 +591,7 @@ class FreqtradeBot(LoggingMixin):
         time_in_force = self.strategy.order_time_in_force['entry']
 
         [side, name] = ['sell', 'Short'] if is_short else ['buy', 'Long']
-        trade_side: Literal['long', 'short'] = 'short' if is_short else 'long'
+        trade_side: LongShort = 'short' if is_short else 'long'
         pos_adjust = trade is not None
 
         enter_limit_requested, stake_amount, leverage = self.get_valid_enter_price_and_stake(
@@ -746,7 +747,7 @@ class FreqtradeBot(LoggingMixin):
 
     def get_valid_enter_price_and_stake(
         self, pair: str, price: Optional[float], stake_amount: float,
-        trade_side: Literal['long', 'short'],
+        trade_side: LongShort,
         entry_tag: Optional[str],
         trade: Optional[Trade]
     ) -> Tuple[float, float, float]:
@@ -760,7 +761,9 @@ class FreqtradeBot(LoggingMixin):
             custom_entry_price = strategy_safe_wrapper(self.strategy.custom_entry_price,
                                                        default_retval=proposed_enter_rate)(
                 pair=pair, current_time=datetime.now(timezone.utc),
-                proposed_rate=proposed_enter_rate, entry_tag=entry_tag)
+                proposed_rate=proposed_enter_rate, entry_tag=entry_tag,
+                side=trade_side,
+            )
 
             enter_limit_requested = self.get_valid_price(custom_entry_price, proposed_enter_rate)
 
@@ -1010,7 +1013,7 @@ class FreqtradeBot(LoggingMixin):
 
         # We check if stoploss order is fulfilled
         if stoploss_order and stoploss_order['status'] in ('closed', 'triggered'):
-            trade.sell_reason = ExitType.STOPLOSS_ON_EXCHANGE.value
+            trade.exit_reason = ExitType.STOPLOSS_ON_EXCHANGE.value
             self.update_trade_state(trade, trade.stoploss_order_id, stoploss_order,
                                     stoploss_order=True)
             # Lock pair for one candle to prevent immediate rebuys
@@ -1286,7 +1289,7 @@ class FreqtradeBot(LoggingMixin):
             trade.close_date = None
             trade.is_open = True
             trade.open_order_id = None
-            trade.sell_reason = None
+            trade.exit_reason = None
             cancelled = True
         else:
             # TODO: figure out how to handle partially complete sell orders
@@ -1414,9 +1417,9 @@ class FreqtradeBot(LoggingMixin):
         trade.orders.append(order_obj)
 
         trade.open_order_id = order['id']
-        trade.sell_order_status = ''
+        trade.exit_order_status = ''
         trade.close_rate_requested = limit
-        trade.sell_reason = exit_tag or exit_check.exit_reason
+        trade.exit_reason = exit_tag or exit_check.exit_reason
 
         # Lock pair for one candle to prevent immediate re-trading
         self.strategy.lock_pair(trade.pair, datetime.now(timezone.utc),
@@ -1461,7 +1464,8 @@ class FreqtradeBot(LoggingMixin):
             'profit_ratio': profit_ratio,
             'buy_tag': trade.enter_tag,
             'enter_tag': trade.enter_tag,
-            'sell_reason': trade.sell_reason,
+            'sell_reason': trade.exit_reason,  # Deprecated
+            'exit_reason': trade.exit_reason,
             'open_date': trade.open_date,
             'close_date': trade.close_date or datetime.utcnow(),
             'stake_currency': self.config['stake_currency'],
@@ -1480,10 +1484,10 @@ class FreqtradeBot(LoggingMixin):
         """
         Sends rpc notification when a sell cancel occurred.
         """
-        if trade.sell_order_status == reason:
+        if trade.exit_order_status == reason:
             return
         else:
-            trade.sell_order_status = reason
+            trade.exit_order_status = reason
 
         profit_rate = trade.close_rate if trade.close_rate else trade.close_rate_requested
         profit_trade = trade.calc_profit(rate=profit_rate)
@@ -1509,7 +1513,8 @@ class FreqtradeBot(LoggingMixin):
             'profit_ratio': profit_ratio,
             'buy_tag': trade.enter_tag,
             'enter_tag': trade.enter_tag,
-            'sell_reason': trade.sell_reason,
+            'sell_reason': trade.exit_reason,  # Deprecated
+            'exit_reason': trade.exit_reason,
             'open_date': trade.open_date,
             'close_date': trade.close_date or datetime.now(timezone.utc),
             'stake_currency': self.config['stake_currency'],
