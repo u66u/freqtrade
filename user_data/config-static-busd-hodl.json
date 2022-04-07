@@ -73,7 +73,6 @@
             "RNDR/BUSD",
             "UNI/BUSD",
             "EGLD/BUSD",
-            "BNB/BUSD",
             "ENJ/BUSD"
         ],
         "pair_blacklist": []
