@@ -9,11 +9,11 @@
     "dry_run_wallet": 190,
     "cancel_open_orders_on_exit": false,
     "unfilledtimeout": {
-        "entry": 10,
+        "entry": 600,
         "exit": 30
     },
     "order_types": {
-        "entry": "market",
+        "entry": "limit",
         "exit": "market",
         "emergency_exit": "market",
         "trailing_stop_loss": "market",
