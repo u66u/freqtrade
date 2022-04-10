@@ -191,7 +191,7 @@ class FreqtradeBot(LoggingMixin):
             # Check and handle any timed out open orders
             self.check_handle_timedout()
 
-        # Protect from collisions with forceexit.
+        # Protect from collisions with force_exit.
         # Without this, freqtrade my try to recreate stoploss_on_exchange orders
         # while exiting is in process, since telegram messages arrive in an different thread.
         with self._exit_lock:
@@ -598,6 +598,7 @@ class FreqtradeBot(LoggingMixin):
             pair, price, stake_amount, trade_side, enter_tag, trade)
 
         if not stake_amount:
+            logger.info(f"No stake amount to enter a trade for {pair}.")
             return False
 
         if pos_adjust:
@@ -675,6 +676,7 @@ class FreqtradeBot(LoggingMixin):
 
         # Fee is applied twice because we make a LIMIT_BUY and LIMIT_SELL
         fee = self.exchange.get_fee(symbol=pair, taker_or_maker='maker')
+        base_currency = self.exchange.get_pair_base_currency(pair)
         open_date = datetime.now(timezone.utc)
         funding_fees = self.exchange.get_funding_fees(
             pair=pair, amount=amount, is_short=is_short, open_date=open_date)
@@ -682,6 +684,8 @@ class FreqtradeBot(LoggingMixin):
         if trade is None:
             trade = Trade(
                 pair=pair,
+                base_currency=base_currency,
+                stake_currency=self.config['stake_currency'],
                 stake_amount=stake_amount,
                 amount=amount,
                 is_open=True,
@@ -1379,7 +1383,7 @@ class FreqtradeBot(LoggingMixin):
         order_type = ordertype or self.strategy.order_types[exit_type]
         if exit_check.exit_type == ExitType.EMERGENCY_EXIT:
             # Emergency sells (default to market!)
-            order_type = self.strategy.order_types.get("emergencyexit", "market")
+            order_type = self.strategy.order_types.get("emergency_exit", "market")
 
         amount = self._safe_exit_amount(trade.pair, trade.amount)
         time_in_force = self.strategy.order_time_in_force['exit']
