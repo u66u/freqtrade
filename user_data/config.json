@@ -7,38 +7,38 @@
     "fiat_display_currency": "USD",
     "dry_run": true,
     "dry_run_wallet": 70,
+    "trading_mode": "spot", //futures
+    // "margin_mode": "isolated",
     "cancel_open_orders_on_exit": false,
     "unfilledtimeout": {
-        "buy": 60,
-        "sell": 10,
-        "unit": "seconds"
+        "entry": 5,
+        "exit": 10,
+        "unit": "minutes"
     },
     "order_types": {
-        "buy": "market",
-        "sell": "market",
-        "forcesell": "market",
-        "emergencysell": "market",
-        "trailing_stop_loss": "market",
+        "entry": "limit",
+        "exit": "market",
+        "emergencyexit": "market",
+        "forceexit": "market",
+        "forceentry": "market",
         "stoploss": "market",
         "stoploss_on_exchange": false,
-        "stoploss_on_exchange_interval": 60,
-        "stoploss_on_exchange_limit_ratio": 0.99
+        "stoploss_on_exchange_interval": 60
     },
-    "bid_strategy": {
-        "price_side": "ask",
-        "ask_last_balance": 0.0,
+    "entry_pricing": {
+        "price_side": "same",
         "use_order_book": false,
         "order_book_top": 1,
+        "price_last_balance": 0.0,
         "check_depth_of_market": {
             "enabled": false,
             "bids_to_ask_delta": 1
         }
     },
-    "ask_strategy": {
-        "price_side": "bid",
+    "exit_pricing": {
+        "price_side": "other",
         "use_order_book": false,
-        "order_book_min": 1,
-        "order_book_max": 1
+        "order_book_top": 1
     },
     "pairlists": [
         // {"method": "StaticPairList"}, // Uncomment if you want to use static list
@@ -86,7 +86,7 @@
     },
     "bot_name": "freqtrade_bot",
     "initial_state": "running",
-    "forcebuy_enable": false,
+    "force_entry_enable": false,
     "internals": {
         "process_throttle_secs": 2
     },
