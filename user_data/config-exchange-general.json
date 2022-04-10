@@ -3,7 +3,7 @@
         "ccxt_config": {"enableRateLimit": true},
         "ccxt_async_config": {
             "enableRateLimit": true,
-            "rateLimit": 100
+            "rateLimit": 0
         },
         "pair_blacklist": [
             // Exchange
