@@ -272,7 +272,7 @@ def main():
 
     parallel = True
     if args.no_parallel is not None:
-	parallel = False
+        parallel = False
 
     if args.pairlist is None:
         pairlist = ft_pairlists.whitelist
