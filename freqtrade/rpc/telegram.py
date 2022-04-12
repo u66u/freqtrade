@@ -274,7 +274,7 @@ class Telegram(RPCHandler):
                                 else "")
 
         # Check if all sell properties are available.
-        # This might not be the case if the message origin is triggered by /forcesell
+        # This might not be the case if the message origin is triggered by /forceexit
         if (all(prop in msg for prop in ['gain', 'fiat_currency', 'stake_currency'])
                 and self._rpc._fiat_converter):
             msg['profit_fiat'] = self._rpc._fiat_converter.convert_amount(
@@ -419,7 +419,8 @@ class Telegram(RPCHandler):
                 if prev_avg_price:
                     minus_on_entry = (cur_entry_average - prev_avg_price) / prev_avg_price
 
-                dur_entry = cur_entry_datetime - arrow.get(filled_orders[x-1]["order_filled_date"])
+                dur_entry = cur_entry_datetime - arrow.get(
+                    filled_orders[x - 1]["order_filled_date"])
                 days = dur_entry.days
                 hours, remainder = divmod(dur_entry.seconds, 3600)
                 minutes, seconds = divmod(remainder, 60)
