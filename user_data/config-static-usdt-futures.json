@@ -44,6 +44,8 @@
     "pairlists": [
         {"method": "StaticPairList"},
     ],
+    "dataformat_ohlcv": "hdf5",
+    "dataformat_trades": "hdf5",
     "exchange": {
         "name": "binance",
         "key": "1",
