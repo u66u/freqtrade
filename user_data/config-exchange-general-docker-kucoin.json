@@ -1,0 +1,30 @@
+{
+    "exchange": {
+        "ccxt_config": {
+            "enableRateLimit": false,
+            "timeout": 60000,
+            "urls": {
+                "api": {
+                    "public": "http://exchange-proxy:8080/kucoin",
+                    "private": "http://exchange-proxy:8080/kucoin"
+                }
+            }
+        },
+        "ccxt_async_config": {
+            "enableRateLimit": false,
+            "timeout": 60000
+        },
+        "pair_blacklist": [
+            // Exchange
+            "(BNB|KCS)/.*",
+            // Leverage
+            ".*(_PREMIUM|BEAR|BULL|DOWN|HALF|HEDGE|UP|[1235][SL]|2021)/.*",
+            // Fiat
+            "(AUD|BRZ|CAD|CHF|EUR|GBP|HKD|IDRT|JPY|NGN|RUB|SGD|TRY|UAH|USD|ZAR)/.*",
+            // Stable
+            "(BUSD|CUSDT|DAI|PAX|PAXG|SUSD|TUSD|USDC|USDT|VAI)/.*",
+            // FAN
+            "(ACM|AFA|ALA|ALL|ALPINE|APL|ASR|ATM|BAR|CAI|CITY|FOR|GAL|GOZ|IBFK|JUV|LAZIO|LEG|LOCK-1|NAVI|NMR|NOV|OG|PFL|PORTO|PSG|ROUSH|SANTOS|STV|TH|TRA|UCH|UFC|YBO)/.*",
+        ]
+    }
+}
