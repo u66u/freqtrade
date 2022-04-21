@@ -91,6 +91,7 @@
         "process_throttle_secs": 2
     },
     "db_url": "sqlite:///user_data/tradesv3.sqlite",
+    // "db_url": "sqlite:////freqtrade/user_data/tradesv3-dry-cend-2-kucoin.sqlite", // docker
     "user_data_dir" : "user_data",
     "strategy": "SampleStrategy",
     "strategy_path": "user_data/strategies"

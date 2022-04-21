@@ -35,4 +35,4 @@ services:
   #   image: mikekonan/exchange-proxy:latest-amd64
   #   restart: unless-stopped
   #   command: -verbose 1
-  #   container_name: github.com/mikekonan/exchange-proxy-proxy
+  #   container_name: kucoin-proxy
