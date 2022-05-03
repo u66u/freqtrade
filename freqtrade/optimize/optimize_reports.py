@@ -9,10 +9,10 @@ from pandas import DataFrame, to_datetime
 from tabulate import tabulate
 
 from freqtrade.constants import DATETIME_PRINT_FORMAT, LAST_BT_RESULT_FN, UNLIMITED_STAKE_AMOUNT
-from freqtrade.data.btanalysis import (calculate_csum, calculate_market_change,
-                                       calculate_max_drawdown)
-from freqtrade.misc import (decimals_per_coin, file_dump_joblib, file_dump_json,
-                            get_backtest_metadata_filename, round_coin_value)
+from freqtrade.data.metrics import (calculate_cagr, calculate_csum, calculate_market_change,
+                                    calculate_max_drawdown)
+from freqtrade.misc import decimals_per_coin, file_dump_joblib, file_dump_json, round_coin_value
+from freqtrade.optimize.backtest_caching import get_backtest_metadata_filename
 
 
 logger = logging.getLogger(__name__)
@@ -446,6 +446,7 @@ def generate_strategy_stats(pairlist: List[str],
         'profit_total_abs': results['profit_abs'].sum(),
         'profit_total_long_abs': results.loc[~results['is_short'], 'profit_abs'].sum(),
         'profit_total_short_abs': results.loc[results['is_short'], 'profit_abs'].sum(),
+        'cagr': calculate_cagr(backtest_days, start_balance, content['final_balance']),
         'backtest_start': min_date.strftime(DATETIME_PRINT_FORMAT),
         'backtest_start_ts': int(min_date.timestamp() * 1000),
         'backtest_end': max_date.strftime(DATETIME_PRINT_FORMAT),
@@ -497,9 +498,12 @@ def generate_strategy_stats(pairlist: List[str],
         (drawdown_abs, drawdown_start, drawdown_end, high_val, low_val,
          max_drawdown) = calculate_max_drawdown(
              results, value_col='profit_abs', starting_balance=start_balance)
+        (_, _, _, _, _, max_relative_drawdown) = calculate_max_drawdown(
+             results, value_col='profit_abs', starting_balance=start_balance, relative=True)
         strat_stats.update({
             'max_drawdown': max_drawdown_legacy,  # Deprecated - do not use
             'max_drawdown_account': max_drawdown,
+            'max_relative_drawdown': max_relative_drawdown,
             'max_drawdown_abs': drawdown_abs,
             'drawdown_start': drawdown_start.strftime(DATETIME_PRINT_FORMAT),
             'drawdown_start_ts': drawdown_start.timestamp() * 1000,
@@ -520,6 +524,7 @@ def generate_strategy_stats(pairlist: List[str],
         strat_stats.update({
             'max_drawdown': 0.0,
             'max_drawdown_account': 0.0,
+            'max_relative_drawdown': 0.0,
             'max_drawdown_abs': 0.0,
             'max_drawdown_low': 0.0,
             'max_drawdown_high': 0.0,
@@ -728,6 +733,26 @@ def text_table_add_metrics(strat_results: Dict) -> str:
                                                        strat_results['stake_currency'])),
         ] if strat_results.get('trade_count_short', 0) > 0 else []
 
+        drawdown_metrics = []
+        if 'max_relative_drawdown' in strat_results:
+            # Compatibility to show old hyperopt results
+            drawdown_metrics.append(
+                ('Max % of account underwater', f"{strat_results['max_relative_drawdown']:.2%}")
+            )
+        drawdown_metrics.extend([
+            ('Absolute Drawdown (Account)', f"{strat_results['max_drawdown_account']:.2%}")
+            if 'max_drawdown_account' in strat_results else (
+                'Drawdown', f"{strat_results['max_drawdown']:.2%}"),
+            ('Absolute Drawdown', round_coin_value(strat_results['max_drawdown_abs'],
+                                                   strat_results['stake_currency'])),
+            ('Drawdown high', round_coin_value(strat_results['max_drawdown_high'],
+                                               strat_results['stake_currency'])),
+            ('Drawdown low', round_coin_value(strat_results['max_drawdown_low'],
+                                              strat_results['stake_currency'])),
+            ('Drawdown Start', strat_results['drawdown_start']),
+            ('Drawdown End', strat_results['drawdown_end']),
+        ])
+
         # Newly added fields should be ignored if they are missing in strat_results. hyperopt-show
         # command stores these results and newer version of freqtrade must be able to handle old
         # results with missing new fields.
@@ -746,6 +771,7 @@ def text_table_add_metrics(strat_results: Dict) -> str:
             ('Absolute profit ', round_coin_value(strat_results['profit_total_abs'],
                                                   strat_results['stake_currency'])),
             ('Total profit %', f"{strat_results['profit_total']:.2%}"),
+            ('CAGR %', f"{strat_results['cagr']:.2%}" if 'cagr' in strat_results else 'N/A'),
             ('Trades per day', strat_results['trades_per_day']),
             ('Avg. daily profit %',
              f"{(strat_results['profit_total'] / strat_results['backtest_days']):.2%}"),
@@ -782,18 +808,7 @@ def text_table_add_metrics(strat_results: Dict) -> str:
             ('Max balance', round_coin_value(strat_results['csum_max'],
                                              strat_results['stake_currency'])),
 
-            # Compatibility to show old hyperopt results
-            ('Drawdown (Account)', f"{strat_results['max_drawdown_account']:.2%}")
-            if 'max_drawdown_account' in strat_results else (
-                'Drawdown', f"{strat_results['max_drawdown']:.2%}"),
-            ('Drawdown', round_coin_value(strat_results['max_drawdown_abs'],
-                                          strat_results['stake_currency'])),
-            ('Drawdown high', round_coin_value(strat_results['max_drawdown_high'],
-                                               strat_results['stake_currency'])),
-            ('Drawdown low', round_coin_value(strat_results['max_drawdown_low'],
-                                              strat_results['stake_currency'])),
-            ('Drawdown Start', strat_results['drawdown_start']),
-            ('Drawdown End', strat_results['drawdown_end']),
+            *drawdown_metrics,
             ('Market change', f"{strat_results['market_change']:.2%}"),
         ]
 
