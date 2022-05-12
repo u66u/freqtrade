@@ -16,8 +16,8 @@
             "exit_cancel": "silent",
             "entry_fill": "silent",
             "exit_fill": "silent",
-            "protection_trigger": "off",
-            "protection_trigger_global": "on"
+            "protection_trigger": "silent",
+            "protection_trigger_global": "silent"
         },
         "reload": true,
         "balance_dust_level": 0.01
