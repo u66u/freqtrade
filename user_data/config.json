@@ -16,7 +16,7 @@
         "unit": "minutes"
     },
     "order_types": {
-        "entry": "market",
+        "entry": "limit",
         "exit": "market",
         "emergency_exit": "market",
         "force_exit": "market",
@@ -26,7 +26,7 @@
         "stoploss_on_exchange_interval": 60
     },
     "entry_pricing": {
-        "price_side": "other",
+        "price_side": "same",
         "use_order_book": false, // true for futures binance
         "order_book_top": 1,
         "price_last_balance": 0.0,
@@ -94,5 +94,5 @@
     // "db_url": "sqlite:////freqtrade/user_data/tradesv3-dry-cend-2-kucoin.sqlite", // docker
     "user_data_dir" : "user_data",
     "strategy": "SampleStrategy",
-    "strategy_path": "user_data/strategies"
+    "strategy_path": "freqtrade_strategies"
 }
