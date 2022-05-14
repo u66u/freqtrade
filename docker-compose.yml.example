@@ -10,6 +10,10 @@ services:
     # build:
     #   context: .
     #   dockerfile: "./docker/Dockerfile.custom"
+    links:
+      - "binance_proxy_nightshift2k"
+    depends_on:
+      - "binance_proxy_nightshift2k"
     restart: unless-stopped
     container_name: freqtrade
     volumes:
@@ -32,6 +36,13 @@ services:
       --config /freqtrade/user_data/config-exchange-blacklist.json
       --config /freqtrade/user_data/config-telegram.json
       --config /freqtrade/user_data/config-telegram-general.json
+
+  binance_proxy_nightshift2k:
+    image: nightshift2k/binance-proxy:latest
+    container_name: binance_proxy_nightshift2k
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8090:8090"
 
   # exchange-proxy:
   #   image: mikekonan/exchange-proxy:latest-amd64
