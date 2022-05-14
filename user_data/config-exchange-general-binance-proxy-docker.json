@@ -4,7 +4,7 @@
             "enableRateLimit": false,
             "urls": {
                 "api": {
-                    "public": "http://0.0.0.0:8090/api/v3"
+                    "public": "http://localhost:8090/api/v3"
                 }
             }
         },
