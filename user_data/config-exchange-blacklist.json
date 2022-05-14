@@ -1,16 +1,5 @@
 {
     "exchange": {
-        "ccxt_config": {
-            "enableRateLimit": false,
-            "urls": {
-                "api": {
-                    "public": "http://127.0.0.1:8091/api/v3"
-                }
-            }
-        },
-        "ccxt_async_config": {
-            "enableRateLimit": false
-        },
         "pair_blacklist": [
             // Exchange
             "(BNB|KCS)/.*",
@@ -27,4 +16,5 @@
             // FAN
             "(ACM|AFA|ALA|ALL|ALPINE|APL|ASR|ATM|BAR|CAI|CITY|FOR|GAL|GOZ|IBFK|JUV|LAZIO|LEG|LOCK-1|NAVI|NMR|NOV|OG|PFL|PORTO|PSG|ROUSH|SANTOS|STV|TH|TRA|UCH|UFC|YBO)/.*",
         ]
+    }
 }
