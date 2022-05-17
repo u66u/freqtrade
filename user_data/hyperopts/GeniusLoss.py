@@ -105,7 +105,7 @@ class GeniusLoss(IHyperOptLoss):
 
         # total_profit = results['profit_ratio'].sum()
         total_profit = results['profit_abs'].sum()
-        total_trades = len(result)
+        total_trades = len(results)
         total_win = len(results[(results['profit_ratio'] > profit_threshold)])
         total_lose = len(results[(results['profit_ratio'] <= 0)])
         average_profit = results['profit_ratio'].mean() * 100
