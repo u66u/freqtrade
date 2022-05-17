@@ -134,11 +134,12 @@ class GeniusLoss(IHyperOptLoss):
         average_profit_loss = (MIN_ACCEPTED_AVERAGE_PROFIT - average_profit) * total_trades * AVERAGE_PROFIT_WEIGHT
         sortino_ratio_loss = SORTINO_WEIGHT * sortino_ratio
         drawdown_loss = max_drawdown * DRAWDOWN_WEIGHT
-        duration_loss = DURATION_WEIGHT * min(trade_duration / MAX_ACCEPTED_TRADE_DURATION, 1)
+        # duration_loss = DURATION_WEIGHT * min(trade_duration / MAX_ACCEPTED_TRADE_DURATION, 1)
+        duration_loss = DURATION_WEIGHT * (trade_duration / MAX_ACCEPTED_TRADE_DURATION) * 5
         average_trade_daily_loss = (MIN_ACCEPTED_AVERAGE_TRADE_DAILY - average_trades_per_day) * 10 * AVERAGE_TRADE_DAILY_WEIGHT
 
         # result = profit_loss + win_lose_loss + average_profit_loss + sortino_ratio_loss + drawdown_loss + duration_loss
 
-        result = -profit_loss + average_profit_loss + drawdown_loss + sortino_ratio_loss + duration_loss
+        result = -profit_loss + average_profit_loss + drawdown_loss + sortino_ratio_loss + duration_loss + average_trade_daily_loss
 
         return result
