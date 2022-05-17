@@ -108,7 +108,7 @@ class GeniusLoss(IHyperOptLoss):
         total_lose = len(results[(results['profit_ratio'] <= 0)])
         average_profit = results['profit_ratio'].mean() * 100
         sortino_ratio = sortino_daily(results, trade_count, min_date, max_date)
-        trade_duration = results['trade_duration'].mean()
+        # trade_duration = results['trade_duration'].mean()
 
         max_drawdown = 0
         try:
@@ -124,8 +124,8 @@ class GeniusLoss(IHyperOptLoss):
         average_profit_loss = 1 - (min(average_profit, AVERAGE_PROFIT_THRESHOLD) * AVERAGE_PROFIT_WEIGHT)
         sortino_ratio_loss = SORTINO_WEIGHT * sortino_ratio
         drawdown_loss = max_drawdown * DRAWDOWN_WEIGHT
-        duration_loss = DURATION_WEIGHT * min(trade_duration / MAX_ACCEPTED_TRADE_DURATION, 1)
+        # duration_loss = DURATION_WEIGHT * min(trade_duration / MAX_ACCEPTED_TRADE_DURATION, 1)
 
-        result = profit_loss + win_lose_loss + average_profit_loss + sortino_ratio_loss + drawdown_loss + duration_loss
+        result = profit_loss + win_lose_loss + average_profit_loss + sortino_ratio_loss + drawdown_loss # + duration_loss
 
         return result
