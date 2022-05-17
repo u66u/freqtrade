@@ -3,7 +3,7 @@ import math
 from datetime import datetime
 from pandas import DataFrame, date_range
 import pandas as pd
-from freqtrade.data.btanalysis import calculate_max_drawdown
+from freqtrade.data.metrics import calculate_max_drawdown
 
 # Sortino settings
 TARGET_TRADES = 500
@@ -110,10 +110,9 @@ class GeniusLoss(IHyperOptLoss):
         sortino_ratio = sortino_daily(results, trade_count, min_date, max_date)
         trade_duration = results['trade_duration'].mean()
 
-        max_drawdown = 100
+        max_drawdown = 0
         try:
-            max_drawdown, _, _, _, _ = calculate_max_drawdown(
-                results, value_col='profit_ratio')
+            max_drawdown = calculate_max_drawdown(results, value_col='profit_abs')
         except:
             pass
 
