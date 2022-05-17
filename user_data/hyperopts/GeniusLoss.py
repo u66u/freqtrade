@@ -11,6 +11,7 @@ EXPECTED_MAX_PROFIT = 3.0 # x 100%
 MAX_ACCEPTED_TRADE_DURATION = 180 # minutes
 MIN_ACCEPTED_TRADE_DURATION = 2 # minutes
 MIN_ACCEPTED_AVERAGE_TRADE_DAILY = 0.5
+MIN_ACCEPTED_AVERAGE_PROFIT = 0.9
 
 # Loss settings
 # EXPECTED_MAX_PROFIT = 3.0
@@ -19,7 +20,7 @@ AVERAGE_PROFIT_WEIGHT = 1.5
 AVERAGE_PROFIT_THRESHOLD = 3 # %
 SORTINO_WEIGHT = 0.2
 TOTAL_PROFIT_WEIGHT = 1
-DRAWDOWN_WEIGHT = 1.5
+DRAWDOWN_WEIGHT = 2
 DURATION_WEIGHT = 1
 AVERAGE_TRADE_DAILY_WEIGHT = 0.5
 
@@ -128,7 +129,9 @@ class GeniusLoss(IHyperOptLoss):
         # profit_loss = (1 - total_profit / EXPECTED_MAX_PROFIT) * TOTAL_PROFIT_WEIGHT
         profit_loss = total_profit * TOTAL_PROFIT_WEIGHT
         # win_lose_loss = (1 - (total_win / total_lose)) * WIN_LOSS_WEIGHT
-        average_profit_loss = 1 - (min(average_profit, AVERAGE_PROFIT_THRESHOLD) * AVERAGE_PROFIT_WEIGHT * total_trades)
+        # average_profit_loss = 1 - (min(average_profit, AVERAGE_PROFIT_THRESHOLD) * AVERAGE_PROFIT_WEIGHT)
+        # average_profit_loss = 1 - (min(average_profit, AVERAGE_PROFIT_THRESHOLD) * AVERAGE_PROFIT_WEIGHT * total_trades)
+        average_profit_loss = (MIN_ACCEPTED_AVERAGE_PROFIT - average_profit) * total_trades * AVERAGE_PROFIT_WEIGHT
         sortino_ratio_loss = SORTINO_WEIGHT * sortino_ratio
         drawdown_loss = max_drawdown * DRAWDOWN_WEIGHT
         duration_loss = DURATION_WEIGHT * min(trade_duration / MAX_ACCEPTED_TRADE_DURATION, 1)
