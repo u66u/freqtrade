@@ -10,16 +10,18 @@ TARGET_TRADES = 500
 EXPECTED_MAX_PROFIT = 3.0 # x 100%
 MAX_ACCEPTED_TRADE_DURATION = 180 # minutes
 MIN_ACCEPTED_TRADE_DURATION = 2 # minutes
+MIN_ACCEPTED_AVERAGE_TRADE_DAILY = 0.5
 
 # Loss settings
 # EXPECTED_MAX_PROFIT = 3.0
-WIN_LOSS_WEIGHT = 2
+# WIN_LOSS_WEIGHT = 2
 AVERAGE_PROFIT_WEIGHT = 1.5
 AVERAGE_PROFIT_THRESHOLD = 3 # %
 SORTINO_WEIGHT = 0.2
 TOTAL_PROFIT_WEIGHT = 1
 DRAWDOWN_WEIGHT = 1.5
 DURATION_WEIGHT = 1
+AVERAGE_TRADE_DAILY_WEIGHT = 0.5
 
 IGNORE_SMALL_PROFITS = False
 SMALL_PROFITS_THRESHOLD = 0.001  # 0.1%
@@ -106,11 +108,13 @@ class GeniusLoss(IHyperOptLoss):
         # total_profit = results['profit_ratio'].sum()
         total_profit = results['profit_abs'].sum()
         total_trades = len(results)
-        total_win = len(results[(results['profit_ratio'] > profit_threshold)])
-        total_lose = len(results[(results['profit_ratio'] <= 0)])
+        # total_win = len(results[(results['profit_ratio'] > profit_threshold)])
+        # total_lose = len(results[(results['profit_ratio'] <= 0)])
         average_profit = results['profit_ratio'].mean() * 100
         sortino_ratio = sortino_daily(results, trade_count, min_date, max_date)
         trade_duration = results['trade_duration'].mean()
+        backtest_days = (max_date - min_date).days or 1
+        average_trades_per_day = round(total_trades / backtest_days, 5)
 
         max_drawdown = 0
         try:
@@ -118,8 +122,8 @@ class GeniusLoss(IHyperOptLoss):
         except:
             pass
 
-        if total_lose == 0:
-            total_lose = 1
+        # if total_lose == 0:
+        #     total_lose = 1
 
         # profit_loss = (1 - total_profit / EXPECTED_MAX_PROFIT) * TOTAL_PROFIT_WEIGHT
         profit_loss = total_profit * TOTAL_PROFIT_WEIGHT
@@ -128,6 +132,7 @@ class GeniusLoss(IHyperOptLoss):
         sortino_ratio_loss = SORTINO_WEIGHT * sortino_ratio
         drawdown_loss = max_drawdown * DRAWDOWN_WEIGHT
         duration_loss = DURATION_WEIGHT * min(trade_duration / MAX_ACCEPTED_TRADE_DURATION, 1)
+        average_trade_daily_loss = (MIN_ACCEPTED_AVERAGE_TRADE_DAILY - average_trades_per_day) * 10 * AVERAGE_TRADE_DAILY_WEIGHT
 
         # result = profit_loss + win_lose_loss + average_profit_loss + sortino_ratio_loss + drawdown_loss + duration_loss
 
