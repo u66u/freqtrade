@@ -44,7 +44,7 @@
         // {"method": "StaticPairList"}, // Uncomment if you want to use static list
         {
             "method": "VolumePairList",
-            "number_assets": 100,
+            "number_assets": 80,
             "sort_key": "quoteVolume",
         },
         {"method": "AgeFilter", "min_days_listed": 30},
@@ -56,7 +56,7 @@
         },
         {
             "method": "VolumePairList",
-            "number_assets": 80,
+            "number_assets": 60,
             "sort_key": "quoteVolume"
         }
     ],
