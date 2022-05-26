@@ -305,6 +305,7 @@ def test_amount_to_precision(
     (234.53, 4, 0.5, 235.0),
     (0.891534, 4, 0.0001, 0.8916),
     (64968.89, 4, 0.01, 64968.89),
+    (0.000000003483, 4, 1e-12, 0.000000003483),
 
 ])
 def test_price_to_precision(default_conf, mocker, price, precision_mode, precision, expected):
@@ -2807,6 +2808,7 @@ def test_get_historic_trades_notsupported(default_conf, mocker, caplog, exchange
                                      until=trades_history[-1][0])
 
 
+@pytest.mark.usefixtures("init_persistence")
 @pytest.mark.parametrize("exchange_name", EXCHANGES)
 def test_cancel_order_dry_run(default_conf, mocker, exchange_name):
     default_conf['dry_run'] = True
@@ -2972,6 +2974,7 @@ def test_cancel_stoploss_order_with_result(default_conf, mocker, exchange_name):
         exchange.cancel_stoploss_order_with_result(order_id='_', pair='TKN/BTC', amount=123)
 
 
+@pytest.mark.usefixtures("init_persistence")
 @pytest.mark.parametrize("exchange_name", EXCHANGES)
 def test_fetch_order(default_conf, mocker, exchange_name, caplog):
     default_conf['dry_run'] = True
@@ -3024,6 +3027,7 @@ def test_fetch_order(default_conf, mocker, exchange_name, caplog):
                            order_id='_', pair='TKN/BTC')
 
 
+@pytest.mark.usefixtures("init_persistence")
 @pytest.mark.parametrize("exchange_name", EXCHANGES)
 def test_fetch_stoploss_order(default_conf, mocker, exchange_name):
     # Don't test FTX here - that needs a separate test
@@ -3909,6 +3913,70 @@ def test_calculate_funding_fees(
             close_date=trade_date,
             time_in_ratio=time_in_ratio,
         ) == kraken_fee
+
+
+@pytest.mark.parametrize(
+    'mark_price,funding_rate,futures_funding_rate', [
+        (1000, 0.001, None),
+        (1000, 0.001, 0.01),
+        (1000, 0.001, 0.0),
+        (1000, 0.001, -0.01),
+    ])
+def test_combine_funding_and_mark(
+    default_conf,
+    mocker,
+    funding_rate,
+    mark_price,
+    futures_funding_rate,
+):
+    exchange = get_patched_exchange(mocker, default_conf)
+    prior2_date = timeframe_to_prev_date('1h', datetime.now(timezone.utc) - timedelta(hours=2))
+    prior_date = timeframe_to_prev_date('1h', datetime.now(timezone.utc) - timedelta(hours=1))
+    trade_date = timeframe_to_prev_date('1h', datetime.now(timezone.utc))
+    funding_rates = DataFrame([
+        {'date': prior2_date, 'open': funding_rate},
+        {'date': prior_date, 'open': funding_rate},
+        {'date': trade_date, 'open': funding_rate},
+    ])
+    mark_rates = DataFrame([
+        {'date': prior2_date, 'open': mark_price},
+        {'date': prior_date, 'open': mark_price},
+        {'date': trade_date, 'open': mark_price},
+    ])
+
+    df = exchange.combine_funding_and_mark(funding_rates, mark_rates, futures_funding_rate)
+    assert 'open_mark' in df.columns
+    assert 'open_fund' in df.columns
+    assert len(df) == 3
+
+    funding_rates = DataFrame([
+        {'date': trade_date, 'open': funding_rate},
+    ])
+    mark_rates = DataFrame([
+        {'date': prior2_date, 'open': mark_price},
+        {'date': prior_date, 'open': mark_price},
+        {'date': trade_date, 'open': mark_price},
+    ])
+    df = exchange.combine_funding_and_mark(funding_rates, mark_rates, futures_funding_rate)
+
+    if futures_funding_rate is not None:
+        assert len(df) == 3
+        assert df.iloc[0]['open_fund'] == futures_funding_rate
+        assert df.iloc[1]['open_fund'] == futures_funding_rate
+        assert df.iloc[2]['open_fund'] == funding_rate
+    else:
+        assert len(df) == 1
+
+    # Empty funding rates
+    funding_rates = DataFrame([], columns=['date', 'open'])
+    df = exchange.combine_funding_and_mark(funding_rates, mark_rates, futures_funding_rate)
+    if futures_funding_rate is not None:
+        assert len(df) == 3
+        assert df.iloc[0]['open_fund'] == futures_funding_rate
+        assert df.iloc[1]['open_fund'] == futures_funding_rate
+        assert df.iloc[2]['open_fund'] == futures_funding_rate
+    else:
+        assert len(df) == 0
 
 
 def test_get_or_calculate_liquidation_price(mocker, default_conf):
