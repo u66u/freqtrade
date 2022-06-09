@@ -6,7 +6,7 @@
     "tradable_balance_ratio": 0.99,
     "fiat_display_currency": "USD",
     "dry_run": true,
-    "dry_run_wallet": 70,
+    "dry_run_wallet": 80,
     "trading_mode": "spot", //futures
     // "margin_mode": "isolated",
     "cancel_open_orders_on_exit": false,
@@ -88,7 +88,7 @@
     "initial_state": "running",
     "force_entry_enable": false,
     "internals": {
-        "process_throttle_secs": 2
+        "process_throttle_secs": 5
     },
     "db_url": "sqlite:///user_data/tradesv3.sqlite",
     // "db_url": "sqlite:////freqtrade/user_data/tradesv3-dry-cend-2-kucoin.sqlite", // docker
