@@ -5,6 +5,7 @@ FROM freqtradeorg/freqtrade:develop
 # USER root
 
 # The below dependency - pyti - serves as an example. Please use whatever you need!
-RUN pip install --user finta PyWavelets
+RUN pip install --user finta PyWavelets keyboard rich psutil
+COPY scripts/*.* scripts/
 
 # USER ftuser
