@@ -74,7 +74,7 @@ class Order(_DECL_BASE):
 
     @property
     def safe_filled(self) -> float:
-        return self.filled or self.amount or 0.0
+        return self.filled if self.filled is not None else self.amount or 0.0
 
     @property
     def safe_fee_base(self) -> float:
@@ -828,14 +828,6 @@ class LocalTrade():
         return float(f"{profit_ratio:.8f}")
 
     def recalc_trade_from_orders(self):
-        # We need at least 2 entry orders for averaging amounts and rates.
-        # TODO: this condition could probably be removed
-        if len(self.select_filled_orders(self.entry_side)) < 2:
-            self.stake_amount = self.amount * self.open_rate / self.leverage
-
-            # Just in case, still recalc open trade value
-            self.recalc_open_trade_value()
-            return
 
         total_amount = 0.0
         total_stake = 0.0
@@ -847,8 +839,6 @@ class LocalTrade():
 
             tmp_amount = o.safe_amount_after_fee
             tmp_price = o.average or o.price
-            if o.filled is not None:
-                tmp_amount = o.filled
             if tmp_amount > 0.0 and tmp_price is not None:
                 total_amount += tmp_amount
                 total_stake += tmp_price * tmp_amount
