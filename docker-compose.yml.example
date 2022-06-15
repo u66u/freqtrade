@@ -3,17 +3,18 @@ version: '3'
 services:
   freqtrade:
     # image: freqtradeorg/freqtrade:stable
-    image: freqtradeorg/freqtrade:develop
+    # image: freqtradeorg/freqtrade:develop
+    image: freqtrade_custom
     # Use plotting image
     # image: freqtradeorg/freqtrade:develop_plot
     # Build step - only needed when additional dependencies are needed
-    # build:
-    #   context: .
-    #   dockerfile: "./docker/Dockerfile.custom"
-    links:
-      - "binance_proxy"
-    depends_on:
-      - "binance_proxy"
+    build:
+      context: .
+      dockerfile: "./docker/Dockerfile.custom"
+    # links:
+    #   - "binance_proxy"
+    # depends_on:
+    #   - "binance_proxy"
     restart: unless-stopped
     container_name: freqtrade
     volumes:
