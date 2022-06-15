@@ -19,16 +19,16 @@
             {"Strategy": "{strategy}"},
             {"Timeframe": "{timeframe}"},
         ],
-        // "entry_fill": [
-        //     {"Trade ID": "{trade_id}"},
-        //     {"Exchange": "{exchange}"},
-        //     {"Pair": "{pair}"},
-        //     {"Direction": "{direction}"},
-        //     {"Open rate": "{open_rate}"},
-        //     {"Amount": "{amount}"},
-        //     {"Open date": "{open_date:%Y-%m-%d %H:%M:%S}"},
-        //     {"Enter tag": "{enter_tag}"},
-        //     {"Strategy": "{strategy} {timeframe}"},
-        // ]
+        "entry_fill": [
+            {"Trade ID": "{trade_id}"},
+            {"Exchange": "{exchange}"},
+            {"Pair": "{pair}"},
+            {"Direction": "{direction}"},
+            {"Open rate": "{open_rate}"},
+            {"Amount": "{amount}"},
+            {"Open date": "{open_date:%Y-%m-%d %H:%M:%S}"},
+            {"Enter tag": "{enter_tag}"},
+            {"Strategy": "{strategy} {timeframe}"},
+        ]
     }
 }
