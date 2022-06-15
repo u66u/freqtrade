@@ -37,6 +37,7 @@ services:
       --config /freqtrade/user_data/config-exchange-blacklist.json
       --config /freqtrade/user_data/config-telegram.json
       --config /freqtrade/user_data/config-telegram-general.json
+      --config /freqtrade/user_data/config-discord.json
 
   # binance_proxy:
   #   image: nightshift2k/binance-proxy:latest
