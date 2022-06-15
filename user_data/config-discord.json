@@ -1,6 +1,6 @@
 {
     "discord": {
-        "enabled": false,
+        "enabled": true,
         "webhook_url": "https://discord.com/api/webhooks/<Your webhook URL ...>",
         "exit_fill": [
             {"Trade ID": "{trade_id}"},
