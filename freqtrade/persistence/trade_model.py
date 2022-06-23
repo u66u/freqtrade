@@ -8,7 +8,7 @@ from typing import Any, Dict, List, Optional
 
 from sqlalchemy import (Boolean, Column, DateTime, Enum, Float, ForeignKey, Integer, String,
                         UniqueConstraint, desc, func)
-from sqlalchemy.orm import Query, relationship
+from sqlalchemy.orm import Query, lazyload, relationship
 
 from freqtrade.constants import DATETIME_PRINT_FORMAT, NON_OPEN_EXCHANGE_STATES, BuySell, LongShort
 from freqtrade.enums import ExitType, TradingMode
@@ -57,6 +57,7 @@ class Order(_DECL_BASE):
     filled = Column(Float, nullable=True)
     remaining = Column(Float, nullable=True)
     cost = Column(Float, nullable=True)
+    stop_price = Column(Float, nullable=True)
     order_date = Column(DateTime, nullable=True, default=datetime.utcnow)
     order_filled_date = Column(DateTime, nullable=True)
     order_update_date = Column(DateTime, nullable=True)
@@ -107,6 +108,7 @@ class Order(_DECL_BASE):
         self.average = order.get('average', self.average)
         self.remaining = order.get('remaining', self.remaining)
         self.cost = order.get('cost', self.cost)
+        self.stop_price = order.get('stopPrice', self.stop_price)
 
         if 'timestamp' in order and order['timestamp'] is not None:
             self.order_date = datetime.fromtimestamp(order['timestamp'] / 1000, tz=timezone.utc)
@@ -130,6 +132,7 @@ class Order(_DECL_BASE):
             'side': self.ft_order_side,
             'filled': self.filled,
             'remaining': self.remaining,
+            'stopPrice': self.stop_price,
             'datetime': self.order_date_utc.strftime('%Y-%m-%dT%H:%M:%S.%f'),
             'timestamp': int(self.order_date_utc.timestamp() * 1000),
             'status': self.status,
@@ -1115,7 +1118,7 @@ class Trade(_DECL_BASE, LocalTrade):
             )
 
     @staticmethod
-    def get_trades(trade_filter=None) -> Query:
+    def get_trades(trade_filter=None, include_orders: bool = True) -> Query:
         """
         Helper function to query Trades using filters.
         NOTE: Not supported in Backtesting.
@@ -1130,9 +1133,14 @@ class Trade(_DECL_BASE, LocalTrade):
         if trade_filter is not None:
             if not isinstance(trade_filter, list):
                 trade_filter = [trade_filter]
-            return Trade.query.filter(*trade_filter)
+            this_query = Trade.query.filter(*trade_filter)
         else:
-            return Trade.query
+            this_query = Trade.query
+        if not include_orders:
+            # Don't load order relations
+            # Consider using noload or raiseload instead of lazyload
+            this_query = this_query.options(lazyload(Trade.orders))
+        return this_query
 
     @staticmethod
     def get_open_order_trades() -> List['Trade']:

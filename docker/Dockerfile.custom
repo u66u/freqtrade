@@ -8,4 +8,5 @@ FROM freqtradeorg/freqtrade:develop
 RUN pip install --user finta PyWavelets keyboard rich psutil
 COPY scripts/*.* scripts/
 
+# Switch back to user (only if you required root above)
 # USER ftuser
