@@ -66,6 +66,7 @@
             // "LUNA/USDT",
             "ETC/USDT",
             "GALA/USDT",
+            "GAL/USDT",
             "ADA/USDT",
             "XRP/USDT",
             "CELR/USDT",
@@ -182,7 +183,11 @@
             "LPT/USDT",
             "FLM/USDT",
             "1000XEC/USDT",
-            "DEFI/USDT"
+            "DEFI/USDT",
+            "API3/USDT",
+            "APE/USDT",
+            "IMX/USDT",
+            "WOO/USDT",
         ],
         "pair_blacklist": []
     },
