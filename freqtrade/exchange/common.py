@@ -46,6 +46,7 @@ MAP_EXCHANGE_CHILDCLASS = {
     'binanceje': 'binance',
     'binanceusdm': 'binance',
     'okex': 'okx',
+    'gate': 'gateio',
 }
 
 SUPPORTED_EXCHANGES = [
@@ -67,7 +68,6 @@ EXCHANGE_HAS_REQUIRED = [
     'fetchBalance',
 
     # Public endpoints
-    'loadMarkets',
     'fetchOHLCV',
 ]
 
