@@ -4,7 +4,7 @@ from datetime import datetime
 from pandas import DataFrame, date_range
 import pandas as pd
 from freqtrade.data.metrics import calculate_max_drawdown
-from typing import Dict
+from typing import Dict, Any
 
 # Sortino settings
 TARGET_TRADES = 500
