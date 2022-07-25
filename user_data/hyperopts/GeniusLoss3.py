@@ -24,7 +24,7 @@ TOTAL_PROFIT_WEIGHT = 0.5
 DRAWDOWN_WEIGHT = 3
 DURATION_WEIGHT = 1
 AVERAGE_TRADE_DAILY_WEIGHT = 0.5
-EXPECTANCY_WEIGHT = 4
+EXPECTANCY_WEIGHT = 4 * 50
 
 IGNORE_SMALL_PROFITS = False
 SMALL_PROFITS_THRESHOLD = 0.001  # 0.1%
@@ -173,9 +173,11 @@ class GeniusLoss3(IHyperOptLoss):
         # duration_loss = DURATION_WEIGHT * min(trade_duration / MAX_ACCEPTED_TRADE_DURATION, 1)
         duration_loss = DURATION_WEIGHT * (trade_duration / MAX_ACCEPTED_TRADE_DURATION) * 5
         average_trade_daily_loss = (MIN_ACCEPTED_AVERAGE_TRADE_DAILY - average_trades_per_day) * 10 * AVERAGE_TRADE_DAILY_WEIGHT
-        expectancy_loss = expectancy(results, backtest_stats, trade_count) * EXPECTANCY_WEIGHT * 50
+        expectancy_loss = expectancy(results, backtest_stats, trade_count) * EXPECTANCY_WEIGHT
         # result = profit_loss + win_lose_loss + average_profit_loss + sortino_ratio_loss + drawdown_loss + duration_loss
 
         result = -profit_loss + average_profit_loss + drawdown_loss + sortino_ratio_loss + duration_loss + average_trade_daily_loss + expectancy_loss
+
+        print("exp:{:.2f} sortino:{:.2f} ".format(expectancy_loss, sortino_ratio))
 
         return result
