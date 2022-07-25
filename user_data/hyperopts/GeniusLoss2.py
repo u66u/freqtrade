@@ -19,7 +19,7 @@ MIN_ACCEPTED_AVERAGE_PROFIT = 0.9
 AVERAGE_PROFIT_WEIGHT = 1.5
 AVERAGE_PROFIT_THRESHOLD = 5 # %
 SORTINO_WEIGHT = 3
-TOTAL_PROFIT_WEIGHT = 1
+TOTAL_PROFIT_WEIGHT = 0.5
 DRAWDOWN_WEIGHT = 2
 DURATION_WEIGHT = 1
 AVERAGE_TRADE_DAILY_WEIGHT = 0.5
@@ -140,6 +140,6 @@ class GeniusLoss2(IHyperOptLoss):
 
         # result = profit_loss + win_lose_loss + average_profit_loss + sortino_ratio_loss + drawdown_loss + duration_loss
 
-        result = average_profit_loss + drawdown_loss + sortino_ratio_loss + duration_loss + average_trade_daily_loss
+        result = -profit_loss + average_profit_loss + drawdown_loss + sortino_ratio_loss + duration_loss + average_trade_daily_loss
 
         return result
