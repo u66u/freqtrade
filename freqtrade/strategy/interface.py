@@ -102,6 +102,8 @@ class IStrategy(ABC, HyperStrategyMixin):
 
     # Count of candles the strategy requires before producing valid signals
     startup_candle_count: int = 0
+    startup_candle_count_15m: int = 0
+    startup_candle_count_1d: int = 0
 
     # Protections
     protections: List = []
