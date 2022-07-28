@@ -75,7 +75,7 @@ def _format_pair_name(config, pair: str) -> str:
 
 def _create_and_merge_informative_pair(strategy, dataframe: DataFrame, metadata: dict,
                                        inf_data: InformativeData,
-                                       populate_indicators: PopulateIndicators):
+                                       populate_indicators: PopulateIndicators, backtest: bool=False):
     asset = inf_data.asset or ''
     timeframe = inf_data.timeframe
     fmt = inf_data.fmt
@@ -107,7 +107,7 @@ def _create_and_merge_informative_pair(strategy, dataframe: DataFrame, metadata:
             fmt = '{base}_{quote}_' + fmt           # Informatives of other pairs
 
     inf_metadata = {'pair': asset, 'timeframe': timeframe}
-    inf_dataframe = strategy.dp.get_pair_dataframe(asset, timeframe, candle_type)
+    inf_dataframe = strategy.dp.get_pair_dataframe(asset, timeframe, candle_type, backtest)
     inf_dataframe = populate_indicators(strategy, inf_dataframe, inf_metadata)
 
     formatter: Any = None

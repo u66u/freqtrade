@@ -1116,7 +1116,7 @@ class IStrategy(ABC, HyperStrategyMixin):
                                         pair=trade.pair, trade=trade, order=order,
                                         current_time=current_time)
 
-    def advise_all_indicators(self, data: Dict[str, DataFrame]) -> Dict[str, DataFrame]:
+    def advise_all_indicators(self, data: Dict[str, DataFrame], backtest: bool = False) -> Dict[str, DataFrame]:
         """
         Populates indicators for given candle (OHLCV) data (for multiple pairs)
         Does not run advise_entry or advise_exit!
@@ -1126,10 +1126,10 @@ class IStrategy(ABC, HyperStrategyMixin):
         Has positive effects on memory usage for whatever reason - also when
         using only one strategy.
         """
-        return {pair: self.advise_indicators(pair_data.copy(), {'pair': pair}).copy()
+        return {pair: self.advise_indicators(pair_data.copy(), {'pair': pair}, backtest).copy()
                 for pair, pair_data in data.items()}
 
-    def advise_indicators(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
+    def advise_indicators(self, dataframe: DataFrame, metadata: dict, backtest: bool = False) -> DataFrame:
         """
         Populate indicators that will be used in the Buy, Sell, short, exit_short strategy
         This method should not be overridden.
@@ -1142,7 +1142,7 @@ class IStrategy(ABC, HyperStrategyMixin):
         # call populate_indicators_Nm() which were tagged with @informative decorator.
         for inf_data, populate_fn in self._ft_informative:
             dataframe = _create_and_merge_informative_pair(
-                self, dataframe, metadata, inf_data, populate_fn)
+                self, dataframe, metadata, inf_data, populate_fn, backtest)
 
         return self.populate_indicators(dataframe, metadata)
 

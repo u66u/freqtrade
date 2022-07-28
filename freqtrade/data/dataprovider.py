@@ -70,7 +70,8 @@ class DataProvider:
         self,
         pair: str,
         timeframe: str = None,
-        candle_type: str = ''
+        candle_type: str = '',
+        use_own_startup: bool = False
     ) -> DataFrame:
         """
         Get stored historical candle (OHLCV) data
@@ -85,9 +86,15 @@ class DataProvider:
             timerange = TimeRange.parse_timerange(None if self._config.get(
                 'timerange') is None else str(self._config.get('timerange')))
             # Move informative start time respecting startup_candle_count
-            timerange.subtract_start(
-                timeframe_to_seconds(str(timeframe)) * self._config.get('startup_candle_count', 0)
-            )
+            if use_own_startup:
+                timerange.subtract_start(
+                    timeframe_to_seconds(str(timeframe)) * self._config.get(f'startup_candle_count_{timeframe}', 0)
+                )
+            else:
+                timerange.subtract_start(
+                    timeframe_to_seconds(str(timeframe)) * self._config.get('startup_candle_count', 0)
+                )
+
             self.__cached_pairs_backtesting[saved_pair] = load_pair_history(
                 pair=pair,
                 timeframe=timeframe or self._config['timeframe'],
@@ -103,7 +110,8 @@ class DataProvider:
         self,
         pair: str,
         timeframe: str = None,
-        candle_type: str = ''
+        candle_type: str = '',
+        use_own_startup: bool = False
     ) -> DataFrame:
         """
         Return pair candle (OHLCV) data, either live or cached historical -- depending
@@ -120,7 +128,7 @@ class DataProvider:
             data = self.ohlcv(pair=pair, timeframe=timeframe, candle_type=candle_type)
         else:
             # Get historical OHLCV data (cached on disk).
-            data = self.historic_ohlcv(pair=pair, timeframe=timeframe, candle_type=candle_type)
+            data = self.historic_ohlcv(pair=pair, timeframe=timeframe, candle_type=candle_type, use_own_startup=use_own_startup)
         if len(data) == 0:
             logger.warning(f"No data found for ({pair}, {timeframe}, {candle_type}).")
         return data
