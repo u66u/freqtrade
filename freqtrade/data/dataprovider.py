@@ -87,7 +87,8 @@ class DataProvider:
                 'timerange') is None else str(self._config.get('timerange')))
             # Move informative start time respecting startup_candle_count
             if use_own_startup:
-                logger.info(f'{timeframe} timeframe use own startup_candle_count of {self._config.get(f'startup_candle_count_{timeframe}', 0)}')
+                own_startup = self._config.get(f'startup_candle_count_{timeframe}', 0)
+                logger.info(f'{timeframe} timeframe use own startup_candle_count of {own_startup}')
                 timerange.subtract_start(
                     timeframe_to_seconds(str(timeframe)) * self._config.get(f'startup_candle_count_{timeframe}', 0)
                 )
