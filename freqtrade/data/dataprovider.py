@@ -86,16 +86,16 @@ class DataProvider:
             timerange = TimeRange.parse_timerange(None if self._config.get(
                 'timerange') is None else str(self._config.get('timerange')))
             # Move informative start time respecting startup_candle_count
+            startup_candle = self._config.get('startup_candle_count', 0)
             if use_own_startup:
                 own_startup = self._config.get(f'startup_candle_count_{timeframe}', 0)
                 # logger.info(f'{timeframe} timeframe use own startup_candle_count of {own_startup}')
-                timerange.subtract_start(
-                    timeframe_to_seconds(str(timeframe)) * own_startup
-                )
-            else:
-                timerange.subtract_start(
-                    timeframe_to_seconds(str(timeframe)) * self._config.get('startup_candle_count', 0)
-                )
+                if int(own_startup) > 0:
+                    startup_candle = own_startup
+                
+            timerange.subtract_start(
+                timeframe_to_seconds(str(timeframe)) * startup_candle
+            )
 
             self.__cached_pairs_backtesting[saved_pair] = load_pair_history(
                 pair=pair,
