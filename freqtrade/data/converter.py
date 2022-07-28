@@ -122,6 +122,45 @@ def ohlcv_fill_up_missing_data(dataframe: DataFrame, timeframe: str, pair: str) 
             logger.debug(message)
     return df
 
+def reduce_mem_usage(pair: str, df: DataFrame):
+    """ iterate through all the columns of a dataframe and modify the data type
+        to reduce memory usage.        
+    """
+    start_mem = df.memory_usage().sum() / 1024**2
+    logger.info(f"Memory usage of dataframe for {pair} is {start_mem:.2f} MB")
+   
+    for col in df.columns[1:]:
+        col_type = df[col].dtype
+        
+        if col_type != object:
+            c_min = df[col].min()
+            c_max = df[col].max()
+            if str(col_type)[:3] == "int":
+                if c_min > np.iinfo(np.int8).min and c_max < np.iinfo(np.int8).max:
+                    df[col] = df[col].astype(np.int8)
+                elif c_min > np.iinfo(np.int16).min and c_max < np.iinfo(np.int16).max:
+                    df[col] = df[col].astype(np.int16)
+                elif c_min > np.iinfo(np.int32).min and c_max < np.iinfo(np.int32).max:
+                    df[col] = df[col].astype(np.int32)
+                elif c_min > np.iinfo(np.int64).min and c_max < np.iinfo(np.int64).max:
+                    df[col] = df[col].astype(np.int64)  
+            elif str(col_type)[:5] == "float":
+                if c_min > np.finfo(np.float16).min and c_max < np.finfo(np.float16).max:
+                    df[col] = df[col].astype(np.float16)
+                elif c_min > np.finfo(np.float32).min and c_max < np.finfo(np.float32).max:
+                    df[col] = df[col].astype(np.float32)
+                else:
+                    df[col] = df[col].astype(np.float64)
+            else:
+                logger.info(f"Columen not optimized because the type is {str(col_type)}")
+        # else:
+            # df[col] = df[col].astype('category')
+
+    end_mem = df.memory_usage().sum() / 1024**2
+    logger.info("Memory usage after optimization is: {:.2f} MB".format(end_mem))
+    logger.info("Decreased by {:.1f}%".format(100 * (start_mem - end_mem) / start_mem))
+    
+    return df
 
 def trim_dataframe(df: DataFrame, timerange, df_date_col: str = 'date',
                    startup_candles: int = 0) -> DataFrame:
@@ -160,6 +199,7 @@ def trim_dataframes(preprocessed: Dict[str, DataFrame], timerange,
     for pair, df in preprocessed.items():
         trimed_df = trim_dataframe(df, timerange, startup_candles=startup_candles)
         if not trimed_df.empty:
+            trimed_df = reduce_mem_usage(pair, trimed_df)
             processed[pair] = trimed_df
         else:
             logger.warning(f'{pair} has no data left after adjusting for startup candles, '
