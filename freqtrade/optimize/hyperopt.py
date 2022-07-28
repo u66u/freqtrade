@@ -411,7 +411,7 @@ class Hyperopt:
         self.backtesting.load_bt_data_detail()
         logger.info("Dataload complete. Calculating indicators")
 
-        preprocessed = self.backtesting.strategy.advise_all_indicators(data, True)
+        preprocessed = self.backtesting.strategy.advise_all_indicators(data)
 
         # Trim startup period from analyzed dataframe to get correct dates for output.
         processed = trim_dataframes(preprocessed, timerange, self.backtesting.required_startup)

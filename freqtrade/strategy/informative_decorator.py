@@ -18,13 +18,15 @@ class InformativeData:
     fmt: Union[str, Callable[[Any], str], None]
     ffill: bool
     candle_type: Optional[CandleType]
+    startup_candle_count: int
 
 
 def informative(timeframe: str, asset: str = '',
                 fmt: Optional[Union[str, Callable[[Any], str]]] = None,
                 *,
                 candle_type: Optional[Union[CandleType, str]] = None,
-                ffill: bool = True) -> Callable[[PopulateIndicators], PopulateIndicators]:
+                ffill: bool = True,
+                startup_candle_count: int = 0) -> Callable[[PopulateIndicators], PopulateIndicators]:
     """
     A decorator for populate_indicators_Nn(self, dataframe, metadata), allowing these functions to
     define informative indicators.
@@ -59,10 +61,11 @@ def informative(timeframe: str, asset: str = '',
     _fmt = fmt
     _ffill = ffill
     _candle_type = CandleType.from_string(candle_type) if candle_type else None
+    _startup_candle_count = startup_candle_count
 
     def decorator(fn: PopulateIndicators):
         informative_pairs = getattr(fn, '_ft_informative', [])
-        informative_pairs.append(InformativeData(_asset, _timeframe, _fmt, _ffill, _candle_type))
+        informative_pairs.append(InformativeData(_asset, _timeframe, _fmt, _ffill, _candle_type, _startup_candle_count))
         setattr(fn, '_ft_informative', informative_pairs)
         return fn
     return decorator
@@ -75,11 +78,12 @@ def _format_pair_name(config, pair: str) -> str:
 
 def _create_and_merge_informative_pair(strategy, dataframe: DataFrame, metadata: dict,
                                        inf_data: InformativeData,
-                                       populate_indicators: PopulateIndicators, backtest: bool=False):
+                                       populate_indicators: PopulateIndicators):
     asset = inf_data.asset or ''
     timeframe = inf_data.timeframe
     fmt = inf_data.fmt
     candle_type = inf_data.candle_type
+    startup_candle_count = inf_data.startup_candle_count
 
     config = strategy.config
 
@@ -107,7 +111,7 @@ def _create_and_merge_informative_pair(strategy, dataframe: DataFrame, metadata:
             fmt = '{base}_{quote}_' + fmt           # Informatives of other pairs
 
     inf_metadata = {'pair': asset, 'timeframe': timeframe}
-    inf_dataframe = strategy.dp.get_pair_dataframe(asset, timeframe, candle_type, backtest)
+    inf_dataframe = strategy.dp.get_pair_dataframe(asset, timeframe, candle_type, startup_candle_count)
     inf_dataframe = populate_indicators(strategy, inf_dataframe, inf_metadata)
 
     formatter: Any = None

@@ -102,12 +102,6 @@ class IStrategy(ABC, HyperStrategyMixin):
 
     # Count of candles the strategy requires before producing valid signals
     startup_candle_count: int = 0
-    startup_candle_count_5m: int = 0
-    startup_candle_count_15m: int = 0
-    startup_candle_count_30m: int = 0
-    startup_candle_count_1h: int = 0
-    startup_candle_count_4h: int = 0
-    startup_candle_count_1d: int = 0
 
     # Protections
     protections: List = []
@@ -1122,7 +1116,7 @@ class IStrategy(ABC, HyperStrategyMixin):
                                         pair=trade.pair, trade=trade, order=order,
                                         current_time=current_time)
 
-    def advise_all_indicators(self, data: Dict[str, DataFrame], backtest: bool = False) -> Dict[str, DataFrame]:
+    def advise_all_indicators(self, data: Dict[str, DataFrame]) -> Dict[str, DataFrame]:
         """
         Populates indicators for given candle (OHLCV) data (for multiple pairs)
         Does not run advise_entry or advise_exit!
@@ -1132,10 +1126,10 @@ class IStrategy(ABC, HyperStrategyMixin):
         Has positive effects on memory usage for whatever reason - also when
         using only one strategy.
         """
-        return {pair: self.advise_indicators(pair_data.copy(), {'pair': pair}, backtest).copy()
+        return {pair: self.advise_indicators(pair_data.copy(), {'pair': pair}).copy()
                 for pair, pair_data in data.items()}
 
-    def advise_indicators(self, dataframe: DataFrame, metadata: dict, backtest: bool = False) -> DataFrame:
+    def advise_indicators(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
         """
         Populate indicators that will be used in the Buy, Sell, short, exit_short strategy
         This method should not be overridden.
@@ -1148,7 +1142,7 @@ class IStrategy(ABC, HyperStrategyMixin):
         # call populate_indicators_Nm() which were tagged with @informative decorator.
         for inf_data, populate_fn in self._ft_informative:
             dataframe = _create_and_merge_informative_pair(
-                self, dataframe, metadata, inf_data, populate_fn, backtest)
+                self, dataframe, metadata, inf_data, populate_fn)
 
         return self.populate_indicators(dataframe, metadata)
 
