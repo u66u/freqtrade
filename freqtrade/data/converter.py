@@ -12,7 +12,7 @@ from pandas import DataFrame, to_datetime
 
 from freqtrade.constants import DEFAULT_DATAFRAME_COLUMNS, DEFAULT_TRADES_COLUMNS, TradeList
 from freqtrade.enums import CandleType
-
+import numpy as np
 
 logger = logging.getLogger(__name__)
 
