@@ -203,20 +203,10 @@ def calculate_expectancy(trades: pd.DataFrame) -> float:
 
     expectancy = 1
 
-    profit_sum = 0
-    loss_sum = 0
-    nb_win_trades = 0
-    nb_loss_trades = 0
-
-    for trade in trades:
-        profit = float(trade['profit_abs'])
-        # tp.append(profit)
-        if profit > 0:
-            profit_sum += profit
-            nb_win_trades += 1
-        else:
-            loss_sum += abs(profit)
-            nb_loss_trades += 1
+    profit_sum = trades.loc[trades['profit_abs'] > 0, 'profit_abs'].sum()
+    loss_sum = abs(trades.loc[trades['profit_abs'] < 0, 'profit_abs'].sum())
+    nb_win_trades = len(trades.loc[trades['profit_abs'] > 0])
+    nb_loss_trades = len(trades.loc[trades['profit_abs'] < 0])
 
     if (nb_win_trades > 0) and (nb_loss_trades > 0):
         average_win = profit_sum / nb_win_trades
