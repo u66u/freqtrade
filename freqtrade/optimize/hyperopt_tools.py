@@ -377,7 +377,9 @@ class HyperoptTools():
 
         stake_currency = config['stake_currency']
 
-        trials['Expectancy'] = f"{trials['Expectancy']:6.3f}"
+        trials['Expectancy'] = trials['Expectancy'].apply(
+            lambda x: f'{x:6.3f}'
+        )
 
         trials[f"Max Drawdown{' (Acct)' if has_account_drawdown else ''}"] = trials.apply(
             lambda x: "{} {}".format(
