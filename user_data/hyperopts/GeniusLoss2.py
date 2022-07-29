@@ -18,8 +18,8 @@ MIN_ACCEPTED_AVERAGE_PROFIT = 0.9
 # WIN_LOSS_WEIGHT = 2
 AVERAGE_PROFIT_WEIGHT = 1.5
 AVERAGE_PROFIT_THRESHOLD = 5 # %
-SORTINO_WEIGHT = 3
-TOTAL_PROFIT_WEIGHT = 0.5
+SORTINO_WEIGHT = 0.2
+TOTAL_PROFIT_WEIGHT = 1
 DRAWDOWN_WEIGHT = 2
 DURATION_WEIGHT = 1
 AVERAGE_TRADE_DAILY_WEIGHT = 0.5
@@ -65,7 +65,7 @@ def sortino_daily(results: DataFrame, trade_count: int,
     total_downside = sum_daily['downside_returns']
     # Here total_downside contains min(0, P - MAR) values,
     # where P = sum_daily["profit_ratio_after_slippage"]
-    down_stdev = math.sqrt((total_downside**2).sum() / len(total_downside))
+    down_stdev = math.sqrt((total_downside ** 2).sum() / len(total_downside))
 
     if down_stdev != 0:
         sortino_ratio = expected_returns_mean / down_stdev * math.sqrt(days_in_year)
@@ -139,7 +139,12 @@ class GeniusLoss2(IHyperOptLoss):
         average_trade_daily_loss = (MIN_ACCEPTED_AVERAGE_TRADE_DAILY - average_trades_per_day) * 10 * AVERAGE_TRADE_DAILY_WEIGHT
 
         # result = profit_loss + win_lose_loss + average_profit_loss + sortino_ratio_loss + drawdown_loss + duration_loss
+        expectancy = calculate_expectancy(results)
 
         result = -profit_loss + average_profit_loss + drawdown_loss + sortino_ratio_loss + duration_loss + average_trade_daily_loss
 
-        return result
+        if (expectancy < 0):
+            if (result > 0):
+                expectancy = expectancy * -1
+
+        return (result * expectancy)
