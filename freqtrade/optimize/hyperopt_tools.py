@@ -388,9 +388,9 @@ class HyperoptTools():
                     if has_account_drawdown
                     else f"({x['max_drawdown']:,.2%})"
                  ).rjust(7, ' ')
-            ).rjust(21 + len(stake_currency))
+            ).rjust(20 + len(stake_currency))
             if x['max_drawdown'] != 0.0 or x['max_drawdown_account'] != 0.0
-            else '--'.rjust(21 + len(stake_currency)),
+            else '--'.rjust(20 + len(stake_currency)),
             axis=1
         )
 
