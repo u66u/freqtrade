@@ -224,7 +224,7 @@ def calculate_expectancy(trades: pd.DataFrame) -> float:
         risk_reward_ratio = average_win / average_loss
         winrate = nb_win_trades / len(trades)
         expectancy = ((1 + risk_reward_ratio) * winrate) - 1
-    else if nb_win_trades == 0:
+    elif nb_win_trades == 0:
         expectancy = 0
 
     return expectancy
