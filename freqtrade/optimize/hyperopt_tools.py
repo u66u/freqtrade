@@ -400,8 +400,8 @@ class HyperoptTools():
             lambda x: '{} {}'.format(
                 round_coin_value(x['Total profit'], stake_currency, keep_trailing_zeros=True),
                 f"({x['Profit']:,.2%})".rjust(7, ' ')
-            ).rjust(21 + len(stake_currency))
-            if x['Total profit'] != 0.0 else '--'.rjust(21 + len(stake_currency)),
+            ).rjust(20 + len(stake_currency))
+            if x['Total profit'] != 0.0 else '--'.rjust(20 + len(stake_currency)),
             axis=1
         )
         trials = trials.drop(columns=['Total profit'])
