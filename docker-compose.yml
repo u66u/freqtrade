@@ -1,0 +1,51 @@
+---
+version: '3'
+services:
+  freqtrade:
+    # image: freqtradeorg/freqtrade:stable
+    # image: freqtradeorg/freqtrade:develop
+    image: freqtrade_custom
+    # Use plotting image
+    # image: freqtradeorg/freqtrade:develop_plot
+    # Build step - only needed when additional dependencies are needed
+    build:
+      context: .
+      dockerfile: "./docker/Dockerfile.custom"
+    # links:
+    #   - "binance_proxy"
+    # depends_on:
+    #   - "binance_proxy"
+    restart: unless-stopped
+    container_name: freqtrade
+    volumes:
+      - "./user_data:/freqtrade/user_data"
+      - "./freqtrade_strategies:/freqtrade/freqtrade_strategies"
+    # Expose api on port 8080 (localhost only)
+    # Please read the https://www.freqtrade.io/en/stable/rest-api/ documentation
+    # before enabling this.
+    # ports:
+    #   - "127.0.0.1:8081:8081"
+    # Default command used when running `docker compose up`
+    command: >
+      trade
+      --logfile /freqtrade/user_data/logs/freqtrade.log
+      --config /freqtrade/user_data/config.json
+      --config /freqtrade/user_data/config-exchange.json
+      --config /freqtrade/user_data/config-exchange-general.json
+      --config /freqtrade/user_data/config-exchange-blacklist.json
+      --config /freqtrade/user_data/config-telegram.json
+      --config /freqtrade/user_data/config-telegram-general.json
+      --config /freqtrade/user_data/config-discord.json
+
+  # binance_proxy:
+  #   image: nightshift2k/binance-proxy:latest
+  #   container_name: binance_proxy
+  #   restart: unless-stopped
+  #   ports:
+  #     - "127.0.0.1:8090:8090"
+
+  # kucoin_proxy:
+  #   image: mikekonan/exchange-proxy:latest-amd64
+  #   restart: unless-stopped
+  #   command: -verbose 1
+  #   container_name: kucoin_proxy
