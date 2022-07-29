@@ -126,8 +126,8 @@ def reduce_mem_usage(pair: str, df: DataFrame) -> DataFrame:
     """ iterate through all the columns of a dataframe and modify the data type
         to reduce memory usage.        
     """
-    start_mem = df.memory_usage().sum() / 1024**2
-    logger.info(f"Memory usage of dataframe for {pair} is {start_mem:.2f} MB")
+    # start_mem = df.memory_usage().sum() / 1024**2
+    # logger.info(f"Memory usage of dataframe for {pair} is {start_mem:.2f} MB")
    
     for col in df.columns[1:]:
         col_type = df[col].dtype
@@ -151,14 +151,14 @@ def reduce_mem_usage(pair: str, df: DataFrame) -> DataFrame:
                     df[col] = df[col].astype(np.float32)
                 else:
                     df[col] = df[col].astype(np.float64)
-            else:
-                logger.info(f"Columen not optimized because the type is {str(col_type)}")
+            # else:
+            #     logger.info(f"Column not optimized because the type is {str(col_type)}")
         # else:
             # df[col] = df[col].astype('category')
 
-    end_mem = df.memory_usage().sum() / 1024**2
-    logger.info("Memory usage after optimization is: {:.2f} MB".format(end_mem))
-    logger.info("Decreased by {:.1f}%".format(100 * (start_mem - end_mem) / start_mem))
+    # end_mem = df.memory_usage().sum() / 1024**2
+    # logger.info("Memory usage after optimization is: {:.2f} MB".format(end_mem))
+    # logger.info("Decreased by {:.1f}%".format(100 * (start_mem - end_mem) / start_mem))
     
     return df
 
@@ -195,7 +195,6 @@ def trim_dataframes(preprocessed: Dict[str, DataFrame], timerange,
     :return: Dict of trimmed dataframes
     """
     processed: Dict[str, DataFrame] = {}
-    logger.info("3")
     for pair, df in preprocessed.items():
         trimed_df = trim_dataframe(df, timerange, startup_candles=startup_candles)
         if not trimed_df.empty:
@@ -204,7 +203,6 @@ def trim_dataframes(preprocessed: Dict[str, DataFrame], timerange,
         else:
             logger.warning(f'{pair} has no data left after adjusting for startup candles, '
                            f'skipping.')
-    logger.info("4")
     return processed
 
 
