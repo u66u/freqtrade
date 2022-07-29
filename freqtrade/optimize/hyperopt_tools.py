@@ -290,7 +290,7 @@ class HyperoptTools():
                 f"Median profit {results_metrics['profit_median']:7.2%}. "
                 f"Total profit {results_metrics['profit_total_abs']:11.8f} {stake_currency} "
                 f"({results_metrics['profit_total']:8.2%}). "
-                f"Avg duration {results_metrics['holding_avg']} min."
+                f"Avg duration {results_metrics['holding_avg']} min. "
                 f"Expectancy {results_metrics['expectancy']:6.3f}."
                 )
 
