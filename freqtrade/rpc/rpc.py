@@ -265,6 +265,8 @@ class RPC:
                                           and trade.close_rate_requested is None) else '')
                     + ('**' if (trade.close_rate_requested is not None) else ''),
                     shorten_date(arrow.get(trade.open_date).humanize(only_distance=True)),
+                    f'{trade.min_profit:.2%}',
+                    f'{trade.max_profit:.2%}',
                     profit_str
                 ]
                 if self._config.get('position_adjustment_enable', False):
@@ -282,6 +284,8 @@ class RPC:
                 'ID L/S' if nonspot else 'ID',
                 'Pair',
                 'Since',
+                'Min %',
+                'Max %',
                 profitcol]
             if self._config.get('position_adjustment_enable', False):
                 columns.append('# Entries')
@@ -524,9 +528,9 @@ class RPC:
             'profit_all_fiat': profit_all_fiat,
             'trade_count': len(trades),
             'closed_trade_count': len([t for t in trades if not t.is_open]),
-            'first_trade_date': arrow.get(first_date).humanize() if first_date else '',
+            'first_trade_date': arrow.get(first_date).humanize(granularity=["month", "day", "hour", "minute"]) if first_date else '',
             'first_trade_timestamp': int(first_date.timestamp() * 1000) if first_date else 0,
-            'latest_trade_date': arrow.get(last_date).humanize() if last_date else '',
+            'latest_trade_date': arrow.get(last_date).humanize(granularity=["month", "day", "hour", "minute"]) if last_date else '',
             'latest_trade_timestamp': int(last_date.timestamp() * 1000) if last_date else 0,
             'avg_duration': str(timedelta(seconds=sum(durations) / num)).split('.')[0],
             'best_pair': best_pair[0] if best_pair else '',

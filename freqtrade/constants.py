@@ -344,40 +344,48 @@ CONF_SCHEMA = {
             'type': 'object',
             'properties': {
                 'enabled': {'type': 'boolean'},
-                'webhook_url': {'type': 'string'},
+                'webhook_url': {'type': 'array', 'items': {'type': 'string'}},
                 "exit_fill": {
-                    'type': 'array', 'items': {'type': 'object'},
-                    'default': [
-                        {"Trade ID": "{trade_id}"},
-                        {"Exchange": "{exchange}"},
-                        {"Pair": "{pair}"},
-                        {"Direction": "{direction}"},
-                        {"Open rate": "{open_rate}"},
-                        {"Close rate": "{close_rate}"},
-                        {"Amount": "{amount}"},
-                        {"Open date": "{open_date:%Y-%m-%d %H:%M:%S}"},
-                        {"Close date": "{close_date:%Y-%m-%d %H:%M:%S}"},
-                        {"Profit": "{profit_amount} {stake_currency}"},
-                        {"Profitability": "{profit_ratio:.2%}"},
-                        {"Enter tag": "{enter_tag}"},
-                        {"Exit Reason": "{exit_reason}"},
-                        {"Strategy": "{strategy}"},
-                        {"Timeframe": "{timeframe}"},
-                    ]
+                    'type': 'object',
+                    'properties': {
+                        'enabled': {'type': 'boolean', 'default': True},
+                        'rows': {'type':'array', 'items': {'type': 'object'}, 'default': [
+                            {"Trade ID": "{trade_id}"},
+                            {"Exchange": "{exchange}"},
+                            {"Pair": "{pair}"},
+                            {"Direction": "{direction}"},
+                            {"Open rate": "{open_rate}"},
+                            {"Close rate": "{close_rate}"},
+                            {"Amount": "{amount}"},
+                            {"Open date": "{open_date:%Y-%m-%d %H:%M:%S}"},
+                            {"Close date": "{close_date:%Y-%m-%d %H:%M:%S}"},
+                            {"Profit": "{profit_amount} {stake_currency}"},
+                            {"Profit %": "{profit_ratio:.2%}"},
+                            {"Min Profit %": "{min_profit:.2%}"},
+                            {"Max Profit %": "{max_profit:.2%}"},
+                            {"Enter tag": "{enter_tag}"},
+                            {"Exit Reason": "{exit_reason}"},
+                            {"Strategy": "{strategy}"},
+                            {"Timeframe": "{timeframe}"},
+                        ]}
+                    }
                 },
                 "entry_fill": {
-                    'type': 'array', 'items': {'type': 'object'},
-                    'default': [
-                        {"Trade ID": "{trade_id}"},
-                        {"Exchange": "{exchange}"},
-                        {"Pair": "{pair}"},
-                        {"Direction": "{direction}"},
-                        {"Open rate": "{open_rate}"},
-                        {"Amount": "{amount}"},
-                        {"Open date": "{open_date:%Y-%m-%d %H:%M:%S}"},
-                        {"Enter tag": "{enter_tag}"},
-                        {"Strategy": "{strategy} {timeframe}"},
-                    ]
+                    'type': 'object',
+                    'properties': {
+                        'enabled': {'type': 'boolean', 'default': False},
+                        'rows': {'type':'array', 'items': {'type': 'object'}, 'default': [
+                            {"Trade ID": "{trade_id}"},
+                            {"Exchange": "{exchange}"},
+                            {"Pair": "{pair}"},
+                            {"Direction": "{direction}"},
+                            {"Open rate": "{open_rate}"},
+                            {"Amount": "{amount}"},
+                            {"Open date": "{open_date:%Y-%m-%d %H:%M:%S}"},
+                            {"Enter tag": "{enter_tag}"},
+                            {"Strategy": "{strategy} {timeframe}"},
+                        ]}
+                    }
                 },
             }
         },

@@ -1,34 +1,43 @@
 {
     "discord": {
         "enabled": true,
-        "webhook_url": "https://discord.com/api/webhooks/<Your webhook URL ...>",
-        "exit_fill": [
-            {"Trade ID": "{trade_id}"},
-            {"Exchange": "{exchange}"},
-            {"Pair": "{pair}"},
-            {"Direction": "{direction}"},
-            {"Open rate": "{open_rate}"},
-            {"Close rate": "{close_rate}"},
-            {"Amount": "{amount}"},
-            {"Open date": "{open_date:%Y-%m-%d %H:%M:%S}"},
-            {"Close date": "{close_date:%Y-%m-%d %H:%M:%S}"},
-            {"Profit": "{profit_amount} {stake_currency}"},
-            {"Profitability": "{profit_ratio:.2%}"},
-            {"Enter tag": "{enter_tag}"},
-            {"Exit Reason": "{exit_reason}"},
-            {"Strategy": "{strategy}"},
-            {"Timeframe": "{timeframe}"},
+        "webhook_url": [
+            "https://discord.com/api/webhooks/<Your webhook URL1 ...>",
+            "https://discord.com/api/webhooks/<Your webhook URL2 ...>",
         ],
-        "entry_fill": [
-            {"Trade ID": "{trade_id}"},
-            {"Exchange": "{exchange}"},
-            {"Pair": "{pair}"},
-            {"Direction": "{direction}"},
-            {"Open rate": "{open_rate}"},
-            {"Amount": "{amount}"},
-            {"Open date": "{open_date:%Y-%m-%d %H:%M:%S}"},
-            {"Enter tag": "{enter_tag}"},
-            {"Strategy": "{strategy} {timeframe}"},
-        ]
+        "exit_fill": {
+            "enabled": true,
+            // "rows": [
+            //     {"Trade ID": "{trade_id}"},
+            //     {"Exchange": "{exchange}"},
+            //     {"Pair": "{pair}"},
+            //     {"Direction": "{direction}"},
+            //     {"Open rate": "{open_rate}"},
+            //     {"Close rate": "{close_rate}"},
+            //     {"Amount": "{amount}"},
+            //     {"Open date": "{open_date:%Y-%m-%d %H:%M:%S}"},
+            //     {"Close date": "{close_date:%Y-%m-%d %H:%M:%S}"},
+            //     {"Profit": "{profit_amount} {stake_currency}"},
+            //     {"Profitability": "{profit_ratio:.2%}"},
+            //     {"Enter tag": "{enter_tag}"},
+            //     {"Exit Reason": "{exit_reason}"},
+            //     {"Strategy": "{strategy}"},
+            //     {"Timeframe": "{timeframe}"},
+            // ]
+        },
+        "entry_fill": {
+            "enabled": true,
+            // "rows": [
+            //     {"Trade ID": "{trade_id}"},
+            //     {"Exchange": "{exchange}"},
+            //     {"Pair": "{pair}"},
+            //     {"Direction": "{direction}"},
+            //     {"Open rate": "{open_rate}"},
+            //     {"Amount": "{amount}"},
+            //     {"Open date": "{open_date:%Y-%m-%d %H:%M:%S}"},
+            //     {"Enter tag": "{enter_tag}"},
+            //     {"Strategy": "{strategy} {timeframe}"},
+            // ]
+        }
     }
 }

@@ -470,6 +470,8 @@ class LocalTrade():
                                       if self.initial_stop_loss_pct else None),
             'min_rate': self.min_rate,
             'max_rate': self.max_rate,
+            'min_profit': self.min_profit,
+            'max_profit': self.max_profit,
 
             'leverage': self.leverage,
             'interest_rate': self.interest_rate,
@@ -778,7 +780,7 @@ class LocalTrade():
             profit = close_trade_value - self.open_trade_value
         return float(f"{profit:.8f}")
 
-    def calc_profit_ratio(self, rate: float) -> float:
+    def calc_profit_ratio(self, rate: float, use_first_rate=False) -> float:
         """
         Calculates the profit as ratio (including fee).
         :param rate: rate to compare with.
@@ -793,10 +795,19 @@ class LocalTrade():
         if (short_close_zero or long_close_zero):
             return 0.0
         else:
-            if self.is_short:
-                profit_ratio = (1 - (close_trade_value / self.open_trade_value)) * leverage
+            if use_first_rate:
+                first_entry = self.select_filled_orders(self.entry_side)[0]
+                first_trade_rate = first_entry.safe_price
+                if self.is_short:
+                    profit_ratio = (1 - (rate / first_trade_rate)) * leverage
+                else:
+                    profit_ratio = ((rate / first_trade_rate) - 1) * leverage
             else:
-                profit_ratio = ((close_trade_value / self.open_trade_value) - 1) * leverage
+                if self.is_short:
+                    profit_ratio = (1 - (close_trade_value / self.open_trade_value)) * leverage
+                else:
+                    profit_ratio = ((close_trade_value / self.open_trade_value) - 1) * leverage
+            
 
         return float(f"{profit_ratio:.8f}")
 
@@ -879,6 +890,22 @@ class LocalTrade():
                     )
                 or (o.ft_is_open is True and o.status is not None)
                 ]
+
+    @property
+    def min_profit_rate(self) -> float:
+        return self.max_rate if self.is_short else self.min_rate
+
+    @property
+    def max_profit_rate(self) -> float:
+        return self.min_rate if self.is_short else self.max_rate
+    
+    @property
+    def min_profit(self) -> float:
+        return self.calc_profit_ratio(self.min_profit_rate, (self.nr_of_successful_entries > 1))
+
+    @property
+    def max_profit(self) -> float:
+        return self.calc_profit_ratio(self.max_profit_rate, (self.nr_of_successful_entries > 1))
 
     @property
     def nr_of_successful_entries(self) -> int:

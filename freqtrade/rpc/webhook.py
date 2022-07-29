@@ -86,15 +86,20 @@ class Webhook(RPCHandler):
             attempts += 1
 
             try:
-                if self._format == 'form':
-                    response = post(self._url, data=payload)
-                elif self._format == 'json':
-                    response = post(self._url, json=payload)
-                elif self._format == 'raw':
-                    response = post(self._url, data=payload['data'],
-                                    headers={'Content-Type': 'text/plain'})
+                if isinstance(self._url, list):
+                    for url in self._url:
+                        response = self._post_msg(url, payload)
                 else:
-                    raise NotImplementedError('Unknown format: {}'.format(self._format))
+                    response = self._post_msg(self._url, payload)
+                # if self._format == 'form':
+                #     response = post(self._url, data=payload)
+                # elif self._format == 'json':
+                #     response = post(self._url, json=payload)
+                # elif self._format == 'raw':
+                #     response = post(self._url, data=payload['data'],
+                #                     headers={'Content-Type': 'text/plain'})
+                # else:
+                #     raise NotImplementedError('Unknown format: {}'.format(self._format))
 
                 # Throw a RequestException if the post was not successful
                 response.raise_for_status()
@@ -102,3 +107,14 @@ class Webhook(RPCHandler):
 
             except RequestException as exc:
                 logger.warning("Could not call webhook url. Exception: %s", exc)
+
+    def _post_msg(self, url, payload):
+        if self._format == 'form':
+            return post(url, data=payload)
+        elif self._format == 'json':
+            return post(url, json=payload)
+        elif self._format == 'raw':
+            return post(url, data=payload['data'],
+                            headers={'Content-Type': 'text/plain'})
+        else:
+            raise NotImplementedError('Unknown format: {}'.format(self._format))

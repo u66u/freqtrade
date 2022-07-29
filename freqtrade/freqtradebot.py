@@ -1546,6 +1546,8 @@ class FreqtradeBot(LoggingMixin):
             'close_date': trade.close_date or datetime.utcnow(),
             'stake_currency': self.config['stake_currency'],
             'fiat_currency': self.config.get('fiat_display_currency'),
+            'min_profit': trade.min_profit,
+            'max_profit': trade.max_profit,
         }
 
         if 'fiat_display_currency' in self.config:

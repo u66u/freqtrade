@@ -339,7 +339,9 @@ class Telegram(RPCHandler):
                         f"*Close Rate:* `{msg['limit']:.8f}`")
 
         elif msg['type'] == RPCMessageType.EXIT_FILL:
-            message += f"*Close Rate:* `{msg['close_rate']:.8f}`"
+            message += (f"*Close Rate:* `{msg['close_rate']:.8f}`\n"
+                        f"*Min Profit:* `{msg['min_profit']:.2%}`\n"
+                        f"*Max Profit:* `{msg['max_profit']:.2%}`\n")
 
         return message
 
@@ -525,6 +527,8 @@ class Telegram(RPCHandler):
                     "*Current Rate:* `{current_rate:.8f}`" if r['is_open'] else "",
                     ("*Current Profit:* " if r['is_open'] else "*Close Profit: *")
                     + "`{profit_ratio:.2%}`",
+                    "*Min Profit:* `{min_profit:.2%}`",
+                    "*Max Profit:* `{max_profit:.2%}`",
                 ])
 
                 if r['is_open']:

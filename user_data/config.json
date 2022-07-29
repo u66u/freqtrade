@@ -3,7 +3,8 @@
     "stake_currency": "BUSD",
     "stake_amount" : "unlimited",
     "amend_last_stake_amount ": true,
-    "tradable_balance_ratio": 0.99,
+    // "tradable_balance_ratio": 0.99,
+    "available_capital": 65,
     "fiat_display_currency": "USD",
     "dry_run": true,
     "dry_run_wallet": 80,
@@ -53,17 +54,17 @@
         //     "number_assets": 50
         // },
         {"method": "AgeFilter", "min_days_listed": 30},
-        {
-            "method": "VolatilityFilter",
-            "lookback_days": 3,
-            "min_volatility": 0.02,
-            "refresh_period": 1800
-        },
-        {
-            "method": "VolumePairList",
-            "number_assets": 60,
-            "sort_key": "quoteVolume"
-        }
+        // {
+        //     "method": "VolatilityFilter",
+        //     "lookback_days": 3,
+        //     "min_volatility": 0.02,
+        //     "refresh_period": 1800
+        // },
+        // {
+        //     "method": "VolumePairList",
+        //     "number_assets": 60,
+        //     "sort_key": "quoteVolume"
+        // }
     ],
     "edge": {
         "enabled": false,

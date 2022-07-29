@@ -32,11 +32,12 @@ class Discord(Webhook):
     def send_msg(self, msg) -> None:
         logger.info(f"Sending discord message: {msg}")
 
-        if msg['type'].value in self.config['discord']:
+        if (msg['type'].value in self.config['discord']) and (('enabled' not in self.config['discord'][msg['type'].value]) or (self.config['discord'][msg['type'].value]['enabled'] == True)):
 
             msg['strategy'] = self.strategy
             msg['timeframe'] = self.timeframe
-            fields = self.config['discord'].get(msg['type'].value)
+            # fields = self.config['discord'].get(msg['type'].value)
+            fields = self.config['discord'][msg['type'].value].get('rows')
             color = 0x0000FF
             if msg['type'] in (RPCMessageType.EXIT, RPCMessageType.EXIT_FILL):
                 profit_ratio = msg.get('profit_ratio')
