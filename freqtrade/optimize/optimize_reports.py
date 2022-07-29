@@ -9,7 +9,7 @@ from tabulate import tabulate
 
 from freqtrade.constants import DATETIME_PRINT_FORMAT, LAST_BT_RESULT_FN, UNLIMITED_STAKE_AMOUNT
 from freqtrade.data.metrics import (calculate_cagr, calculate_csum, calculate_market_change,
-                                    calculate_max_drawdown)
+                                    calculate_max_drawdown, calculate_expectancy)
 from freqtrade.misc import decimals_per_coin, file_dump_joblib, file_dump_json, round_coin_value
 from freqtrade.optimize.backtest_caching import get_backtest_metadata_filename
 
@@ -447,6 +447,7 @@ def generate_strategy_stats(pairlist: List[str],
         'profit_total_short_abs': results.loc[results['is_short'], 'profit_abs'].sum(),
         'cagr': calculate_cagr(backtest_days, start_balance, content['final_balance']),
         'profit_factor': profit_factor,
+        'expectancy': calculate_expectancy(results),
         'backtest_start': min_date.strftime(DATETIME_PRINT_FORMAT),
         'backtest_start_ts': int(min_date.timestamp() * 1000),
         'backtest_end': max_date.strftime(DATETIME_PRINT_FORMAT),

@@ -190,3 +190,41 @@ def calculate_cagr(days_passed: int, starting_balance: float, final_balance: flo
     :return: CAGR
     """
     return (final_balance / starting_balance) ** (1 / (days_passed / 365)) - 1
+
+
+def calculate_expectancy(trades: pd.DataFrame) -> float:
+    """
+    Calculate expectancy
+    :param trades: DataFrame containing trades (requires columns close_date and profit_ratio)
+    :return: expectancy
+    """
+    if len(trades) == 0:
+        return 0
+
+    expectancy = 1
+
+    profit_sum = 0
+    loss_sum = 0
+    nb_win_trades = 0
+    nb_loss_trades = 0
+
+    for trade in trades:
+        profit = float(trade['profit_abs'])
+        # tp.append(profit)
+        if profit > 0:
+            profit_sum += profit
+            nb_win_trades += 1
+        else:
+            loss_sum += abs(profit)
+            nb_loss_trades += 1
+
+    if (nb_win_trades > 0) and (nb_loss_trades > 0):
+        average_win = profit_sum / nb_win_trades
+        average_loss = loss_sum / nb_loss_trades
+        risk_reward_ratio = average_win / average_loss
+        winrate = nb_win_trades / len(trades)
+        expectancy = ((1 + risk_reward_ratio) * winrate) - 1
+    else if nb_win_trades == 0:
+        expectancy = 0
+
+    return expectancy

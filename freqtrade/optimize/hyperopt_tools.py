@@ -291,6 +291,7 @@ class HyperoptTools():
                 f"Total profit {results_metrics['profit_total_abs']:11.8f} {stake_currency} "
                 f"({results_metrics['profit_total']:8.2%}). "
                 f"Avg duration {results_metrics['holding_avg']} min."
+                f"Expectancy {results_metrics['expectancy']:6.3f}."
                 )
 
     @staticmethod
@@ -325,12 +326,12 @@ class HyperoptTools():
                          'results_metrics.profit_total', 'results_metrics.holding_avg',
                          'results_metrics.max_drawdown',
                          'results_metrics.max_drawdown_account', 'results_metrics.max_drawdown_abs',
-                         'loss', 'is_initial_point', 'is_random', 'is_best']]
+                         'loss', 'is_initial_point', 'is_random', 'is_best', 'results_metrics.expectancy']]
 
         trials.columns = [
             'Best', 'Epoch', 'Trades', ' Win Draw Loss', 'Avg profit',
             'Total profit', 'Profit', 'Avg duration', 'max_drawdown', 'max_drawdown_account',
-            'max_drawdown_abs', 'Objective', 'is_initial_point', 'is_random', 'is_best'
+            'max_drawdown_abs', 'Objective', 'is_initial_point', 'is_random', 'is_best', 'Expectancy'
             ]
 
         return trials
