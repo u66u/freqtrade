@@ -1,4 +1,6 @@
-FROM freqtradeorg/freqtrade:develop
+FROM stash86/freqtrade:linux-arm64-v8
+# FROM stash86/freqtrade:linux-amd64
+
 
 # Switch user to root if you must install something from apt
 # Don't forget to switch the user back below!
