@@ -1154,8 +1154,10 @@ class Backtesting:
         # need to reprocess data every time to populate signals
         preprocessed = self.strategy.advise_all_indicators(data)
 
+        logger.info("1")
         # Trim startup period from analyzed dataframe
         preprocessed_tmp = trim_dataframes(preprocessed, timerange, self.required_startup)
+        logger.info("2")
 
         if not preprocessed_tmp:
             raise OperationalException(

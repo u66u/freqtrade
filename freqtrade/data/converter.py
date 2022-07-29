@@ -122,7 +122,7 @@ def ohlcv_fill_up_missing_data(dataframe: DataFrame, timeframe: str, pair: str) 
             logger.debug(message)
     return df
 
-def reduce_mem_usage(pair: str, df: DataFrame):
+def reduce_mem_usage(pair: str, df: DataFrame) -> DataFrame:
     """ iterate through all the columns of a dataframe and modify the data type
         to reduce memory usage.        
     """
@@ -195,7 +195,7 @@ def trim_dataframes(preprocessed: Dict[str, DataFrame], timerange,
     :return: Dict of trimmed dataframes
     """
     processed: Dict[str, DataFrame] = {}
-
+    logger.info("3")
     for pair, df in preprocessed.items():
         trimed_df = trim_dataframe(df, timerange, startup_candles=startup_candles)
         if not trimed_df.empty:
@@ -204,6 +204,7 @@ def trim_dataframes(preprocessed: Dict[str, DataFrame], timerange,
         else:
             logger.warning(f'{pair} has no data left after adjusting for startup candles, '
                            f'skipping.')
+    logger.info("4")
     return processed
 
 
