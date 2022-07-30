@@ -235,6 +235,7 @@ def generate_strategy_comparison(bt_stats: Dict) -> List[Dict]:
         tabular_data.append(deepcopy(result['results_per_pair'][-1]))
         # Update "key" to strategy (results_per_pair has it as "Total").
         tabular_data[-1]['key'] = strategy
+        tabular_data[-1]['expectancy'] = result['expectancy']
         tabular_data[-1]['max_drawdown_account'] = result['max_drawdown_account']
         tabular_data[-1]['max_drawdown_abs'] = round_coin_value(
             result['max_drawdown_abs'], result['stake_currency'], False)
@@ -698,6 +699,7 @@ def text_table_strategy(strategy_results, stake_currency: str) -> str:
     # _get_line_header() is also used for per-pair summary. Per-pair drawdown is mostly useless
     # therefore we slip this column in only for strategy summary here.
     headers.append('Drawdown')
+    headers.append('Expectancy')
 
     # Align drawdown string on the center two space separator.
     if 'max_drawdown_account' in strategy_results[0]:
@@ -705,6 +707,8 @@ def text_table_strategy(strategy_results, stake_currency: str) -> str:
     else:
         # Support for prior backtest results
         drawdown = [f'{t["max_drawdown_per"]:.2f}' for t in strategy_results]
+
+    expectancy = [f'{t["expectancy"]:.3f}' for t in strategy_results]
 
     dd_pad_abs = max([len(t['max_drawdown_abs']) for t in strategy_results])
     dd_pad_per = max([len(dd) for dd in drawdown])
@@ -714,7 +718,7 @@ def text_table_strategy(strategy_results, stake_currency: str) -> str:
     output = [[
         t['key'], t['trades'], t['profit_mean_pct'], t['profit_sum_pct'], t['profit_total_abs'],
         t['profit_total_pct'], t['duration_avg'],
-        _generate_wins_draws_losses(t['wins'], t['draws'], t['losses']), drawdown]
+        _generate_wins_draws_losses(t['wins'], t['draws'], t['losses']), drawdown, expectancy]
         for t, drawdown in zip(strategy_results, drawdown)]
     # Ignore type as floatfmt does allow tuples but mypy does not know that
     return tabulate(output, headers=headers,
