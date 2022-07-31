@@ -1,7 +1,6 @@
 FROM stash86/freqtrade:linux-arm64-v8
 # FROM stash86/freqtrade:linux-amd64
 
-
 # Switch user to root if you must install something from apt
 # Don't forget to switch the user back below!
 # USER root
@@ -9,7 +8,6 @@ FROM stash86/freqtrade:linux-arm64-v8
 # The below dependency - pyti - serves as an example. Please use whatever you need!
 # RUN pip install --user finta PyWavelets keyboard rich psutil
 # COPY scripts/*.* scripts/
-RUN pip install --user finta
 
 # Switch back to user (only if you required root above)
 # USER ftuser
