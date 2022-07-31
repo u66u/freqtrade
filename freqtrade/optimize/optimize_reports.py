@@ -711,7 +711,7 @@ def text_table_strategy(strategy_results, stake_currency: str) -> str:
     if 'expectancy' in strategy_results[0]:
         expectancy = [f'{t["expectancy"]:.3f}' for t in strategy_results]
     else:
-        expectancy = ['n/a' for t in strategy_results]
+        expectancy = 'n/a'
 
     dd_pad_abs = max([len(t['max_drawdown_abs']) for t in strategy_results])
     dd_pad_per = max([len(dd) for dd in drawdown])
