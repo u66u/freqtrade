@@ -40,4 +40,4 @@ class ExpectancyDrawDownLoss(IHyperOptLoss):
             return -total_profit
 
         expectancy = calculate_expectancy(results)
-        return -total_profit / max_drawdown[0] * expectancy
+        return -total_profit / max(max_drawdown[0], 1) * min(expectancy, 2)
