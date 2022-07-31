@@ -18,7 +18,7 @@ from freqtrade import __version__
 from freqtrade.configuration.timerange import TimeRange
 from freqtrade.constants import CANCEL_REASON, DATETIME_PRINT_FORMAT
 from freqtrade.data.history import load_data
-from freqtrade.data.metrics import calculate_max_drawdown
+from freqtrade.data.metrics import calculate_max_drawdown, calculate_expectancy
 from freqtrade.enums import (CandleType, ExitCheckTuple, ExitType, SignalDirection, State,
                              TradingMode)
 from freqtrade.exceptions import ExchangeError, PricingError
@@ -500,6 +500,14 @@ class RPC:
                 # ValueError if no losing trade.
                 pass
 
+        expectancy = 0
+        if len(trades_df) > 0:
+            try:
+                expectancy = calculate_expectancy(trades_df)
+            except ValueError:
+                # ValueError if no losing trade.
+                pass
+
         profit_all_fiat = self._fiat_converter.convert_amount(
             profit_all_coin_sum,
             stake_currency,
@@ -542,6 +550,7 @@ class RPC:
             'max_drawdown': max_drawdown,
             'max_drawdown_abs': max_drawdown_abs,
             'trading_volume': trading_volume,
+            'expectancy': expectancy,
         }
 
     def _rpc_balance(self, stake_currency: str, fiat_display_currency: str) -> Dict:
