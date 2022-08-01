@@ -5,8 +5,8 @@
             "timeout": 60000,
             "urls": {
                 "api": {
-                    "public": "http://exchange-proxy:8080/kucoin",
-                    "private": "http://exchange-proxy:8080/kucoin"
+                    "public": "http://kucoin_proxy:8080/kucoin",
+                    "private": "http://kucoin_proxy:8080/kucoin"
                 }
             }
         },
