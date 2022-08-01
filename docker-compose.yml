@@ -2,12 +2,7 @@
 version: '3'
 services:
   freqtrade:
-    # image: freqtradeorg/freqtrade:stable
-    # image: freqtradeorg/freqtrade:develop
     image: freqtrade_custom
-    # Use plotting image
-    # image: freqtradeorg/freqtrade:develop_plot
-    # Build step - only needed when additional dependencies are needed
     build:
       context: .
       dockerfile: "./docker/Dockerfile.custom"
@@ -44,8 +39,8 @@ services:
   #   ports:
   #     - "127.0.0.1:8090:8090"
 
-  # kucoin_proxy:
+  # kucoin-proxy:
   #   image: mikekonan/exchange-proxy:latest-amd64
   #   restart: unless-stopped
   #   command: -verbose 1
-  #   container_name: kucoin_proxy
+  #   container_name: kucoin-proxy
