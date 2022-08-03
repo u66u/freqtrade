@@ -27,6 +27,9 @@ services:
       --config /freqtrade/user_data/config1.json
       --config /freqtrade/user_data/config-exchange1.json
       --config /freqtrade/user_data/config-exchange-general.json
+    #  --config /freqtrade/user_data/config-exchange-general-binance-proxy-docker.json
+    #  --config /freqtrade/user_data/config-exchange-general-binance-proxy-futures.json
+    #  --config /freqtrade/user_data/config-exchange-general-docker-kucoin.json
       --config /freqtrade/user_data/config-exchange-blacklist.json
       --config /freqtrade/user_data/config-telegram1.json
       --config /freqtrade/user_data/config-telegram-general.json
@@ -53,6 +56,9 @@ services:
       --config /freqtrade/user_data/config2.json
       --config /freqtrade/user_data/config-exchange2.json
       --config /freqtrade/user_data/config-exchange-general.json
+    #  --config /freqtrade/user_data/config-exchange-general-binance-proxy-docker.json
+    #  --config /freqtrade/user_data/config-exchange-general-binance-proxy-futures.json
+    #  --config /freqtrade/user_data/config-exchange-general-docker-kucoin.json
       --config /freqtrade/user_data/config-exchange-blacklist.json
       --config /freqtrade/user_data/config-telegram2.json
       --config /freqtrade/user_data/config-telegram-general.json
@@ -79,6 +85,9 @@ services:
       --config /freqtrade/user_data/config3.json
       --config /freqtrade/user_data/config-exchange3.json
       --config /freqtrade/user_data/config-exchange-general.json
+    #  --config /freqtrade/user_data/config-exchange-general-binance-proxy-docker.json
+    #  --config /freqtrade/user_data/config-exchange-general-binance-proxy-futures.json
+    #  --config /freqtrade/user_data/config-exchange-general-docker-kucoin.json
       --config /freqtrade/user_data/config-exchange-blacklist.json
       --config /freqtrade/user_data/config-telegram3.json
       --config /freqtrade/user_data/config-telegram-general.json
@@ -105,6 +114,9 @@ services:
       --config /freqtrade/user_data/config4.json
       --config /freqtrade/user_data/config-exchange4.json
       --config /freqtrade/user_data/config-exchange-general.json
+    #  --config /freqtrade/user_data/config-exchange-general-binance-proxy-docker.json
+    #  --config /freqtrade/user_data/config-exchange-general-binance-proxy-futures.json
+    #  --config /freqtrade/user_data/config-exchange-general-docker-kucoin.json
       --config /freqtrade/user_data/config-exchange-blacklist.json
       --config /freqtrade/user_data/config-telegram4.json
       --config /freqtrade/user_data/config-telegram-general.json
