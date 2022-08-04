@@ -895,7 +895,7 @@ class Backtesting:
                     exit_row = data[pair][-1]
                     self._exit_trade(trade, exit_row, exit_row[OPEN_IDX], trade.amount)
                     trade.orders[-1].close_bt_order(exit_row[DATE_IDX].to_pydatetime(), trade)
-                    
+
                     trade.close_date = exit_row[DATE_IDX].to_pydatetime()
                     trade.exit_reason = ExitType.FORCE_EXIT.value
                     trade.close(exit_row[OPEN_IDX], show_msg=False)
