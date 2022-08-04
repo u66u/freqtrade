@@ -1601,7 +1601,7 @@ class Exchange:
                                       is_short, order_book=order_book, ticker=ticker)
         return entry_rate, exit_rate
 
-        # Fee handling
+    # Fee handling
 
     @retrier
     def get_trades_for_order(self, order_id: str, pair: str, since: datetime,
