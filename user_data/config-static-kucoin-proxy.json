@@ -53,8 +53,8 @@
             "timeout": 60000,
             "urls": {
                 "api": {
-                    "public": "http://exchange-proxy:8080/kucoin",
-                    "private": "http://exchange-proxy:8080/kucoin"
+                    "public": "http://kucoin-proxy:8080/kucoin",
+                    "private": "http://kucoin-proxy:8080/kucoin"
                 }
             }
         },
@@ -201,7 +201,6 @@
             "NEAR/USDT",
             "NEO/USDT",
             "NFT/USDT",
-            "NIF/USDT",
             "NIM/USDT",
             "NKN/USDT",
             "NOIA/USDT",
@@ -271,7 +270,6 @@
             "UBX/USDT",
             "UBXT/USDT",
             "UFO/USDT",
-            "UMB/USDT",
             "UNI/USDT",
             "UNO/USDT",
             "UOS/USDT",
