@@ -2,10 +2,10 @@
 version: '3'
 services:
   freqtrade:
-    image: freqtrade_custom
-    build:
-      context: .
-      dockerfile: "./docker/Dockerfile.custom"
+    image: stash86/freqtrade:linux-arm64-v8
+    # build:
+    #   context: .
+    #   dockerfile: "./docker/Dockerfile.custom"
     # links:
     #   - "binance_proxy"
     # depends_on:
@@ -35,10 +35,10 @@ services:
       --config /freqtrade/user_data/config-telegram-general.json
     #  --config /freqtrade/user_data/config-discord1.json
   freqtrade2:
-    image: freqtrade_custom
-    build:
-      context: .
-      dockerfile: "./docker/Dockerfile.custom"
+    image: stash86/freqtrade:linux-arm64-v8
+    # build:
+    #   context: .
+    #   dockerfile: "./docker/Dockerfile.custom"
     # links:
     #   - "binance_proxy"
     # depends_on:
@@ -64,10 +64,10 @@ services:
       --config /freqtrade/user_data/config-telegram-general.json
     #  --config /freqtrade/user_data/config-discord2.json
   freqtrade3:
-    image: freqtrade_custom
-    build:
-      context: .
-      dockerfile: "./docker/Dockerfile.custom"
+    image: stash86/freqtrade:linux-arm64-v8
+    # build:
+    #   context: .
+    #   dockerfile: "./docker/Dockerfile.custom"
     # links:
     #   - "binance_proxy"
     # depends_on:
@@ -93,10 +93,10 @@ services:
       --config /freqtrade/user_data/config-telegram-general.json
     #  --config /freqtrade/user_data/config-discord3.json
   freqtrade4:
-    image: freqtrade_custom
-    build:
-      context: .
-      dockerfile: "./docker/Dockerfile.custom"
+    image: stash86/freqtrade:linux-arm64-v8
+    # build:
+    #   context: .
+    #   dockerfile: "./docker/Dockerfile.custom"
     # links:
     #   - "binance_proxy"
     # depends_on:
