@@ -36,8 +36,8 @@ class ExpectancyDrawDownLoss(IHyperOptLoss):
         try:
             max_drawdown = calculate_max_drawdown(results, value_col='profit_abs')
         except ValueError:
-            # No losing trade, therefore no drawdown.
-            return -total_profit
+            # No losing trade, therefore no drawdown. Return 0 because this is bad scenario
+            return 0
 
         expectancy = calculate_expectancy(results)
         drawdown_loss = -total_profit / max(max_drawdown[0], 1)
