@@ -11,13 +11,14 @@ EXPECTED_MAX_PROFIT = 3.0 # x 100%
 MAX_ACCEPTED_TRADE_DURATION = 180 # minutes
 MIN_ACCEPTED_TRADE_DURATION = 2 # minutes
 MIN_ACCEPTED_AVERAGE_TRADE_DAILY = 0.5
-MIN_ACCEPTED_AVERAGE_PROFIT = 0.9
+MIN_ACCEPTED_AVERAGE_PROFIT = 1.5
 
 # Loss settings
 # EXPECTED_MAX_PROFIT = 3.0
 # WIN_LOSS_WEIGHT = 2
 AVERAGE_PROFIT_WEIGHT = 1.5
-AVERAGE_PROFIT_THRESHOLD = 5 # %
+AVERAGE_PROFIT_THRESHOLD = 20 # %
+UNREALISTIC_AVERAGE_PROFIT = 50
 SORTINO_WEIGHT = 0.2
 TOTAL_PROFIT_WEIGHT = 1
 DRAWDOWN_WEIGHT = 2
@@ -112,6 +113,10 @@ class GeniusLoss(IHyperOptLoss):
         # total_win = len(results[(results['profit_ratio'] > profit_threshold)])
         # total_lose = len(results[(results['profit_ratio'] <= 0)])
         average_profit = results['profit_ratio'].mean() * 100
+
+        if average_profit > UNREALISTIC_AVERAGE_PROFIT:
+            return 1000
+
         sortino_ratio = sortino_daily(results, trade_count, min_date, max_date)
         trade_duration = results['trade_duration'].mean()
         backtest_days = (max_date - min_date).days or 1
