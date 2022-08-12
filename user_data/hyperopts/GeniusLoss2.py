@@ -63,6 +63,9 @@ class GeniusLoss2(IHyperOptLoss):
         backtest_days = (max_date - min_date).days or 1
         average_trades_per_day = round(total_trades / backtest_days, 5)
 
+        if (total_profit < 0) and (average_profit < 0):
+            average_profit = -average_profit
+            
         result = -total_profit * (average_profit/MIN_ACCEPTED_AVERAGE_PROFIT) * average_trades_per_day / trade_duration
 
         return result
