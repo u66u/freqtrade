@@ -1,12 +1,12 @@
 {
     "max_open_trades": 4,
     "stake_currency": "USDT",
-    "stake_amount" : 15,
+    "stake_amount" : 45,
     "amend_last_stake_amount ": true,
     "tradable_balance_ratio": 0.99,
     "fiat_display_currency": "USD",
     "dry_run": true,
-    "dry_run_wallet": 65,
+    "dry_run_wallet": 200,
     "cancel_open_orders_on_exit": false,
     "unfilledtimeout": {
         "buy": 10,
@@ -302,7 +302,7 @@
             "COCOS/USDT",
             "HARD/USDT",
             "FIS/USDT"
-        ],
+        ], 
         "pair_blacklist": []
     },
     "edge": {
