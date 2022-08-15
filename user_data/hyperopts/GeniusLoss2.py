@@ -66,6 +66,9 @@ class GeniusLoss2(IHyperOptLoss):
         if (total_profit < 0) and (average_profit < 0):
             average_profit = -average_profit
             
+        if trade_duration == 0:
+            trade_duration = 1
+            
         result = -total_profit * (average_profit/MIN_ACCEPTED_AVERAGE_PROFIT) * average_trades_per_day / trade_duration
 
         return result
