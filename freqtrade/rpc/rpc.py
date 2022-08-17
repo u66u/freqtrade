@@ -179,8 +179,10 @@ class RPC:
                 else:
                     current_rate = trade.close_rate
                 if len(trade.select_filled_orders(trade.entry_side)) > 0:
-                    current_profit = trade.calc_profit_ratio(current_rate)
-                    current_profit_abs = trade.calc_profit(current_rate)
+                    current_profit = trade.calc_profit_ratio(
+                        current_rate) if not isnan(current_rate) else NAN
+                    current_profit_abs = trade.calc_profit(
+                        current_rate) if not isnan(current_rate) else NAN
                     current_profit_fiat: Optional[float] = None
                     # Calculate fiat profit
                     if self._fiat_converter:
@@ -242,12 +244,15 @@ class RPC:
                         trade.pair, side='exit', is_short=trade.is_short, refresh=False)
                 except (PricingError, ExchangeError):
                     current_rate = NAN
-                if len(trade.select_filled_orders(trade.entry_side)) > 0:
-                    trade_profit = trade.calc_profit(current_rate)
-                    profit_str = f'{trade.calc_profit_ratio(current_rate):.2%}'
+                    trade_profit = NAN
+                    profit_str = f'{NAN:.2%}'
                 else:
-                    trade_profit = 0.0
-                    profit_str = f'{0.0:.2f}'
+                    if trade.nr_of_successful_entries > 0:
+                        trade_profit = trade.calc_profit(current_rate)
+                        profit_str = f'{trade.calc_profit_ratio(current_rate):.2%}'
+                    else:
+                        trade_profit = 0.0
+                        profit_str = f'{0.0:.2f}'
                 direction_str = ('S' if trade.is_short else 'L') if nonspot else ''
                 if self._fiat_converter:
                     fiat_profit = self._fiat_converter.convert_amount(
@@ -431,8 +436,6 @@ class RPC:
         for trade in trades:
             current_rate: float = 0.0
 
-            if not trade.open_rate:
-                continue
             if trade.close_date:
                 durations.append((trade.close_date - trade.open_date).total_seconds())
 
@@ -454,9 +457,13 @@ class RPC:
                         trade.pair, side='exit', is_short=trade.is_short, refresh=False)
                 except (PricingError, ExchangeError):
                     current_rate = NAN
-                profit_ratio = trade.calc_profit_ratio(rate=current_rate)
-                profit_abs = trade.calc_profit(
-                    rate=trade.close_rate or current_rate) + trade.realized_profit
+                if isnan(current_rate):
+                    profit_ratio = NAN
+                    profit_abs = NAN
+                else:
+                    profit_ratio = trade.calc_profit_ratio(rate=current_rate)
+                    profit_abs = trade.calc_profit(
+                        rate=trade.close_rate or current_rate) + trade.realized_profit
 
             profit_all_coin.append(profit_abs)
             profit_all_ratio.append(profit_ratio)
