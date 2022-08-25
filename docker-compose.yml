@@ -30,6 +30,7 @@ services:
     #  --config /freqtrade/user_data/config-exchange-general-binance-proxy-docker.json
     #  --config /freqtrade/user_data/config-exchange-general-binance-proxy-futures.json
     #  --config /freqtrade/user_data/config-exchange-general-docker-kucoin.json
+    #  --freqaimodel LightGBMRegressor
       --config /freqtrade/user_data/config-exchange-blacklist.json
       --config /freqtrade/user_data/config-telegram1.json
       --config /freqtrade/user_data/config-telegram-general.json
