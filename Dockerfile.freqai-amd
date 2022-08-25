@@ -1,0 +1,9 @@
+ARG sourceimage=stash86/freqtrade
+ARG sourcetag=linux-amd64
+FROM ${sourceimage}:${sourcetag}
+
+# Install dependencies
+COPY requirements-freqai.txt /freqtrade/
+
+RUN pip install -r requirements-freqai.txt --user --no-cache-dir
+
