@@ -14,8 +14,7 @@ from freqtrade.constants import (DATETIME_PRINT_FORMAT, MATH_CLOSE_PREC, NON_OPE
                                  BuySell, LongShort)
 from freqtrade.enums import ExitType, TradingMode
 from freqtrade.exceptions import DependencyException, OperationalException
-from freqtrade.exchange import amount_to_precision, price_to_precision
-from freqtrade.exchange.exchange import amount_to_contracts, contracts_to_amount
+from freqtrade.exchange import amount_to_contract_precision, price_to_precision
 from freqtrade.leverage import interest
 from freqtrade.persistence.base import _DECL_BASE
 from freqtrade.util import FtPrecise
@@ -627,11 +626,8 @@ class LocalTrade():
             else:
                 logger.warning(
                     f'Got different open_order_id {self.open_order_id} != {order.order_id}')
-            amount_tr = contracts_to_amount(
-                amount_to_precision(
-                    amount_to_contracts(self.amount, self.contract_size),
-                    self.amount_precision, self.precision_mode),
-                self.contract_size)
+            amount_tr = amount_to_contract_precision(self.amount, self.amount_precision,
+                                                     self.precision_mode, self.contract_size)
             if isclose(order.safe_amount_after_fee, amount_tr, abs_tol=MATH_CLOSE_PREC):
                 self.close(order.safe_price)
             else:
@@ -858,7 +854,7 @@ class LocalTrade():
         avg_price = FtPrecise(0.0)
         close_profit = 0.0
         close_profit_abs = 0.0
-
+        profit = None
         for o in self.orders:
             if o.ft_is_open or not o.filled:
                 continue
@@ -885,8 +881,6 @@ class LocalTrade():
                 close_profit_abs += profit
                 close_profit = self.calc_profit_ratio(
                     exit_rate, amount=exit_amount, open_rate=avg_price)
-                if current_amount <= ZERO:
-                    profit = close_profit_abs
             else:
                 total_stake = total_stake + self._calc_open_trade_value(tmp_amount, price)
 
@@ -895,8 +889,8 @@ class LocalTrade():
             self.realized_profit = close_profit_abs
             self.close_profit_abs = profit
 
-        current_amount_tr = amount_to_precision(float(current_amount),
-                                                self.amount_precision, self.precision_mode)
+        current_amount_tr = amount_to_contract_precision(
+            float(current_amount), self.amount_precision, self.precision_mode, self.contract_size)
         if current_amount_tr > 0.0:
             # Trade is still open
             # Leverage not updated, as we don't allow changing leverage through DCA at the moment.
@@ -911,6 +905,7 @@ class LocalTrade():
             # Close profit abs / maximum owned
             # Fees are considered as they are part of close_profit_abs
             self.close_profit = (close_profit_abs / total_stake) * self.leverage
+            self.close_profit_abs = close_profit_abs
 
     def select_order_by_order_id(self, order_id: str) -> Optional[Order]:
         """
