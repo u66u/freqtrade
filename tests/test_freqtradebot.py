@@ -4,7 +4,6 @@
 import logging
 import time
 from copy import deepcopy
-from math import isclose
 from typing import List
 from unittest.mock import ANY, MagicMock, PropertyMock, patch
 
@@ -12,7 +11,7 @@ import arrow
 import pytest
 from pandas import DataFrame
 
-from freqtrade.constants import CANCEL_REASON, MATH_CLOSE_PREC, UNLIMITED_STAKE_AMOUNT
+from freqtrade.constants import CANCEL_REASON, UNLIMITED_STAKE_AMOUNT
 from freqtrade.enums import (CandleType, ExitCheckTuple, ExitType, RPCMessageType, RunMode,
                              SignalDirection, State)
 from freqtrade.exceptions import (DependencyException, ExchangeError, InsufficientFundsError,
@@ -23,9 +22,9 @@ from freqtrade.persistence import Order, PairLocks, Trade
 from freqtrade.persistence.models import PairLock
 from freqtrade.plugins.protections.iprotection import ProtectionReturn
 from freqtrade.worker import Worker
-from tests.conftest import (create_mock_trades, get_patched_freqtradebot, get_patched_worker,
-                            log_has, log_has_re, patch_edge, patch_exchange, patch_get_signal,
-                            patch_wallet, patch_whitelist)
+from tests.conftest import (create_mock_trades, create_mock_trades_usdt, get_patched_freqtradebot,
+                            get_patched_worker, log_has, log_has_re, patch_edge, patch_exchange,
+                            patch_get_signal, patch_wallet, patch_whitelist)
 from tests.conftest_trades import (MOCK_TRADE_COUNT, entry_side, exit_side, mock_order_1,
                                    mock_order_2, mock_order_2_sell, mock_order_3, mock_order_3_sell,
                                    mock_order_4, mock_order_5_stoploss, mock_order_6_sell)
@@ -474,8 +473,6 @@ def test_create_trade_no_signal(default_conf_usdt, fee, mocker) -> None:
     freqtrade = FreqtradeBot(default_conf_usdt)
     patch_get_signal(freqtrade, enter_long=False, exit_long=False)
 
-    Trade.query = MagicMock()
-    Trade.query.filter = MagicMock()
     assert not freqtrade.create_trade('ETH/USDT')
 
 
@@ -569,7 +566,7 @@ def test_process_trade_creation(default_conf_usdt, ticker_usdt, limit_order, lim
     assert trade.open_date is not None
     assert trade.exchange == 'binance'
     assert trade.open_rate == ticker_usdt.return_value[ticker_side]
-    assert isclose(trade.amount, 60 / ticker_usdt.return_value[ticker_side])
+    assert pytest.approx(trade.amount) == 60 / ticker_usdt.return_value[ticker_side]
 
     assert log_has(
         f'{"Short" if is_short else "Long"} signal found: about create a new trade for ETH/USDT '
@@ -678,6 +675,7 @@ def test_process_trade_no_whitelist_pair(default_conf_usdt, ticker_usdt, limit_b
         open_rate=0.001,
         exchange='binance',
     ))
+    Trade.commit()
 
     assert pair not in freqtrade.active_pair_whitelist
     freqtrade.process()
@@ -1801,7 +1799,7 @@ def test_tsl_on_exchange_compatible_with_edge(mocker, edge_conf, fee, caplog,
     # stoploss initially at 20% as edge dictated it.
     assert freqtrade.handle_trade(trade) is False
     assert freqtrade.handle_stoploss_on_exchange(trade) is False
-    assert isclose(trade.stop_loss, 1.76)
+    assert pytest.approx(trade.stop_loss) == 1.76
 
     cancel_order_mock = MagicMock()
     stoploss_order_mock = MagicMock()
@@ -1818,7 +1816,7 @@ def test_tsl_on_exchange_compatible_with_edge(mocker, edge_conf, fee, caplog,
     assert freqtrade.handle_stoploss_on_exchange(trade) is False
 
     # stoploss should remain the same
-    assert isclose(trade.stop_loss, 1.76)
+    assert pytest.approx(trade.stop_loss) == 1.76
 
     # stoploss on exchange should not be canceled
     cancel_order_mock.assert_not_called()
@@ -2172,7 +2170,7 @@ def test_handle_trade(
 
     assert trade.close_rate == (2.0 if is_short else 2.2)
     assert pytest.approx(trade.close_profit) == close_profit
-    assert trade.calc_profit(trade.close_rate) == 5.685
+    assert pytest.approx(trade.calc_profit(trade.close_rate)) == 5.685
     assert trade.close_date is not None
     assert trade.exit_reason == 'sell_signal1'
 
@@ -2415,6 +2413,7 @@ def test_manage_open_orders_entry_usercustom(
     open_trade.orders[0].side = 'sell' if is_short else 'buy'
     open_trade.orders[0].ft_order_side = 'sell' if is_short else 'buy'
     Trade.query.session.add(open_trade)
+    Trade.commit()
 
     # Ensure default is to return empty (so not mocked yet)
     freqtrade.manage_open_orders()
@@ -2473,6 +2472,7 @@ def test_manage_open_orders_entry(
 
     open_trade.is_short = is_short
     Trade.query.session.add(open_trade)
+    Trade.commit()
 
     freqtrade.strategy.check_entry_timeout = MagicMock(return_value=False)
     freqtrade.strategy.adjust_entry_price = MagicMock(return_value=1234)
@@ -2510,6 +2510,7 @@ def test_adjust_entry_cancel(
 
     open_trade.is_short = is_short
     Trade.query.session.add(open_trade)
+    Trade.commit()
 
     # Timeout to not interfere
     freqtrade.strategy.ft_check_timed_out = MagicMock(return_value=False)
@@ -2550,6 +2551,7 @@ def test_adjust_entry_maintain_replace(
 
     open_trade.is_short = is_short
     Trade.query.session.add(open_trade)
+    Trade.commit()
 
     # Timeout to not interfere
     freqtrade.strategy.ft_check_timed_out = MagicMock(return_value=False)
@@ -2602,6 +2604,7 @@ def test_check_handle_cancelled_buy(
     open_trade.orders = []
     open_trade.is_short = is_short
     Trade.query.session.add(open_trade)
+    Trade.commit()
 
     # check it does cancel buy orders over the time limit
     freqtrade.manage_open_orders()
@@ -2632,6 +2635,7 @@ def test_manage_open_orders_buy_exception(
 
     open_trade.is_short = is_short
     Trade.query.session.add(open_trade)
+    Trade.commit()
 
     # check it does cancel buy orders over the time limit
     freqtrade.manage_open_orders()
@@ -2673,6 +2677,7 @@ def test_manage_open_orders_exit_usercustom(
     open_trade_usdt.is_open = False
 
     Trade.query.session.add(open_trade_usdt)
+    Trade.commit()
     # Ensure default is false
     freqtrade.manage_open_orders()
     assert cancel_order_mock.call_count == 0
@@ -2755,6 +2760,7 @@ def test_manage_open_orders_exit(
     open_trade_usdt.is_short = is_short
 
     Trade.query.session.add(open_trade_usdt)
+    Trade.commit()
 
     freqtrade.strategy.check_exit_timeout = MagicMock(return_value=False)
     freqtrade.strategy.check_entry_timeout = MagicMock(return_value=False)
@@ -2795,6 +2801,7 @@ def test_check_handle_cancelled_exit(
     open_trade_usdt.is_short = is_short
 
     Trade.query.session.add(open_trade_usdt)
+    Trade.commit()
 
     # check it does cancel sell orders over the time limit
     freqtrade.manage_open_orders()
@@ -2831,6 +2838,7 @@ def test_manage_open_orders_partial(
     freqtrade = FreqtradeBot(default_conf_usdt)
     prior_stake = open_trade.stake_amount
     Trade.query.session.add(open_trade)
+    Trade.commit()
 
     # check it does cancel buy orders over the time limit
     # note this is for a partially-complete buy order
@@ -2875,6 +2883,7 @@ def test_manage_open_orders_partial_fee(
     open_trade.fee_open = fee()
     open_trade.fee_close = fee()
     Trade.query.session.add(open_trade)
+    Trade.commit()
     # cancelling a half-filled order should update the amount to the bought amount
     # and apply fees if necessary.
     freqtrade.manage_open_orders()
@@ -2924,6 +2933,7 @@ def test_manage_open_orders_partial_except(
     open_trade.fee_open = fee()
     open_trade.fee_close = fee()
     Trade.query.session.add(open_trade)
+    Trade.commit()
     # cancelling a half-filled order should update the amount to the bought amount
     # and apply fees if necessary.
     freqtrade.manage_open_orders()
@@ -2962,6 +2972,7 @@ def test_manage_open_orders_exception(default_conf_usdt, ticker_usdt, open_trade
     freqtrade = FreqtradeBot(default_conf_usdt)
 
     Trade.query.session.add(open_trade_usdt)
+    Trade.commit()
 
     caplog.clear()
     freqtrade.manage_open_orders()
@@ -4144,6 +4155,7 @@ def test_trailing_stop_loss_positive(
             'last': enter_price + (-0.06 if is_short else 0.06),
         })
     )
+    caplog.clear()
     # stop-loss not reached, adjusted stoploss
     assert freqtrade.handle_trade(trade) is False
     caplog_text = (f"ETH/USDT - Using positive stoploss: 0.01 offset: {offset} profit: "
@@ -4524,11 +4536,8 @@ def test_get_real_amount_wrong_amount_rounding(default_conf_usdt, trades_for_ord
 
     order_obj = Order.parse_from_ccxt_object(buy_order_fee, 'LTC/ETH', 'buy')
     # Amount changes by fee amount.
-    assert isclose(
-        freqtrade.get_real_amount(trade, limit_buy_order_usdt, order_obj),
-        amount - (amount * 0.001),
-        abs_tol=MATH_CLOSE_PREC,
-    )
+    assert pytest.approx(freqtrade.get_real_amount(
+        trade, limit_buy_order_usdt, order_obj)) == amount - (amount * 0.001)
 
 
 def test_get_real_amount_open_trade_usdt(default_conf_usdt, fee, mocker):
@@ -4956,6 +4965,31 @@ def test_startup_update_open_orders(mocker, default_conf_usdt, fee, caplog, is_s
     assert hto_mock.call_count == 2
     assert hto_mock.call_args_list[0][0][0]['status'] == 'canceled'
     assert hto_mock.call_args_list[1][0][0]['status'] == 'canceled'
+
+
+@pytest.mark.usefixtures("init_persistence")
+def test_startup_backpopulate_precision(mocker, default_conf_usdt, fee, caplog):
+    freqtrade = get_patched_freqtradebot(mocker, default_conf_usdt)
+    create_mock_trades_usdt(fee)
+
+    trades = Trade.get_trades().all()
+    trades[-1].exchange = 'some_other_exchange'
+    for trade in trades:
+        assert trade.price_precision is None
+        assert trade.amount_precision is None
+        assert trade.precision_mode is None
+
+    freqtrade.startup_backpopulate_precision()
+    trades = Trade.get_trades().all()
+    for trade in trades:
+        if trade.exchange == 'some_other_exchange':
+            assert trade.price_precision is None
+            assert trade.amount_precision is None
+            assert trade.precision_mode is None
+        else:
+            assert trade.price_precision is not None
+            assert trade.amount_precision is not None
+            assert trade.precision_mode is not None
 
 
 @pytest.mark.usefixtures("init_persistence")

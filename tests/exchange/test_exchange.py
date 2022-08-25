@@ -14,12 +14,12 @@ from pandas import DataFrame
 from freqtrade.enums import CandleType, MarginMode, TradingMode
 from freqtrade.exceptions import (DDosProtection, DependencyException, InvalidOrderException,
                                   OperationalException, PricingError, TemporaryError)
-from freqtrade.exchange import Binance, Bittrex, Exchange, Kraken
+from freqtrade.exchange import (Binance, Bittrex, Exchange, Kraken, amount_to_precision,
+                                date_minus_candles, market_is_active, price_to_precision,
+                                timeframe_to_minutes, timeframe_to_msecs, timeframe_to_next_date,
+                                timeframe_to_prev_date, timeframe_to_seconds)
 from freqtrade.exchange.common import (API_FETCH_ORDER_RETRY_COUNT, API_RETRY_COUNT,
                                        calculate_backoff, remove_credentials)
-from freqtrade.exchange.exchange import (date_minus_candles, market_is_active, timeframe_to_minutes,
-                                         timeframe_to_msecs, timeframe_to_next_date,
-                                         timeframe_to_prev_date, timeframe_to_seconds)
 from freqtrade.resolvers.exchange_resolver import ExchangeResolver
 from tests.conftest import get_mock_coro, get_patched_exchange, log_has, log_has_re, num_log_has_re
 
@@ -181,11 +181,11 @@ def test_init_ccxt_kwargs(default_conf, mocker, caplog):
     assert log_has("Applying additional ccxt config: {'TestKWARG': 11, 'TestKWARG44': 11}", caplog)
     assert log_has(asynclogmsg, caplog)
     # Test additional headers case
-    Exchange._headers = {'hello': 'world'}
+    Exchange._ccxt_params = {'hello': 'world'}
     ex = Exchange(conf)
 
     assert log_has("Applying additional ccxt config: {'TestKWARG': 11, 'TestKWARG44': 11}", caplog)
-    assert ex._api.headers == {'hello': 'world'}
+    assert ex._api.hello == 'world'
     assert ex._ccxt_config == {}
     Exchange._headers = {}
 
@@ -279,62 +279,35 @@ def test_validate_order_time_in_force(default_conf, mocker, caplog):
     ex.validate_order_time_in_force(tif2)
 
 
-@pytest.mark.parametrize("amount,precision_mode,precision,contract_size,expected,trading_mode", [
-    (2.34559, 2, 4, 1, 2.3455, 'spot'),
-    (2.34559, 2, 5, 1, 2.34559, 'spot'),
-    (2.34559, 2, 3, 1, 2.345, 'spot'),
-    (2.9999, 2, 3, 1, 2.999, 'spot'),
-    (2.9909, 2, 3, 1, 2.990, 'spot'),
-    (2.9909, 2, 0, 1, 2, 'spot'),
-    (29991.5555, 2, 0, 1, 29991, 'spot'),
-    (29991.5555, 2, -1, 1, 29990, 'spot'),
-    (29991.5555, 2, -2, 1, 29900, 'spot'),
+@pytest.mark.parametrize("amount,precision_mode,precision,expected", [
+    (2.34559, 2, 4, 2.3455),
+    (2.34559, 2, 5, 2.34559),
+    (2.34559, 2, 3, 2.345),
+    (2.9999, 2, 3, 2.999),
+    (2.9909, 2, 3, 2.990),
+    (2.9909, 2, 0, 2),
+    (29991.5555, 2, 0, 29991),
+    (29991.5555, 2, -1, 29990),
+    (29991.5555, 2, -2, 29900),
     # Tests for Tick-size
-    (2.34559, 4, 0.0001, 1, 2.3455, 'spot'),
-    (2.34559, 4, 0.00001, 1, 2.34559, 'spot'),
-    (2.34559, 4, 0.001, 1, 2.345, 'spot'),
-    (2.9999, 4, 0.001, 1, 2.999, 'spot'),
-    (2.9909, 4, 0.001, 1, 2.990, 'spot'),
-    (2.9909, 4, 0.005, 0.01, 2.99, 'futures'),
-    (2.9999, 4, 0.005, 10, 2.995, 'futures'),
+    (2.34559, 4, 0.0001, 2.3455),
+    (2.34559, 4, 0.00001, 2.34559),
+    (2.34559, 4, 0.001, 2.345),
+    (2.9999, 4, 0.001, 2.999),
+    (2.9909, 4, 0.001, 2.990),
+    (2.9909, 4, 0.005, 2.99),
+    (2.9999, 4, 0.005, 2.995),
 ])
-def test_amount_to_precision(
-    default_conf,
-    mocker,
-    amount,
-    precision_mode,
-    precision,
-    contract_size,
-    expected,
-    trading_mode
-):
+def test_amount_to_precision(amount, precision_mode, precision, expected,):
     """
     Test rounds down
     """
-
-    markets = PropertyMock(return_value={
-        'ETH/BTC': {
-            'contractSize': contract_size,
-            'precision': {
-                'amount': precision
-            }
-        }
-    })
-
-    default_conf['trading_mode'] = trading_mode
-    default_conf['margin_mode'] = 'isolated'
-
-    exchange = get_patched_exchange(mocker, default_conf, id="binance")
     # digits counting mode
     # DECIMAL_PLACES = 2
     # SIGNIFICANT_DIGITS = 3
     # TICK_SIZE = 4
-    mocker.patch('freqtrade.exchange.Exchange.precisionMode',
-                 PropertyMock(return_value=precision_mode))
-    mocker.patch('freqtrade.exchange.Exchange.markets', markets)
 
-    pair = 'ETH/BTC'
-    assert exchange.amount_to_precision(pair, amount) == expected
+    assert amount_to_precision(amount, precision, precision_mode) == expected
 
 
 @pytest.mark.parametrize("price,precision_mode,precision,expected", [
@@ -359,21 +332,13 @@ def test_amount_to_precision(
     (0.000000003483, 4, 1e-12, 0.000000003483),
 
 ])
-def test_price_to_precision(default_conf, mocker, price, precision_mode, precision, expected):
-    """Test price to precision"""
-    markets = PropertyMock(return_value={'ETH/BTC': {'precision': {'price': precision}}})
-
-    exchange = get_patched_exchange(mocker, default_conf, id="binance")
-    mocker.patch('freqtrade.exchange.Exchange.markets', markets)
+def test_price_to_precision(price, precision_mode, precision, expected):
     # digits counting mode
     # DECIMAL_PLACES = 2
     # SIGNIFICANT_DIGITS = 3
     # TICK_SIZE = 4
-    mocker.patch('freqtrade.exchange.Exchange.precisionMode',
-                 PropertyMock(return_value=precision_mode))
 
-    pair = 'ETH/BTC'
-    assert exchange.price_to_precision(pair, price) == expected
+    assert price_to_precision(price, precision, precision_mode) == expected
 
 
 @pytest.mark.parametrize("price,precision_mode,precision,expected", [
@@ -2387,10 +2352,11 @@ def test_fetch_l2_order_book(default_conf, mocker, order_book_l2, exchange_name)
         order_book = exchange.fetch_l2_order_book(pair='ETH/BTC', limit=val)
         assert api_mock.fetch_l2_order_book.call_args_list[0][0][0] == 'ETH/BTC'
         # Not all exchanges support all limits for orderbook
-        if not exchange._ft_has['l2_limit_range'] or val in exchange._ft_has['l2_limit_range']:
+        if (not exchange.get_option('l2_limit_range')
+                or val in exchange.get_option('l2_limit_range')):
             assert api_mock.fetch_l2_order_book.call_args_list[0][0][1] == val
         else:
-            next_limit = exchange.get_next_limit_in_list(val, exchange._ft_has['l2_limit_range'])
+            next_limit = exchange.get_next_limit_in_list(val, exchange.get_option('l2_limit_range'))
             assert api_mock.fetch_l2_order_book.call_args_list[0][0][1] == next_limit
 
 
@@ -3346,16 +3312,16 @@ def test_merge_ft_has_dict(default_conf, mocker):
 
     ex = Kraken(default_conf)
     assert ex._ft_has != Exchange._ft_has_default
-    assert ex._ft_has['trades_pagination'] == 'id'
-    assert ex._ft_has['trades_pagination_arg'] == 'since'
+    assert ex.get_option('trades_pagination') == 'id'
+    assert ex.get_option('trades_pagination_arg') == 'since'
 
     # Binance defines different values
     ex = Binance(default_conf)
     assert ex._ft_has != Exchange._ft_has_default
-    assert ex._ft_has['stoploss_on_exchange']
-    assert ex._ft_has['order_time_in_force'] == ['gtc', 'fok', 'ioc']
-    assert ex._ft_has['trades_pagination'] == 'id'
-    assert ex._ft_has['trades_pagination_arg'] == 'fromId'
+    assert ex.get_option('stoploss_on_exchange')
+    assert ex.get_option('order_time_in_force') == ['gtc', 'fok', 'ioc']
+    assert ex.get_option('trades_pagination') == 'id'
+    assert ex.get_option('trades_pagination_arg') == 'fromId'
 
     conf = copy.deepcopy(default_conf)
     conf['exchange']['_ft_has_params'] = {"DeadBeef": 20,
@@ -4322,7 +4288,7 @@ def test__fetch_and_calculate_funding_fees_datetime_called(
     ('XLTCUSDT', 0.01, 'futures'),
     ('ETH/USDT:USDT', 10, 'futures')
 ])
-def test__get_contract_size(mocker, default_conf, pair, expected_size, trading_mode):
+def est__get_contract_size(mocker, default_conf, pair, expected_size, trading_mode):
     api_mock = MagicMock()
     default_conf['trading_mode'] = trading_mode
     default_conf['margin_mode'] = 'isolated'
@@ -4341,7 +4307,7 @@ def test__get_contract_size(mocker, default_conf, pair, expected_size, trading_m
             'contractSize': '10',
         }
     })
-    size = exchange._get_contract_size(pair)
+    size = exchange.get_contract_size(pair)
     assert expected_size == size
 
 
@@ -4826,6 +4792,20 @@ def test_load_leverage_tiers(mocker, default_conf, leverage_tiers, exchange_name
     )
 
 
+@pytest.mark.asyncio
+@pytest.mark.parametrize('exchange_name', EXCHANGES)
+async def test_get_market_leverage_tiers(mocker, default_conf, exchange_name):
+    default_conf['exchange']['name'] = exchange_name
+    await async_ccxt_exception(
+        mocker,
+        default_conf,
+        MagicMock(),
+        "get_market_leverage_tiers",
+        "fetch_market_leverage_tiers",
+        symbol='BTC/USDT:USDT'
+    )
+
+
 def test_parse_leverage_tier(mocker, default_conf):
     exchange = get_patched_exchange(mocker, default_conf)
 
@@ -5166,7 +5146,7 @@ def test_stoploss_contract_size(mocker, default_conf, contract_size, order_amoun
     mocker.patch('freqtrade.exchange.Exchange.price_to_precision', lambda s, x, y: y)
 
     exchange = get_patched_exchange(mocker, default_conf, api_mock)
-    exchange._get_contract_size = MagicMock(return_value=contract_size)
+    exchange.get_contract_size = MagicMock(return_value=contract_size)
 
     api_mock.create_order.reset_mock()
     order = exchange.stoploss(
