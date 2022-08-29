@@ -3,16 +3,27 @@ import math
 from datetime import datetime
 from pandas import DataFrame, date_range
 import pandas as pd
-from freqtrade.data.metrics import calculate_max_drawdown, calculate_expectancy
+from freqtrade.data.metrics import calculate_max_drawdown
 
 # Sortino settings
 TARGET_TRADES = 500
 EXPECTED_MAX_PROFIT = 3.0 # x 100%
 MAX_ACCEPTED_TRADE_DURATION = 180 # minutes
 MIN_ACCEPTED_TRADE_DURATION = 2 # minutes
-MAX_ACCEPTED_AVERAGE_TRADE_DAILY = 2
+MIN_ACCEPTED_AVERAGE_TRADE_DAILY = 0.5
+MIN_ACCEPTED_AVERAGE_PROFIT = 1.5
 
-AVERAGE_PROFIT_THRESHOLD = 0.5 # 50%
+# Loss settings
+# EXPECTED_MAX_PROFIT = 3.0
+# WIN_LOSS_WEIGHT = 2
+AVERAGE_PROFIT_WEIGHT = 1.5
+AVERAGE_PROFIT_THRESHOLD = 20 # %
+UNREALISTIC_AVERAGE_PROFIT = 50
+SORTINO_WEIGHT = 0.2
+TOTAL_PROFIT_WEIGHT = 1
+DRAWDOWN_WEIGHT = 2
+DURATION_WEIGHT = 1
+AVERAGE_TRADE_DAILY_WEIGHT = 0.5
 
 IGNORE_SMALL_PROFITS = False
 SMALL_PROFITS_THRESHOLD = 0.001  # 0.1%
@@ -40,43 +51,21 @@ class GeniusLoss3(IHyperOptLoss):
         """
         Objective function, returns smaller number for better results.
         """
-        profit_threshold = 0
 
-        if IGNORE_SMALL_PROFITS:
-            profit_threshold = SMALL_PROFITS_THRESHOLD
-
-        # total_profit = results['profit_ratio'].sum()
         total_profit = results['profit_abs'].sum()
         total_trades = len(results)
-        # total_win = len(results[(results['profit_ratio'] > profit_threshold)])
-        # total_lose = len(results[(results['profit_ratio'] <= 0)])
-        average_profit = results['profit_ratio'].mean()
+        average_profit = results['profit_ratio'].mean() * 100
+
         trade_duration = results['trade_duration'].mean()
         backtest_days = (max_date - min_date).days or 1
         average_trades_per_day = round(total_trades / backtest_days, 5)
 
-        max_drawdown = 0
-        try:
-            max_drawdown = calculate_max_drawdown(results, value_col='profit_abs')[0]
-        except:
-            pass
+        if (total_profit < 0) and (average_profit < 0):
+            average_profit = -average_profit
+            
+        if trade_duration == 0:
+            trade_duration = 1
+            
+        result = -total_profit * (average_profit/MIN_ACCEPTED_AVERAGE_PROFIT) * average_trades_per_day / trade_duration
 
-        # if total_lose == 0:
-        #     total_lose = 1
-
-        profit_loss = total_profit
-        average_profit_loss = (average_profit)
-        drawdown_loss = max_drawdown if (max_drawdown > 0) else 1
-        duration_loss = (trade_duration)
-        average_trade_daily_loss = (average_trades_per_day)
-
-        # result = profit_loss + win_lose_loss + average_profit_loss + sortino_ratio_loss + drawdown_loss + duration_loss
-        expectancy = calculate_expectancy(results)
-
-        result = (-profit_loss * average_profit_loss * average_trade_daily_loss) / (duration_loss * drawdown_loss * 10)
-
-        if (expectancy < 0):
-            if (result > 0):
-                expectancy = expectancy * -1
-
-        return (result * expectancy)
+        return result
