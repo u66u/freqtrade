@@ -16,8 +16,6 @@ from sklearn.model_selection import train_test_split
 from sklearn.neighbors import NearestNeighbors
 
 from freqtrade.configuration import TimeRange
-from freqtrade.data.dataprovider import DataProvider
-from freqtrade.data.history.history_utils import refresh_backtest_ohlcv_data
 from freqtrade.exceptions import OperationalException
 from freqtrade.exchange import timeframe_to_seconds
 from freqtrade.strategy.interface import IStrategy
@@ -168,9 +166,17 @@ class FreqaiDataKitchen:
             train_labels = labels
             train_weights = weights
 
-        return self.build_data_dictionary(
-            train_features, test_features, train_labels, test_labels, train_weights, test_weights
-        )
+        # Simplest way to reverse the order of training and test data:
+        if self.freqai_config['feature_parameters'].get('reverse_train_test_order', False):
+            return self.build_data_dictionary(
+                test_features, train_features, test_labels,
+                train_labels, test_weights, train_weights
+                )
+        else:
+            return self.build_data_dictionary(
+                train_features, test_features, train_labels,
+                test_labels, train_weights, test_weights
+            )
 
     def filter_features(
         self,
@@ -513,6 +519,18 @@ class FreqaiDataKitchen:
 
         return avg_mean_dist
 
+    def get_outlier_percentage(self, dropped_pts: npt.NDArray) -> float:
+        """
+        Check if more than X% of points werer dropped during outlier detection.
+        """
+        outlier_protection_pct = self.freqai_config["feature_parameters"].get(
+            "outlier_protection_percentage", 30)
+        outlier_pct = (dropped_pts.sum() / len(dropped_pts)) * 100
+        if outlier_pct >= outlier_protection_pct:
+            return outlier_pct
+        else:
+            return 0.0
+
     def use_SVM_to_remove_outliers(self, predict: bool) -> None:
         """
         Build/inference a Support Vector Machine to detect outliers
@@ -550,8 +568,17 @@ class FreqaiDataKitchen:
                 self.data_dictionary["train_features"]
             )
             y_pred = self.svm_model.predict(self.data_dictionary["train_features"])
-            dropped_points = np.where(y_pred == -1, 0, y_pred)
+            kept_points = np.where(y_pred == -1, 0, y_pred)
             # keep_index = np.where(y_pred == 1)
+            outlier_pct = self.get_outlier_percentage(1 - kept_points)
+            if outlier_pct:
+                logger.warning(
+                        f"SVM detected {outlier_pct:.2f}% of the points as outliers. "
+                        f"Keeping original dataset."
+                )
+                self.svm_model = None
+                return
+
             self.data_dictionary["train_features"] = self.data_dictionary["train_features"][
                 (y_pred == 1)
             ]
@@ -563,7 +590,7 @@ class FreqaiDataKitchen:
             ]
 
             logger.info(
-                f"SVM tossed {len(y_pred) - dropped_points.sum()}"
+                f"SVM tossed {len(y_pred) - kept_points.sum()}"
                 f" train points from {len(y_pred)} total points."
             )
 
@@ -572,7 +599,7 @@ class FreqaiDataKitchen:
             # to reduce code duplication
             if self.freqai_config['data_split_parameters'].get('test_size', 0.1) != 0:
                 y_pred = self.svm_model.predict(self.data_dictionary["test_features"])
-                dropped_points = np.where(y_pred == -1, 0, y_pred)
+                kept_points = np.where(y_pred == -1, 0, y_pred)
                 self.data_dictionary["test_features"] = self.data_dictionary["test_features"][
                     (y_pred == 1)
                 ]
@@ -583,7 +610,7 @@ class FreqaiDataKitchen:
                 ]
 
             logger.info(
-                f"SVM tossed {len(y_pred) - dropped_points.sum()}"
+                f"SVM tossed {len(y_pred) - kept_points.sum()}"
                 f" test points from {len(y_pred)} total points."
             )
 
@@ -604,6 +631,8 @@ class FreqaiDataKitchen:
         from math import cos, sin
 
         if predict:
+            if not self.data['DBSCAN_eps']:
+                return
             train_ft_df = self.data_dictionary['train_features']
             pred_ft_df = self.data_dictionary['prediction_features']
             num_preds = len(pred_ft_df)
@@ -635,8 +664,8 @@ class FreqaiDataKitchen:
                     cos(angle) * (point[1] - origin[1])
                 return (x, y)
 
-            MinPts = len(self.data_dictionary['train_features'].columns) * 2
-            # measure pairwise distances to train_features.shape[1]*2 nearest neighbours
+            MinPts = int(len(self.data_dictionary['train_features'].index) * 0.25)
+            # measure pairwise distances to nearest neighbours
             neighbors = NearestNeighbors(
                 n_neighbors=MinPts, n_jobs=self.thread_count)
             neighbors_fit = neighbors.fit(self.data_dictionary['train_features'])
@@ -666,6 +695,15 @@ class FreqaiDataKitchen:
             self.data['DBSCAN_eps'] = epsilon
             self.data['DBSCAN_min_samples'] = MinPts
             dropped_points = np.where(clustering.labels_ == -1, 1, 0)
+
+            outlier_pct = self.get_outlier_percentage(dropped_points)
+            if outlier_pct:
+                logger.warning(
+                        f"DBSCAN detected {outlier_pct:.2f}% of the points as outliers. "
+                        f"Keeping original dataset."
+                )
+                self.data['DBSCAN_eps'] = 0
+                return
 
             self.data_dictionary['train_features'] = self.data_dictionary['train_features'][
                 (clustering.labels_ != -1)
@@ -725,7 +763,7 @@ class FreqaiDataKitchen:
         if (len(do_predict) - do_predict.sum()) > 0:
             logger.info(
                 f"DI tossed {len(do_predict) - do_predict.sum()} predictions for "
-                "being too far from training data"
+                "being too far from training data."
             )
 
         self.do_predict += do_predict
@@ -863,9 +901,7 @@ class FreqaiDataKitchen:
         # We notice that users like to use exotic indicators where
         # they do not know the required timeperiod. Here we include a factor
         # of safety by multiplying the user considered "max" by 2.
-        max_period = self.freqai_config["feature_parameters"].get(
-            "indicator_max_period_candles", 20
-        ) * 2
+        max_period = self.config.get('startup_candle_count', 20) * 2
         additional_seconds = max_period * max_tf_seconds
 
         if trained_timestamp != 0:
@@ -910,31 +946,6 @@ class FreqaiDataKitchen:
         )
 
         self.model_filename = f"cb_{coin.lower()}_{int(trained_timerange.stopts)}"
-
-    def download_all_data_for_training(self, timerange: TimeRange, dp: DataProvider) -> None:
-        """
-        Called only once upon start of bot to download the necessary data for
-        populating indicators and training the model.
-        :param timerange: TimeRange = The full data timerange for populating the indicators
-                                      and training the model.
-        :param dp: DataProvider instance attached to the strategy
-        """
-        new_pairs_days = int((timerange.stopts - timerange.startts) / SECONDS_IN_DAY)
-        if not dp._exchange:
-            # Not realistic - this is only called in live mode.
-            raise OperationalException("Dataprovider did not have an exchange attached.")
-        refresh_backtest_ohlcv_data(
-            dp._exchange,
-            pairs=self.all_pairs,
-            timeframes=self.freqai_config["feature_parameters"].get("include_timeframes"),
-            datadir=self.config["datadir"],
-            timerange=timerange,
-            new_pairs_days=new_pairs_days,
-            erase=False,
-            data_format=self.config.get("dataformat_ohlcv", "json"),
-            trading_mode=self.config.get("trading_mode", "spot"),
-            prepend=self.config.get("prepend_data", False),
-        )
 
     def set_all_pairs(self) -> None:
 
