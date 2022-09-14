@@ -45,7 +45,7 @@
         // {"method": "StaticPairList"}, // Uncomment if you want to use static list
         {
             "method": "VolumePairList",
-            "number_assets": 80,
+            "number_assets": 50,
             "sort_key": "quoteVolume",
         },
         // {
