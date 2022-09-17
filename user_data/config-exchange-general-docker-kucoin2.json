@@ -1,0 +1,17 @@
+{
+    "exchange": {
+        "ccxt_config": {
+            "enableRateLimit": false,
+            "timeout": 60000,
+            "aiohttp_proxy": "http://kucoin-proxy:8080/kucoin",
+            "proxies": {
+                "http": "http://kucoin-proxy:8080/kucoin",
+                "https": "http://kucoin-proxy:8080/kucoin"
+            },      
+        },
+        "ccxt_async_config": {
+            "enableRateLimit": false,
+            "timeout": 60000
+        },
+    }
+}
