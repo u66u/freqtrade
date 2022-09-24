@@ -1,0 +1,19 @@
+{
+   "external_message_consumer": {
+        "enabled": true,
+        "producers": [
+            {
+                "name": "default", // This can be any name you'd like, default is "default"
+                "host": "", // The host IP address from your producer's api_server config
+                "port": 8081, // The port from your producer's api_server config
+                "ws_token": "" // The ws_token from your producer's api_server config
+            }
+        ],
+        // The following configurations are optional, and usually not required
+        // "wait_timeout": 300,
+        // "ping_timeout": 10,
+        // "sleep_time": 10,
+        "remove_entry_exit_signals": false,
+        // "message_size_limit": 8
+    }
+}
