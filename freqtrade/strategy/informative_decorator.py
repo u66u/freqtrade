@@ -26,7 +26,8 @@ def informative(timeframe: str, asset: str = '',
                 *,
                 candle_type: Optional[Union[CandleType, str]] = None,
                 ffill: bool = True,
-                startup_candle_count: int = 0) -> Callable[[PopulateIndicators], PopulateIndicators]:
+                startup_candle_count: int = 0,
+                analyze_per_epoch: bool = False) -> Callable[[PopulateIndicators], PopulateIndicators]:
     """
     A decorator for populate_indicators_Nn(self, dataframe, metadata), allowing these functions to
     define informative indicators.
