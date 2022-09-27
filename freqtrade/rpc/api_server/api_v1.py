@@ -60,8 +60,10 @@ def version():
 
 
 @router.get('/balance', response_model=Balances, tags=['info'])
-def balance(fiat_display_currency: string = config.get('fiat_display_currency', ''),rpc: RPC = Depends(get_rpc), config=Depends(get_config)):
+def balance(fiat_display_currency: string = '',rpc: RPC = Depends(get_rpc), config=Depends(get_config)):
     """Account Balances"""
+    if fiat_display_currency == '':
+        fiat_display_currency = config.get('fiat_display_currency', '')
     return rpc._rpc_balance(config['stake_currency'], fiat_display_currency,)
 
 
