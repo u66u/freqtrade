@@ -7,6 +7,7 @@ FROM stash86/freqtrade:linux-arm64-v8
 
 # The below dependency - pyti - serves as an example. Please use whatever you need!
 # RUN pip install --user finta PyWavelets keyboard rich psutil
+RUN pip install --user pandas==1.4.4
 # COPY scripts/*.* scripts/
 
 # Switch back to user (only if you required root above)
