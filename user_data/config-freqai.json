@@ -13,7 +13,7 @@
         "entry": 10,
         "exit": 30
     },
-    "dataformat_ohlcv": "hdf5",
+    "dataformat_ohlcv": "feather",
     "dataformat_trades": "hdf5",
     "exchange": {
         "name": "binance",
