@@ -4,68 +4,11 @@
     "stake_amount" : "unlimited",
     "amend_last_stake_amount ": true,
     // "tradable_balance_ratio": 0.99,
-    "available_capital": 65,
+    "available_capital": 70,
     "fiat_display_currency": "USD",
     "dry_run": true,
-    "dry_run_wallet": 80,
-    "trading_mode": "spot", //futures
-    // "margin_mode": "isolated",
+    "dry_run_wallet": 70,
     "cancel_open_orders_on_exit": false,
-    "unfilledtimeout": {
-        "entry": 5,
-        "exit": 10,
-        "unit": "minutes"
-    },
-    "order_types": {
-        "entry": "market",
-        "exit": "market",
-        "emergency_exit": "market",
-        "force_exit": "market",
-        "force_entry": "market",
-        "stoploss": "market",
-        "stoploss_on_exchange": false,
-        "stoploss_on_exchange_interval": 60
-    },
-    "entry_pricing": {
-        "price_side": "other",
-        "use_order_book": false, // true for futures binance
-        "order_book_top": 1,
-        "price_last_balance": 0.0,
-        "check_depth_of_market": {
-            "enabled": false,
-            "bids_to_ask_delta": 1
-        }
-    },
-    "exit_pricing": {
-        "price_side": "other",
-        "use_order_book": false, // true for futures binance
-        "order_book_top": 1
-    },
-    "pairlists": [
-        // {"method": "StaticPairList"}, // Uncomment if you want to use static list
-        {
-            "method": "VolumePairList",
-            "number_assets": 50,
-            "sort_key": "quoteVolume",
-        },
-        // {
-        //     "method": "OffsetFilter",
-        //     "offset": 50,
-        //     "number_assets": 50
-        // },
-        {"method": "AgeFilter", "min_days_listed": 30},
-        // {
-        //     "method": "VolatilityFilter",
-        //     "lookback_days": 3,
-        //     "min_volatility": 0.02,
-        //     "refresh_period": 1800
-        // },
-        // {
-        //     "method": "VolumePairList",
-        //     "number_assets": 60,
-        //     "sort_key": "quoteVolume"
-        // }
-    ],
     "bot_name": "freqtrade_bot",
     "initial_state": "running",
     "force_entry_enable": false,
