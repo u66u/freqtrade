@@ -18,12 +18,12 @@ import ccxt.async_support as ccxt_async
 from cachetools import TTLCache
 from ccxt import ROUND_DOWN, ROUND_UP, TICK_SIZE, TRUNCATE, decimal_to_precision
 from dateutil import parser
-from pandas import DataFrame
+from pandas import DataFrame, concat
 
-from freqtrade.constants import (DEFAULT_AMOUNT_RESERVE_PERCENT, NON_OPEN_EXCHANGE_STATES, BuySell,
-                                 Config, EntryExit, ListPairsWithTimeframes, MakerTaker,
+from freqtrade.constants import (DEFAULT_AMOUNT_RESERVE_PERCENT, NON_OPEN_EXCHANGE_STATES, BidAsk,
+                                 BuySell, Config, EntryExit, ListPairsWithTimeframes, MakerTaker,
                                  PairWithTimeframe)
-from freqtrade.data.converter import ohlcv_to_dataframe, trades_dict_to_list
+from freqtrade.data.converter import clean_ohlcv_dataframe, ohlcv_to_dataframe, trades_dict_to_list
 from freqtrade.enums import OPTIMIZE_MODES, CandleType, MarginMode, TradingMode
 from freqtrade.exceptions import (DDosProtection, ExchangeError, InsufficientFundsError,
                                   InvalidOrderException, OperationalException, PricingError,
@@ -31,6 +31,7 @@ from freqtrade.exceptions import (DDosProtection, ExchangeError, InsufficientFun
 from freqtrade.exchange.common import (API_FETCH_ORDER_RETRY_COUNT, BAD_EXCHANGES,
                                        EXCHANGE_HAS_OPTIONAL, EXCHANGE_HAS_REQUIRED,
                                        remove_credentials, retrier, retrier_async)
+from freqtrade.exchange.types import Ticker, Tickers
 from freqtrade.misc import (chunks, deep_merge_dicts, file_dump_json, file_load_json,
                             safe_value_fallback2)
 from freqtrade.plugins.pairlist.pairlist_helpers import expand_pairlist
@@ -179,13 +180,14 @@ class Exchange:
             exchange_config, ccxt_async, ccxt_kwargs=ccxt_async_config)
 
         logger.info(f'Using Exchange "{self.name}"')
-
+        self.required_candle_call_count = 1
         if validate:
             # Initial markets load
             self._load_markets()
             self.validate_config(config)
+            self._startup_candle_count: int = config.get('startup_candle_count', 0)
             self.required_candle_call_count = self.validate_required_startup_candles(
-                config.get('startup_candle_count', 0), config.get('timeframe', ''))
+                self._startup_candle_count, config.get('timeframe', ''))
 
         # Converts the interval provided in minutes in config to seconds
         self.markets_refresh_interval: int = exchange_config.get(
@@ -1419,14 +1421,15 @@ class Exchange:
             raise OperationalException(e) from e
 
     @retrier
-    def get_tickers(self, symbols: Optional[List[str]] = None, cached: bool = False) -> Dict:
+    def get_tickers(self, symbols: Optional[List[str]] = None, cached: bool = False) -> Tickers:
         """
         :param cached: Allow cached result
         :return: fetch_tickers result
         """
+        tickers: Tickers
         if cached:
             with self._cache_lock:
-                tickers = self._fetch_tickers_cache.get('fetch_tickers')
+                tickers = self._fetch_tickers_cache.get('fetch_tickers')  # type: ignore
             if tickers:
                 return tickers
         try:
@@ -1449,12 +1452,12 @@ class Exchange:
     # Pricing info
 
     @retrier
-    def fetch_ticker(self, pair: str) -> dict:
+    def fetch_ticker(self, pair: str) -> Ticker:
         try:
             if (pair not in self.markets or
                     self.markets[pair].get('active', False) is False):
                 raise ExchangeError(f"Pair {pair} not available")
-            data = self._api.fetch_ticker(pair)
+            data: Ticker = self._api.fetch_ticker(pair)
             return data
         except ccxt.DDoSProtection as e:
             raise DDosProtection(e) from e
@@ -1505,7 +1508,7 @@ class Exchange:
         except ccxt.BaseError as e:
             raise OperationalException(e) from e
 
-    def _get_price_side(self, side: str, is_short: bool, conf_strategy: Dict) -> str:
+    def _get_price_side(self, side: str, is_short: bool, conf_strategy: Dict) -> BidAsk:
         price_side = conf_strategy['price_side']
 
         if price_side in ('same', 'other'):
@@ -1524,7 +1527,7 @@ class Exchange:
 
     def get_rate(self, pair: str, refresh: bool,
                  side: EntryExit, is_short: bool,
-                 order_book: Optional[dict] = None, ticker: Optional[dict] = None) -> float:
+                 order_book: Optional[dict] = None, ticker: Optional[Ticker] = None) -> float:
         """
         Calculates bid/ask target
         bid rate - between current ask price and last price
@@ -1850,10 +1853,22 @@ class Exchange:
         return pair, timeframe, candle_type, data
 
     def _build_coroutine(self, pair: str, timeframe: str, candle_type: CandleType,
-                         since_ms: Optional[int]) -> Coroutine:
+                         since_ms: Optional[int], cache: bool) -> Coroutine:
+        not_all_data = cache and self.required_candle_call_count > 1
+        if cache and (pair, timeframe, candle_type) in self._klines:
+            candle_limit = self.ohlcv_candle_limit(timeframe, candle_type)
+            min_date = date_minus_candles(timeframe, candle_limit - 5).timestamp()
+            # Check if 1 call can get us updated candles without hole in the data.
+            if min_date < self._pairs_last_refresh_time.get((pair, timeframe, candle_type), 0):
+                # Cache can be used - do one-off call.
+                not_all_data = False
+            else:
+                # Time jump detected, evict cache
+                logger.info(
+                    f"Time jump detected. Evicting cache for {pair}, {timeframe}, {candle_type}")
+                del self._klines[(pair, timeframe, candle_type)]
 
-        if (not since_ms
-                and (self._ft_has["ohlcv_require_since"] or self.required_candle_call_count > 1)):
+        if (not since_ms and (self._ft_has["ohlcv_require_since"] or not_all_data)):
             # Multiple calls for one pair - to get more history
             one_call = timeframe_to_msecs(timeframe) * self.ohlcv_candle_limit(
                 timeframe, candle_type, since_ms)
@@ -1878,10 +1893,8 @@ class Exchange:
         input_coroutines = []
         cached_pairs = []
         for pair, timeframe, candle_type in set(pair_list):
-            if (
-                timeframe not in self.timeframes
-                and candle_type in (CandleType.SPOT, CandleType.FUTURES)
-            ):
+            if (timeframe not in self.timeframes
+                    and candle_type in (CandleType.SPOT, CandleType.FUTURES)):
                 logger.warning(
                     f"Cannot download ({pair}, {timeframe}) combination as this timeframe is "
                     f"not available on {self.name}. Available timeframes are "
@@ -1890,8 +1903,9 @@ class Exchange:
 
             if ((pair, timeframe, candle_type) not in self._klines or not cache
                     or self._now_is_time_to_refresh(pair, timeframe, candle_type)):
-                input_coroutines.append(self._build_coroutine(
-                    pair, timeframe, candle_type=candle_type, since_ms=since_ms))
+
+                input_coroutines.append(
+                    self._build_coroutine(pair, timeframe, candle_type, since_ms, cache))
 
             else:
                 logger.debug(
@@ -1900,6 +1914,28 @@ class Exchange:
                 cached_pairs.append((pair, timeframe, candle_type))
 
         return input_coroutines, cached_pairs
+
+    def _process_ohlcv_df(self, pair: str, timeframe: str, c_type: CandleType, ticks: List[List],
+                          cache: bool, drop_incomplete: bool) -> DataFrame:
+        # keeping last candle time as last refreshed time of the pair
+        if ticks and cache:
+            self._pairs_last_refresh_time[(pair, timeframe, c_type)] = ticks[-1][0] // 1000
+        # keeping parsed dataframe in cache
+        ohlcv_df = ohlcv_to_dataframe(ticks, timeframe, pair=pair, fill_missing=True,
+                                      drop_incomplete=drop_incomplete)
+        if cache:
+            if (pair, timeframe, c_type) in self._klines:
+                old = self._klines[(pair, timeframe, c_type)]
+                # Reassign so we return the updated, combined df
+                ohlcv_df = clean_ohlcv_dataframe(concat([old, ohlcv_df], axis=0), timeframe, pair,
+                                                 fill_missing=True, drop_incomplete=False)
+                candle_limit = self.ohlcv_candle_limit(timeframe, self._config['candle_type_def'])
+                # Age out old candles
+                ohlcv_df = ohlcv_df.tail(candle_limit + self._startup_candle_count)
+                self._klines[(pair, timeframe, c_type)] = ohlcv_df
+            else:
+                self._klines[(pair, timeframe, c_type)] = ohlcv_df
+        return ohlcv_df
 
     def refresh_latest_ohlcv(self, pair_list: ListPairsWithTimeframes, *,
                              since_ms: Optional[int] = None, cache: bool = True,
@@ -1937,16 +1973,11 @@ class Exchange:
                     continue
                 # Deconstruct tuple (has 4 elements)
                 pair, timeframe, c_type, ticks = res
-                # keeping last candle time as last refreshed time of the pair
-                if ticks:
-                    self._pairs_last_refresh_time[(pair, timeframe, c_type)] = ticks[-1][0] // 1000
-                # keeping parsed dataframe in cache
-                ohlcv_df = ohlcv_to_dataframe(
-                    ticks, timeframe, pair=pair, fill_missing=True,
-                    drop_incomplete=drop_incomplete)
+                ohlcv_df = self._process_ohlcv_df(
+                    pair, timeframe, c_type, ticks, cache, drop_incomplete)
+
                 results_df[(pair, timeframe, c_type)] = ohlcv_df
-                if cache:
-                    self._klines[(pair, timeframe, c_type)] = ohlcv_df
+
         # Return cached klines
         for pair, timeframe, c_type in cached_pairs:
             results_df[(pair, timeframe, c_type)] = self.klines(
@@ -1989,8 +2020,8 @@ class Exchange:
             candle_limit = self.ohlcv_candle_limit(
                 timeframe, candle_type=candle_type, since_ms=since_ms)
 
-            if candle_type != CandleType.SPOT:
-                params.update({'price': candle_type})
+            if candle_type and candle_type != CandleType.SPOT:
+                params.update({'price': candle_type.value})
             if candle_type != CandleType.FUNDING_RATE:
                 data = await self._api_async.fetch_ohlcv(
                     pair, timeframe=timeframe, since=since_ms,
