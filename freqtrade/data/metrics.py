@@ -226,7 +226,7 @@ def calculate_sortino(trades: pd.DataFrame,
     :param trades: DataFrame containing trades (requires columns close_date and profit_ratio)
     :return: expectancy
     """
-    if (len(trades) == 0) or (min_date == None) or (max_date == None) or (min_date == max_date)_:
+    if (len(trades) == 0) or (min_date == None) or (max_date == None) or (min_date == max_date):
         return 0
 
     total_profit = trades["profit_ratio"]
