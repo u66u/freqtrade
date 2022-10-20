@@ -18,7 +18,7 @@ from freqtrade import __version__
 from freqtrade.configuration.timerange import TimeRange
 from freqtrade.constants import CANCEL_REASON, DATETIME_PRINT_FORMAT, Config
 from freqtrade.data.history import load_data
-from freqtrade.data.metrics import calculate_max_drawdown, calculate_expectancy
+from freqtrade.data.metrics import calculate_max_drawdown, calculate_expectancy, calculate_sortino
 from freqtrade.enums import (CandleType, ExitCheckTuple, ExitType, SignalDirection, State,
                              TradingMode)
 from freqtrade.exceptions import ExchangeError, PricingError
@@ -529,6 +529,15 @@ class RPC:
         first_date = trades[0].open_date if trades else None
         last_date = trades[-1].open_date if trades else None
         num = float(len(durations) or 1)
+
+        sortino = 0
+        if len(trades_df) > 0:
+            try:
+                sortino = calculate_sortino(trades_df, first_date, last_date)
+            except ValueError:
+                # ValueError if no losing trade.
+                pass
+
         return {
             'profit_closed_coin': profit_closed_coin_sum,
             'profit_closed_percent_mean': round(profit_closed_ratio_mean * 100, 2),
@@ -563,6 +572,7 @@ class RPC:
             'max_drawdown_abs': max_drawdown_abs,
             'trading_volume': trading_volume,
             'expectancy': expectancy,
+            'sortino': sortino,
         }
 
     def _rpc_balance(self, stake_currency: str, fiat_display_currency: str) -> Dict:

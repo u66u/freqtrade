@@ -218,3 +218,33 @@ def calculate_expectancy(trades: pd.DataFrame) -> float:
         expectancy = 0
 
     return expectancy
+
+def calculate_sortino(trades: pd.DataFrame,
+                      min_date: datetime, max_date: datetime) -> float:
+    """
+    Calculate expectancy
+    :param trades: DataFrame containing trades (requires columns close_date and profit_ratio)
+    :return: expectancy
+    """
+    if (len(trades) == 0) or (min_date == None) or (max_date == None) or (min_date == max_date)_:
+        return 0
+
+    total_profit = trades["profit_ratio"]
+    days_period = (max_date - min_date).days
+
+    # adding slippage of 0.1% per trade
+    # total_profit = total_profit - 0.0005
+    expected_returns_mean = total_profit.sum() / days_period
+
+    trades['downside_returns'] = 0
+    trades.loc[total_profit < 0, 'downside_returns'] = trades['profit_ratio']
+    down_stdev = np.std(trades['downside_returns'])
+
+    if down_stdev != 0:
+        sortino_ratio = expected_returns_mean / down_stdev * np.sqrt(365)
+    else:
+        # Define high (negative) sortino ratio to be clear that this is NOT optimal.
+        sortino_ratio = -100
+
+    # print(expected_returns_mean, down_stdev, sortino_ratio)
+    return sortino_ratio

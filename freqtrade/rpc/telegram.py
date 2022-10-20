@@ -825,6 +825,7 @@ class Telegram(RPCHandler):
                     f"*Trading volume:* `{round_coin_value(stats['trading_volume'], stake_cur)}`\n"
                     f"*Profit factor:* `{stats['profit_factor']:.2f}`\n"
                     f"*Expectancy:* `{stats['expectancy']:.2f}`\n"
+                    f"*Sortino:* `{stats['sortino']:.2f}`\n"
                     f"*Max Drawdown:* `{stats['max_drawdown']:.2%} "
                     f"({round_coin_value(stats['max_drawdown_abs'], stake_cur)})`"
                 )
