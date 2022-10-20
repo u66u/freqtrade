@@ -500,7 +500,8 @@ class RPC:
         profit_factor = winning_profit / abs(losing_profit) if losing_profit else float('inf')
 
         trades_df = DataFrame([{'close_date': trade.close_date.strftime(DATETIME_PRINT_FORMAT),
-                                'profit_abs': trade.close_profit_abs}
+                                'profit_abs': trade.close_profit_abs,
+                                'profit_ratio': trade.close_profit}
                                for trade in trades if not trade.is_open])
         max_drawdown_abs = 0.0
         max_drawdown = 0.0
