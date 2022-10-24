@@ -10,7 +10,8 @@ from tabulate import tabulate
 from freqtrade.constants import (DATETIME_PRINT_FORMAT, LAST_BT_RESULT_FN, UNLIMITED_STAKE_AMOUNT,
                                  Config)
 from freqtrade.data.metrics import (calculate_cagr, calculate_csum, calculate_market_change,
-                                    calculate_max_drawdown, calculate_expectancy, calculate_sortino)
+                                    calculate_max_drawdown, calculate_expectancy, calculate_sortino,
+                                    calculate_sharpe, calculate_calmar)
 from freqtrade.misc import decimals_per_coin, file_dump_joblib, file_dump_json, round_coin_value
 from freqtrade.optimize.backtest_caching import get_backtest_metadata_filename
 
@@ -452,6 +453,8 @@ def generate_strategy_stats(pairlist: List[str],
         'profit_factor': profit_factor,
         'expectancy': calculate_expectancy(results),
         'sortino': calculate_sortino(results, min_date, max_date),
+        'sharpe': calculate_sharpe(results, min_date, max_date),
+        'calmar': calculate_calmar(results, min_date, max_date),
         'backtest_start': min_date.strftime(DATETIME_PRINT_FORMAT),
         'backtest_start_ts': int(min_date.timestamp() * 1000),
         'backtest_end': max_date.strftime(DATETIME_PRINT_FORMAT),
@@ -789,6 +792,9 @@ def text_table_add_metrics(strat_results: Dict) -> str:
                                                   strat_results['stake_currency'])),
             ('Total profit %', f"{strat_results['profit_total']:.2%}"),
             ('CAGR %', f"{strat_results['cagr']:.2%}" if 'cagr' in strat_results else 'N/A'),
+            ('Sortino', f"{strat_results['sortino']:.2f}" if 'sortino' in strat_results else 'N/A'),
+            ('Sharpe', f"{strat_results['sharpe']:.2f}" if 'sharpe' in strat_results else 'N/A'),
+            ('Calmar', f"{strat_results['calmar']:.2f}" if 'calmar' in strat_results else 'N/A'),
             ('Profit factor', f'{strat_results["profit_factor"]:.2f}' if 'profit_factor'
                               in strat_results else 'N/A'),
             ('Expectancy', f"{strat_results['expectancy']:.2f}" if 'expectancy' in strat_results else 'N/A'),

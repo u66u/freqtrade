@@ -222,15 +222,18 @@ def calculate_expectancy(trades: pd.DataFrame) -> float:
 def calculate_sortino(trades: pd.DataFrame,
                       min_date: datetime, max_date: datetime) -> float:
     """
-    Calculate expectancy
-    :param trades: DataFrame containing trades (requires columns close_date and profit_ratio)
-    :return: expectancy
+    Calculate sortino
+    :param trades: DataFrame containing trades (requires columns profit_ratio)
+    :return: sortino
     """
     if (len(trades) == 0) or (min_date == None) or (max_date == None) or (min_date == max_date):
         return 0
 
     total_profit = trades["profit_ratio"]
     days_period = (max_date - min_date).days
+
+    if days_period == 0:
+        return 0
 
     # adding slippage of 0.1% per trade
     # total_profit = total_profit - 0.0005
@@ -248,3 +251,67 @@ def calculate_sortino(trades: pd.DataFrame,
 
     # print(expected_returns_mean, down_stdev, sortino_ratio)
     return sortino_ratio
+
+def calculate_sharpe(trades: pd.DataFrame,
+                      min_date: datetime, max_date: datetime) -> float:
+    """
+    Calculate sharpe
+    :param trades: DataFrame containing trades (requires columns close_date and profit_ratio)
+    :return: sharpe
+    """
+    if (len(trades) == 0) or (min_date == None) or (max_date == None) or (min_date == max_date):
+        return 0
+
+    total_profit = trades["profit_ratio"]
+    days_period = (max_date - min_date).days
+
+    if days_period == 0:
+        return 0
+
+    # adding slippage of 0.1% per trade
+    # total_profit = total_profit - 0.0005
+    expected_returns_mean = total_profit.sum() / days_period
+    up_stdev = np.std(total_profit)
+
+    if up_stdev != 0:
+        sharp_ratio = expected_returns_mean / up_stdev * np.sqrt(365)
+    else:
+        # Define high (negative) sharpe ratio to be clear that this is NOT optimal.
+        sharp_ratio = -100
+
+    # print(expected_returns_mean, up_stdev, sharp_ratio)
+    return sharp_ratio
+
+def calculate_calmar(trades: pd.DataFrame,
+                      min_date: datetime, max_date: datetime) -> float:
+    """
+    Calculate calmar
+    :param trades: DataFrame containing trades (requires columns close_date and profit_ratio)
+    :return: calmar
+    """
+    if (len(trades) == 0) or (min_date == None) or (max_date == None) or (min_date == max_date):
+        return 0
+
+    total_profit = trades["profit_ratio"]
+    days_period = (max_date - min_date).days
+
+    # adding slippage of 0.1% per trade
+    # total_profit = total_profit - 0.0005
+    expected_returns_mean = total_profit.sum() / days_period * 100
+
+    # calculate max drawdown
+    try:
+        _, _, _, _, _, max_drawdown = calculate_max_drawdown(
+            trades, value_col="profit_abs"
+        )
+    except ValueError:
+        max_drawdown = 0
+
+    if max_drawdown != 0:
+        calmar_ratio = expected_returns_mean / max_drawdown * msqrt(365)
+    else:
+        # Define high (negative) calmar ratio to be clear that this is NOT optimal.
+        calmar_ratio = -100
+
+    # print(expected_returns_mean, max_drawdown, calmar_ratio)
+    return calmar_ratio
