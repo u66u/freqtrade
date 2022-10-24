@@ -3,7 +3,7 @@ from typing import Dict, Tuple
 from datetime import datetime
 import numpy as np
 import pandas as pd
-
+import math
 
 logger = logging.getLogger(__name__)
 
@@ -308,7 +308,7 @@ def calculate_calmar(trades: pd.DataFrame,
         max_drawdown = 0
 
     if max_drawdown != 0:
-        calmar_ratio = expected_returns_mean / max_drawdown * msqrt(365)
+        calmar_ratio = expected_returns_mean / max_drawdown * math.sqrt(365)
     else:
         # Define high (negative) calmar ratio to be clear that this is NOT optimal.
         calmar_ratio = -100
