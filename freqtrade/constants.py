@@ -150,7 +150,7 @@ CONF_SCHEMA = {
         'stoploss': {'type': 'number', 'maximum': 0, 'exclusiveMaximum': True, 'minimum': -1},
         'trailing_stop': {'type': 'boolean'},
         'trailing_stop_positive': {'type': 'number', 'minimum': 0, 'maximum': 1},
-        'trailing_stop_positive_offset': {'type': 'number', 'minimum': 0, 'maximum': 1},
+        'trailing_stop_positive_offset': {'type': 'number', 'minimum': 0, 'maximum': 100},
         'trailing_only_offset_is_reached': {'type': 'boolean'},
         'use_exit_signal': {'type': 'boolean'},
         'exit_profit_only': {'type': 'boolean'},
