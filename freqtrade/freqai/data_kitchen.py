@@ -1137,6 +1137,51 @@ class FreqaiDataKitchen:
             if pair not in self.all_pairs:
                 self.all_pairs.append(pair)
 
+    def extract_corr_pair_columns_from_populated_indicators(
+        self,
+        dataframe: DataFrame
+    ) -> Dict[str, DataFrame]:
+        """
+        Find the columns of the dataframe corresponding to the corr_pairlist, save them
+        in a dictionary to be reused and attached to other pairs.
+
+        :param dataframe: fully populated dataframe (current pair + corr_pairs)
+        :return: corr_dataframes, dictionary of dataframes to be attached
+                 to other pairs in same candle.
+        """
+        corr_dataframes: Dict[str, DataFrame] = {}
+        pairs = self.freqai_config["feature_parameters"].get("include_corr_pairlist", [])
+
+        for pair in pairs:
+            valid_strs = [f"%-{pair}", f"%{pair}", f"%_{pair}"]
+            pair_cols = [col for col in dataframe.columns if
+                         any(substr in col for substr in valid_strs)]
+            pair_cols.insert(0, 'date')
+            corr_dataframes[pair] = dataframe.filter(pair_cols, axis=1)
+
+        return corr_dataframes
+
+    def attach_corr_pair_columns(self, dataframe: DataFrame,
+                                 corr_dataframes: Dict[str, DataFrame],
+                                 current_pair: str) -> DataFrame:
+        """
+        Attach the existing corr_pair dataframes to the current pair dataframe before training
+
+        :param dataframe: current pair strategy dataframe, indicators populated already
+        :param corr_dataframes: dictionary of saved dataframes from earlier in the same candle
+        :param current_pair: current pair to which we will attach corr pair dataframe
+        :return:
+        :dataframe: current pair dataframe of populated indicators, concatenated with corr_pairs
+                    ready for training
+        """
+        pairs = self.freqai_config["feature_parameters"].get("include_corr_pairlist", [])
+
+        for pair in pairs:
+            if current_pair != pair:
+                dataframe = dataframe.merge(corr_dataframes[pair], how='left', on='date')
+
+        return dataframe
+
     def use_strategy_to_populate_indicators(
         self,
         strategy: IStrategy,
@@ -1144,6 +1189,7 @@ class FreqaiDataKitchen:
         base_dataframes: dict = {},
         pair: str = "",
         prediction_dataframe: DataFrame = pd.DataFrame(),
+        do_corr_pairs: bool = True,
     ) -> DataFrame:
         """
         Use the user defined strategy for populating indicators during retrain
@@ -1153,15 +1199,15 @@ class FreqaiDataKitchen:
         :param base_dataframes: dict = dict containing the current pair dataframes
                                 (for user defined timeframes)
         :param metadata: dict = strategy furnished pair metadata
-        :returns:
+        :return:
         dataframe: DataFrame = dataframe containing populated indicators
         """
 
         # for prediction dataframe creation, we let dataprovider handle everything in the strategy
         # so we create empty dictionaries, which allows us to pass None to
         # `populate_any_indicators()`. Signaling we want the dp to give us the live dataframe.
-        tfs = self.freqai_config["feature_parameters"].get("include_timeframes")
-        pairs = self.freqai_config["feature_parameters"].get("include_corr_pairlist", [])
+        tfs: List[str] = self.freqai_config["feature_parameters"].get("include_timeframes")
+        pairs: List[str] = self.freqai_config["feature_parameters"].get("include_corr_pairlist", [])
         if not prediction_dataframe.empty:
             dataframe = prediction_dataframe.copy()
             for tf in tfs:
@@ -1184,15 +1230,18 @@ class FreqaiDataKitchen:
                 informative=base_dataframes[tf],
                 set_generalized_indicators=sgi
             )
-            if pairs:
-                for i in pairs:
-                    if pair in i:
-                        continue  # dont repeat anything from whitelist
+
+        # ensure corr pairs are always last
+        for corr_pair in pairs:
+            if pair == corr_pair:
+                continue  # dont repeat anything from whitelist
+            for tf in tfs:
+                if pairs and do_corr_pairs:
                     dataframe = strategy.populate_any_indicators(
-                        i,
+                        corr_pair,
                         dataframe.copy(),
                         tf,
-                        informative=corr_dataframes[i][tf]
+                        informative=corr_dataframes[corr_pair][tf]
                     )
 
         self.get_unique_classes_from_labels(dataframe)
@@ -1263,14 +1312,16 @@ class FreqaiDataKitchen:
         append_df = pd.read_hdf(self.backtesting_results_path)
         return append_df
 
-    def check_if_backtest_prediction_exists(
-        self
+    def check_if_backtest_prediction_is_valid(
+        self,
+        length_backtesting_dataframe: int
     ) -> bool:
         """
-        Check if a backtesting prediction already exists
-        :param dk: FreqaiDataKitchen
+        Check if a backtesting prediction already exists and if the predictions
+        to append has the same size of backtesting dataframe slice
+        :param length_backtesting_dataframe: Length of backtesting dataframe slice
         :return:
-        :boolean: whether the prediction file exists or not.
+        :boolean: whether the prediction file is valid.
         """
         path_to_predictionfile = Path(self.full_path /
                                       self.backtest_predictions_folder /
@@ -1278,10 +1329,18 @@ class FreqaiDataKitchen:
         self.backtesting_results_path = path_to_predictionfile
 
         file_exists = path_to_predictionfile.is_file()
+
         if file_exists:
-            logger.info(f"Found backtesting prediction file at {path_to_predictionfile}")
+            append_df = self.get_backtesting_prediction()
+            if len(append_df) == length_backtesting_dataframe:
+                logger.info(f"Found backtesting prediction file at {path_to_predictionfile}")
+                return True
+            else:
+                logger.info("A new backtesting prediction file is required. "
+                            "(Number of predictions is different from dataframe length).")
+                return False
         else:
             logger.info(
                 f"Could not find backtesting prediction file at {path_to_predictionfile}"
             )
-        return file_exists
+            return False
