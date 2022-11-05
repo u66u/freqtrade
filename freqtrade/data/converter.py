@@ -197,7 +197,14 @@ def trim_dataframes(preprocessed: Dict[str, DataFrame], timerange,
     for pair, df in preprocessed.items():
         trimed_df = trim_dataframe(df, timerange, startup_candles=startup_candles)
         if not trimed_df.empty:
+            start_mem = trimed_df.memory_usage().sum() / 1024**2
+            logger.info(f"Memory usage of dataframe for {pair} before reduced is {start_mem:.2f} MB")
+
             trimed_df = reduce_mem_usage(pair, trimed_df)
+
+            end_mem = trimed_df.memory_usage().sum() / 1024**2
+            logger.info(f"Memory usage of dataframe for {pair} after reduced is {end_mem:.2f} MB")
+            
             processed[pair] = trimed_df
         else:
             logger.warning(f'{pair} has no data left after adjusting for startup candles, '
