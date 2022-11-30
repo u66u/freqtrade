@@ -1015,7 +1015,6 @@ def main():
     informative_pair = f"{informative_coin}/{stake_coin}"
     chart_config['current_pair'] = informative_pair
 
-    logger.info('1');
     if args.servers is not None:
         if args.yaml:
             indicators = args.indicators
@@ -1062,7 +1061,7 @@ def main():
 
     if not client_dict:
         raise Exception("No valid clients specified in config or --servers option")
-    logger.info('2');
+    
     tags_config['current_summary'] = str(list(client_dict.keys())[0])
 
     chart_config['current_summary'] = str(list(client_dict.keys())[0])
@@ -1082,7 +1081,7 @@ def main():
         layout["chart1"].update(Panel(Status("Loading...", spinner="line")))
         if not args.include_sysinfo:
             layout["chart2"].update(Panel(Status("Loading...", spinner="line")))
-    logger.info('3');
+    
     if args.include_sysinfo:
         layout['sys_info'].update(Panel(Status("Loading...", spinner="line"), title="[b]System Information", border_style="magenta"))
     
@@ -1100,7 +1099,7 @@ def main():
     layout["footer_clock"].update(datetime.now(tz=timezone.utc).ctime().replace(":", "[blink]:[/]") + " UTC")
     layout["footer_left"].update(" | Status: Loading...")
     layout["footer_right"].update(Text("frogtrade9000 by @froggleston [https://github.com/froggleston]", justify="right"))
-    logger.info('4');
+    
     update_sec = 5
     updatenum = 0
     
@@ -1116,11 +1115,11 @@ def main():
                 try:
                     updatenum = updatenum + 1
                     do_info_panels_update = False
-
+                    logger.info('1');
                     if updatenum / update_sec == 1:
                         do_info_panels_update = True
                         updatenum = 0
-                        
+                    logger.info('2');    
                     if (do_info_panels_update):
                         all_closed_trades = get_all_closed_trades(client_dict)
 
@@ -1146,7 +1145,7 @@ def main():
                         else:
                             if args.include_candle_info:
                                 layout["candle_info"].update(Panel(tradeinfo(client_dict, all_closed_trades, indicators), title="[b]Candle Information", border_style="cyan"))                
-                    
+                    logger.info('3');
                     layout["open"].update(Panel(open_trades_table(client_dict), title="Open Trades", border_style="green"))
                     
                     if args.include_sysinfo:
@@ -1154,7 +1153,7 @@ def main():
                     
                     if args.include_tag_summary:
                         layout['tag_summary'].update(enter_tag_summary(client_dict))
-
+                    logger.info('4');
                     layout["footer_clock"].update(datetime.now(tz=timezone.utc).ctime().replace(":", "[blink]:[/]") + " UTC")
                     layout["footer_left"].update(f" |[green] OK")
                 except Exception as e:
