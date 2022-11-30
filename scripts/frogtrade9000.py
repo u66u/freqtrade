@@ -1107,10 +1107,12 @@ def main():
         # print(get_all_closed_trades(client_dict).items())
         print("DEBUG MODE")
     else:
+        logger.info('a');
         with Live(layout, refresh_per_second=0.33, screen=True):
             if suderp:
+                logger.info('b');
                 keyboard.on_press(key_press)
-            
+            logger.info('c');
             while True:
                 try:
                     updatenum = updatenum + 1
