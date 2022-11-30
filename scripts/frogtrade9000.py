@@ -54,6 +54,10 @@ from rich.table import Table
 from rich.text import Text
 from rich.rule import Rule
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 informative_coin="BTC"
 stake_coin="USDT"
 timeframes = ["15m", "1h", "4h", "1m", "5m"]
@@ -1011,6 +1015,7 @@ def main():
     informative_pair = f"{informative_coin}/{stake_coin}"
     chart_config['current_pair'] = informative_pair
 
+    logger.info('1');
     if args.servers is not None:
         if args.yaml:
             indicators = args.indicators
@@ -1057,7 +1062,7 @@ def main():
 
     if not client_dict:
         raise Exception("No valid clients specified in config or --servers option")
-    
+    logger.info('2');
     tags_config['current_summary'] = str(list(client_dict.keys())[0])
 
     chart_config['current_summary'] = str(list(client_dict.keys())[0])
@@ -1077,7 +1082,7 @@ def main():
         layout["chart1"].update(Panel(Status("Loading...", spinner="line")))
         if not args.include_sysinfo:
             layout["chart2"].update(Panel(Status("Loading...", spinner="line")))
-    
+    logger.info('3');
     if args.include_sysinfo:
         layout['sys_info'].update(Panel(Status("Loading...", spinner="line"), title="[b]System Information", border_style="magenta"))
     
@@ -1095,7 +1100,7 @@ def main():
     layout["footer_clock"].update(datetime.now(tz=timezone.utc).ctime().replace(":", "[blink]:[/]") + " UTC")
     layout["footer_left"].update(" | Status: Loading...")
     layout["footer_right"].update(Text("frogtrade9000 by @froggleston [https://github.com/froggleston]", justify="right"))
-    
+    logger.info('4');
     update_sec = 5
     updatenum = 0
     
