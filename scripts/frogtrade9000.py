@@ -1107,21 +1107,19 @@ def main():
         # print(get_all_closed_trades(client_dict).items())
         print("DEBUG MODE")
     else:
-        logger.info('a');
         with Live(layout, refresh_per_second=0.33, screen=True):
             if suderp:
-                logger.info('b');
                 keyboard.on_press(key_press)
-            logger.info('c');
+            
             while True:
                 try:
                     updatenum = updatenum + 1
                     do_info_panels_update = False
-                    logger.info('1');
+
                     if updatenum / update_sec == 1:
                         do_info_panels_update = True
                         updatenum = 0
-                    logger.info('2');    
+                        
                     if (do_info_panels_update):
                         all_closed_trades = get_all_closed_trades(client_dict)
 
@@ -1147,7 +1145,7 @@ def main():
                         else:
                             if args.include_candle_info:
                                 layout["candle_info"].update(Panel(tradeinfo(client_dict, all_closed_trades, indicators), title="[b]Candle Information", border_style="cyan"))                
-                    logger.info('3');
+                    
                     layout["open"].update(Panel(open_trades_table(client_dict), title="Open Trades", border_style="green"))
                     
                     if args.include_sysinfo:
@@ -1155,7 +1153,7 @@ def main():
                     
                     if args.include_tag_summary:
                         layout['tag_summary'].update(enter_tag_summary(client_dict))
-                    logger.info('4');
+
                     layout["footer_clock"].update(datetime.now(tz=timezone.utc).ctime().replace(":", "[blink]:[/]") + " UTC")
                     layout["footer_left"].update(f" |[green] OK")
                 except Exception as e:
