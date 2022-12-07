@@ -18,8 +18,8 @@ from freqtrade import __version__
 from freqtrade.configuration.timerange import TimeRange
 from freqtrade.constants import CANCEL_REASON, DATETIME_PRINT_FORMAT, Config
 from freqtrade.data.history import load_data
-from freqtrade.data.metrics import (calculate_max_drawdown, calculate_expectancy, calculate_sortino,
-                                    calculate_sharpe, calculate_calmar)
+from freqtrade.data.metrics import (calculate_calmar, calculate_expectancy, calculate_max_drawdown,
+                                    calculate_sharpe, calculate_sortino)
 from freqtrade.enums import (CandleType, ExitCheckTuple, ExitType, SignalDirection, State,
                              TradingMode)
 from freqtrade.exceptions import ExchangeError, PricingError

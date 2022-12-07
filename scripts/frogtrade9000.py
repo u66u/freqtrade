@@ -24,37 +24,41 @@ Conception Date: August 2021
 
 from __future__ import print_function, unicode_literals
 
-import json, random, sys, os, re, argparse, traceback, statistics
-from datetime import datetime, timezone, timedelta
-from time import sleep
+import argparse
+import json
+import logging
+import os
+import random
+import re
+import statistics
+import sys
+import traceback
+from datetime import datetime, timedelta, timezone
 from itertools import cycle
-import requests
-
-import pandas as pd
-import numpy as np
-
-import rest_client as ftrc
-import basic_chart as bc
-
+from time import sleep
 from urllib.request import urlopen
 
+import basic_chart as bc
+import numpy as np
+import pandas as pd
+import requests
+import rest_client as ftrc
 from rich import box
 from rich.align import Align
 from rich.console import Console, Group
 from rich.layout import Layout
 from rich.live import Live
 from rich.panel import Panel
-from rich.progress import Progress, SpinnerColumn, BarColumn, TextColumn
-from rich.prompt import Prompt, IntPrompt
+from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn
+from rich.prompt import IntPrompt, Prompt
+from rich.rule import Rule
 from rich.spinner import Spinner
 from rich.status import Status
 from rich.style import Style
 from rich.syntax import Syntax
 from rich.table import Table
 from rich.text import Text
-from rich.rule import Rule
 
-import logging
 
 logger = logging.getLogger(__name__)
 
