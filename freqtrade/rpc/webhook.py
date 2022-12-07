@@ -132,6 +132,6 @@ class Webhook(RPCHandler):
             return post(url, json=payload)
         elif self._format == 'raw':
             return post(url, data=payload['data'],
-                            headers={'Content-Type': 'text/plain'})
+                        headers={'Content-Type': 'text/plain'})
         else:
             raise NotImplementedError('Unknown format: {}'.format(self._format))
