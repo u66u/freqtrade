@@ -515,7 +515,7 @@ class RPC:
                 # ValueError if no losing trade.
                 pass
 
-        expectancy = 0
+        expectancy = 0.0
         if len(trades_df) > 0:
             try:
                 expectancy = calculate_expectancy(trades_df)
@@ -533,7 +533,7 @@ class RPC:
         last_date = trades[-1].open_date if trades else None
         num = float(len(durations) or 1)
 
-        sortino = 0
+        sortino = 0.0
         if len(trades_df) > 0:
             try:
                 sortino = calculate_sortino(trades_df, first_date, last_date)
@@ -541,7 +541,7 @@ class RPC:
                 # ValueError if no losing trade.
                 pass
 
-        sharpe = 0
+        sharpe = 0.0
         if len(trades_df) > 0:
             try:
                 sharpe = calculate_sharpe(trades_df, first_date, last_date)
@@ -549,7 +549,7 @@ class RPC:
                 # ValueError if no losing trade.
                 pass
 
-        calmar = 0
+        calmar = 0.0
         if len(trades_df) > 0:
             try:
                 calmar = calculate_calmar(trades_df, first_date, last_date)
