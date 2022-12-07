@@ -723,7 +723,7 @@ def text_table_strategy(strategy_results, stake_currency: str) -> str:
         t['key'], t['trades'], t['profit_mean_pct'], t['profit_sum_pct'], t['profit_total_abs'],
         t['profit_total_pct'], t['duration_avg'],
         generate_wins_draws_losses(t['wins'], t['draws'], t['losses']), drawdown,
-                                    f'{t["expectancy"]:.3f}']
+        f'{t["expectancy"]:.3f}']
         for t, drawdown in zip(strategy_results, drawdown)]
     # Ignore type as floatfmt does allow tuples but mypy does not know that
     return tabulate(output, headers=headers,

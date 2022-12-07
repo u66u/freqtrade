@@ -851,8 +851,8 @@ class LocalTrade():
         return float(f"{profit:.8f}")
 
     def calc_profit_ratio(
-            self, rate: float, amount: float = None, open_rate: float = None, use_first_rate=False)
-        -> float:
+            self, rate: float, amount: float = None, open_rate: float = None, use_first_rate=False
+            ) -> float:
         """
         Calculates the profit as ratio (including fee).
         :param rate: rate to compare with.
