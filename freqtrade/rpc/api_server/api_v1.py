@@ -58,7 +58,8 @@ def version():
 
 
 @router.get('/balance', response_model=Balances, tags=['info'])
-def balance(fiat_display_currency: str = '',rpc: RPC = Depends(get_rpc), config=Depends(get_config)):
+def balance(fiat_display_currency: str = '', rpc: RPC = Depends(get_rpc),
+            config=Depends(get_config)):
     """Account Balances"""
     if fiat_display_currency == '':
         fiat_display_currency = config.get('fiat_display_currency', '')
@@ -104,7 +105,8 @@ def status(rpc: RPC = Depends(get_rpc)):
 # Using the responsemodel here will cause a ~100% increase in response time (from 1s to 2s)
 # on big databases. Correct response model: response_model=TradeResponse,
 @router.get('/trades', tags=['info', 'trading'])
-def trades(limit: int = 500, offset: int = 0, order_by_id: bool=True, rpc: RPC = Depends(get_rpc)):
+def trades(limit: int = 500, offset: int = 0, order_by_id: bool = True,
+           rpc: RPC = Depends(get_rpc)):
     return rpc._rpc_trade_history(limit, offset=offset, order_by_id=order_by_id)
 
 
