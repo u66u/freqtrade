@@ -851,13 +851,14 @@ class LocalTrade():
         return float(f"{profit:.8f}")
 
     def calc_profit_ratio(
-            self, rate: float, amount: float = None, open_rate: float = None, use_first_rate=False) -> float:
+            self, rate: float, amount: float = None, open_rate: float = None, use_first_rate=False)
+        -> float:
         """
         Calculates the profit as ratio (including fee).
         :param rate: rate to compare with.
         :param amount: Amount to use for the calculation. Falls back to trade.amount if not set.
         :param open_rate: open_rate to use. Defaults to self.open_rate if not provided.
-        :param use_first_rate: use first entry rate instead of average. Defaults to use average if not provided.
+        :param use_first_rate: use first entry rate instead of average. Defaults to use average.
         :return: profit ratio as float
         """
         close_trade_value = self.calc_close_trade_value(rate, amount)
@@ -1020,14 +1021,16 @@ class LocalTrade():
     @property
     def max_profit_rate(self) -> float:
         return self.min_rate if self.is_short else self.max_rate
-    
+
     @property
     def min_profit(self) -> float:
-        return self.calc_profit_ratio(self.min_profit_rate, use_first_rate=(self.nr_of_successful_entries > 1))
+        return self.calc_profit_ratio(self.min_profit_rate,
+                                      use_first_rate=(self.nr_of_successful_entries > 1))
 
     @property
     def max_profit(self) -> float:
-        return self.calc_profit_ratio(self.max_profit_rate, use_first_rate=(self.nr_of_successful_entries > 1))
+        return self.calc_profit_ratio(self.max_profit_rate,
+                                      use_first_rate=(self.nr_of_successful_entries > 1))
 
     @property
     def nr_of_successful_entries(self) -> int:
