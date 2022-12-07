@@ -27,7 +27,7 @@ class ProfitDrawDownHyperOptLoss(IHyperOptLoss):
         except ValueError:
             max_drawdown_abs = 0
 
-        if ((1 - max_drawdown_abs * DRAWDOWN_MULT) < 0) and total_profit < 0 :
+        if ((1 - max_drawdown_abs * DRAWDOWN_MULT) < 0) and total_profit < 0:
             total_profit *= -1
 
         return -1 * (total_profit * (1 - max_drawdown_abs * DRAWDOWN_MULT))

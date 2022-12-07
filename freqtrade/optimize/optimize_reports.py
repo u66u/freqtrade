@@ -722,7 +722,8 @@ def text_table_strategy(strategy_results, stake_currency: str) -> str:
     output = [[
         t['key'], t['trades'], t['profit_mean_pct'], t['profit_sum_pct'], t['profit_total_abs'],
         t['profit_total_pct'], t['duration_avg'],
-        generate_wins_draws_losses(t['wins'], t['draws'], t['losses']), drawdown, f'{t["expectancy"]:.3f}']
+        generate_wins_draws_losses(t['wins'], t['draws'], t['losses']), drawdown,
+                                   f'{t["expectancy"]:.3f}']
         for t, drawdown in zip(strategy_results, drawdown)]
     # Ignore type as floatfmt does allow tuples but mypy does not know that
     return tabulate(output, headers=headers,
@@ -797,7 +798,8 @@ def text_table_add_metrics(strat_results: Dict) -> str:
             ('Calmar', f"{strat_results['calmar']:.2f}" if 'calmar' in strat_results else 'N/A'),
             ('Profit factor', f'{strat_results["profit_factor"]:.2f}' if 'profit_factor'
                               in strat_results else 'N/A'),
-            ('Expectancy', f"{strat_results['expectancy']:.2f}" if 'expectancy' in strat_results else 'N/A'),
+            ('Expectancy', f"{strat_results['expectancy']:.2f}" if 'expectancy'
+                           in strat_results else 'N/A'),
             ('Trades per day', strat_results['trades_per_day']),
             ('Avg. daily profit %',
              f"{(strat_results['profit_total'] / strat_results['backtest_days']):.2%}"),

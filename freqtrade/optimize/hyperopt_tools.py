@@ -338,13 +338,14 @@ class HyperoptTools():
                          'results_metrics.profit_total', 'results_metrics.holding_avg',
                          'results_metrics.max_drawdown',
                          'results_metrics.max_drawdown_account', 'results_metrics.max_drawdown_abs',
-                         'loss', 'is_initial_point', 'is_random', 'is_best', 'results_metrics.expectancy']]
+                         'loss', 'is_initial_point', 'is_random', 'is_best',
+                         'results_metrics.expectancy']]
 
         trials.columns = [
             'Best', 'Epoch', 'Trades', ' Win  Draw  Loss  Win%', 'Avg profit',
             'Total profit', 'Profit', 'Avg duration', 'max_drawdown', 'max_drawdown_account',
-            'max_drawdown_abs', 'Objective', 'is_initial_point', 'is_random', 'is_best', 'Expectancy'
-            ]
+            'max_drawdown_abs', 'Objective', 'is_initial_point', 'is_random', 'is_best',
+            'Expectancy']
 
         return trials
 
