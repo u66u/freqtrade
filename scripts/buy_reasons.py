@@ -20,22 +20,22 @@ Donations:
 import argparse
 import logging
 import os
+import joblib
 import time
-from multiprocessing import Pool, cpu_count
 from pathlib import Path
 
-import joblib
-import pandas as pd
-from tabulate import tabulate
-
 from freqtrade.configuration import Configuration, TimeRange
-from freqtrade.data.btanalysis import (get_latest_backtest_filename, load_backtest_data,
-                                       load_trades_from_db)
-from freqtrade.data.dataprovider import DataProvider
+from freqtrade.data.btanalysis import (load_trades_from_db, load_backtest_data,
+                                       get_latest_backtest_filename)
 from freqtrade.data.history import load_pair_history
+from freqtrade.data.dataprovider import DataProvider
 from freqtrade.plugins.pairlistmanager import PairListManager
 from freqtrade.resolvers import ExchangeResolver, StrategyResolver
 
+import pandas as pd
+
+from multiprocessing import Pool, cpu_count
+from tabulate import tabulate
 
 logger = logging.getLogger(__name__)
 logger.setLevel("INFO")

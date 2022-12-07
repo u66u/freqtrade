@@ -2,14 +2,14 @@
 
 # -*- coding: utf-8 -*-
 
-import math
 import os
 import sys
 
-import numpy as np
-import pandas as pd
 from asciichart import plot, plot_str
 
+import numpy as np
+import pandas as pd
+import math
 
 # -----------------------------------------------------------------------------
 
@@ -21,7 +21,6 @@ sys.path.append(this_folder)
 # -----------------------------------------------------------------------------
 
 import ccxt  # noqa: E402
-
 
 # -----------------------------------------------------------------------------
 
