@@ -30,7 +30,9 @@ class Discord(Webhook):
 
     def send_msg(self, msg) -> None:
 
-        if (msg['type'].value in self._config['discord']) and (('enabled' not in self._config['discord'][msg['type'].value]) or (self._config['discord'][msg['type'].value]['enabled'] is True)):
+        if ((msg['type'].value in self._config['discord'])
+            and (('enabled' not in self._config['discord'][msg['type'].value])
+                 or (self._config['discord'][msg['type'].value]['enabled'] is True))):
             logger.info(f"Sending discord message: {msg}")
 
             msg['strategy'] = self.strategy
