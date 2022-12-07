@@ -267,7 +267,7 @@ class DataProvider:
         else:
             # Get historical OHLCV data (cached on disk).
             data = self.historic_ohlcv(pair=pair, timeframe=timeframe, candle_type=candle_type,
-                                        startup_candle_count=startup_candle_count)
+                                       startup_candle_count=startup_candle_count)
         if len(data) == 0:
             logger.warning(f"No data found for ({pair}, {timeframe}, {candle_type}).")
         return data

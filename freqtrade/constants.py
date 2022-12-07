@@ -366,7 +366,7 @@ CONF_SCHEMA = {
                     'type': 'object',
                     'properties': {
                         'enabled': {'type': 'boolean', 'default': True},
-                        'rows': {'type':'array', 'items': {'type': 'object'}, 'default': [
+                        'rows': {'type': 'array', 'items': {'type': 'object'}, 'default': [
                             {"Trade ID": "{trade_id}"},
                             {"Exchange": "{exchange}"},
                             {"Pair": "{pair}"},
@@ -391,7 +391,7 @@ CONF_SCHEMA = {
                     'type': 'object',
                     'properties': {
                         'enabled': {'type': 'boolean', 'default': False},
-                        'rows': {'type':'array', 'items': {'type': 'object'}, 'default': [
+                        'rows': {'type': 'array', 'items': {'type': 'object'}, 'default': [
                             {"Trade ID": "{trade_id}"},
                             {"Exchange": "{exchange}"},
                             {"Pair": "{pair}"},
