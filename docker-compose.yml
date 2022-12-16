@@ -14,14 +14,14 @@ services:
       trade
       --logfile /freqtrade/user_data/logs/freqtrade1.log
       --config /freqtrade/user_data/config1.json
-      --config /freqtrade/user_data/config-orders.json
+      --config /freqtrade/user_data/config-orders-limit-entry-30m.json
       --config /freqtrade/user_data/config-pairlist.json
       --config /freqtrade/user_data/config-exchange1.json
       --config /freqtrade/user_data/config-exchange-general-binance-proxy-docker.json
       --config /freqtrade/user_data/config-exchange-blacklist.json
       --config /freqtrade/user_data/config-telegram1.json
       --config /freqtrade/user_data/config-telegram-general.json
-      --config /freqtrade/user_data/config-api1.json
+      --config /freqtrade/user_data/config-api.json
   freqtrade2:
     image: stash86/freqtrade:linux-amd64
     restart: unless-stopped
@@ -35,14 +35,14 @@ services:
       trade
       --logfile /freqtrade/user_data/logs/freqtrade2.log
       --config /freqtrade/user_data/config2.json
-      --config /freqtrade/user_data/config-orders.json
+      --config /freqtrade/user_data/config-orders-limit-entry-30m.json
       --config /freqtrade/user_data/config-pairlist.json
       --config /freqtrade/user_data/config-exchange2.json
       --config /freqtrade/user_data/config-exchange-general-binance-proxy-docker.json
       --config /freqtrade/user_data/config-exchange-blacklist.json
       --config /freqtrade/user_data/config-telegram2.json
       --config /freqtrade/user_data/config-telegram-general.json
-      --config /freqtrade/user_data/config-api2.json
+      --config /freqtrade/user_data/config-api.json
   freqtrade3:
     image: stash86/freqtrade:linux-amd64
     restart: unless-stopped
@@ -56,14 +56,14 @@ services:
       trade
       --logfile /freqtrade/user_data/logs/freqtrade3.log
       --config /freqtrade/user_data/config3.json
-      --config /freqtrade/user_data/config-orders.json
+      --config /freqtrade/user_data/config-orders-limit-entry-30m.json
       --config /freqtrade/user_data/config-pairlist.json
       --config /freqtrade/user_data/config-exchange3.json
       --config /freqtrade/user_data/config-exchange-general-binance-proxy-docker.json
       --config /freqtrade/user_data/config-exchange-blacklist.json
       --config /freqtrade/user_data/config-telegram3.json
       --config /freqtrade/user_data/config-telegram-general.json
-      --config /freqtrade/user_data/config-api3.json
+      --config /freqtrade/user_data/config-api.json
   freqtrade4:
     image: stash86/freqtrade:linux-amd64
     restart: unless-stopped
@@ -77,14 +77,14 @@ services:
       trade
       --logfile /freqtrade/user_data/logs/freqtrade4.log
       --config /freqtrade/user_data/config4.json
-      --config /freqtrade/user_data/config-orders.json
+      --config /freqtrade/user_data/config-orders-limit-entry-30m.json
       --config /freqtrade/user_data/config-pairlist.json
       --config /freqtrade/user_data/config-exchange4.json
       --config /freqtrade/user_data/config-exchange-general-binance-proxy-docker.json
       --config /freqtrade/user_data/config-exchange-blacklist.json
       --config /freqtrade/user_data/config-telegram4.json
       --config /freqtrade/user_data/config-telegram-general.json
-      --config /freqtrade/user_data/config-api4.json
+      --config /freqtrade/user_data/config-api.json
 
   binance_proxy:
     image: nightshift2k/binance-proxy:latest
