@@ -3,24 +3,13 @@ version: '3'
 services:
   freqtrade:
     image: stash86/freqtrade:linux-amd64
-    # build:
-    #   context: .
-    #   dockerfile: "./docker/Dockerfile.custom"
-    # links:
-    #   - "binance_proxy"
-    # depends_on:
-    #   - "binance_proxy"
     restart: unless-stopped
     container_name: freqtrade
     volumes:
       - "./user_data:/freqtrade/user_data"
       - "./freqtrade_strategies:/freqtrade/freqtrade_strategies"
-    # Expose api on port 8080 (localhost only)
-    # Please read the https://www.freqtrade.io/en/stable/rest-api/ documentation
-    # before enabling this.
-    # ports:
-    #   - "127.0.0.1:8081:8081"
-    # Default command used when running `docker compose up`
+    ports:
+      - "127.0.0.1:8081:8081"
     command: >
       trade
       --logfile /freqtrade/user_data/logs/freqtrade1.log
@@ -28,27 +17,20 @@ services:
       --config /freqtrade/user_data/config-orders.json
       --config /freqtrade/user_data/config-pairlist.json
       --config /freqtrade/user_data/config-exchange1.json
-      --config /freqtrade/user_data/config-exchange-general-docker-kucoin.json
+      --config /freqtrade/user_data/config-exchange-general-binance-proxy-docker.json
       --config /freqtrade/user_data/config-exchange-blacklist.json
       --config /freqtrade/user_data/config-telegram1.json
       --config /freqtrade/user_data/config-telegram-general.json
       --config /freqtrade/user_data/config-api1.json
   freqtrade2:
     image: stash86/freqtrade:linux-amd64
-    # build:
-    #   context: .
-    #   dockerfile: "./docker/Dockerfile.custom"
-    # links:
-    #   - "binance_proxy"
-    # depends_on:
-    #   - "binance_proxy"
     restart: unless-stopped
     container_name: freqtrade2
     volumes:
       - "./user_data:/freqtrade/user_data"
       - "./freqtrade_strategies:/freqtrade/freqtrade_strategies"
-    # ports:
-    #   - "127.0.0.1:8082:8082"
+    ports:
+      - "127.0.0.1:8082:8082"
     command: >
       trade
       --logfile /freqtrade/user_data/logs/freqtrade2.log
@@ -56,27 +38,20 @@ services:
       --config /freqtrade/user_data/config-orders.json
       --config /freqtrade/user_data/config-pairlist.json
       --config /freqtrade/user_data/config-exchange2.json
-      --config /freqtrade/user_data/config-exchange-general-docker-kucoin.json
+      --config /freqtrade/user_data/config-exchange-general-binance-proxy-docker.json
       --config /freqtrade/user_data/config-exchange-blacklist.json
       --config /freqtrade/user_data/config-telegram2.json
       --config /freqtrade/user_data/config-telegram-general.json
       --config /freqtrade/user_data/config-api2.json
   freqtrade3:
     image: stash86/freqtrade:linux-amd64
-    # build:
-    #   context: .
-    #   dockerfile: "./docker/Dockerfile.custom"
-    # links:
-    #   - "binance_proxy"
-    # depends_on:
-    #   - "binance_proxy"
     restart: unless-stopped
     container_name: freqtrade3
     volumes:
       - "./user_data:/freqtrade/user_data"
       - "./freqtrade_strategies:/freqtrade/freqtrade_strategies"
-    # ports:
-    #   - "127.0.0.1:8083:8083"
+    ports:
+      - "127.0.0.1:8083:8083"
     command: >
       trade
       --logfile /freqtrade/user_data/logs/freqtrade3.log
@@ -84,27 +59,20 @@ services:
       --config /freqtrade/user_data/config-orders.json
       --config /freqtrade/user_data/config-pairlist.json
       --config /freqtrade/user_data/config-exchange3.json
-      --config /freqtrade/user_data/config-exchange-general-docker-kucoin.json
+      --config /freqtrade/user_data/config-exchange-general-binance-proxy-docker.json
       --config /freqtrade/user_data/config-exchange-blacklist.json
       --config /freqtrade/user_data/config-telegram3.json
       --config /freqtrade/user_data/config-telegram-general.json
       --config /freqtrade/user_data/config-api3.json
   freqtrade4:
     image: stash86/freqtrade:linux-amd64
-    # build:
-    #   context: .
-    #   dockerfile: "./docker/Dockerfile.custom"
-    # links:
-    #   - "binance_proxy"
-    # depends_on:
-    #   - "binance_proxy"
     restart: unless-stopped
     container_name: freqtrade4
     volumes:
       - "./user_data:/freqtrade/user_data"
       - "./freqtrade_strategies:/freqtrade/freqtrade_strategies"
-    # ports:
-    #   - "127.0.0.1:8084:8084"
+    ports:
+      - "127.0.0.1:8084:8084"
     command: >
       trade
       --logfile /freqtrade/user_data/logs/freqtrade4.log
@@ -112,18 +80,18 @@ services:
       --config /freqtrade/user_data/config-orders.json
       --config /freqtrade/user_data/config-pairlist.json
       --config /freqtrade/user_data/config-exchange4.json
-      --config /freqtrade/user_data/config-exchange-general-docker-kucoin.json
+      --config /freqtrade/user_data/config-exchange-general-binance-proxy-docker.json
       --config /freqtrade/user_data/config-exchange-blacklist.json
       --config /freqtrade/user_data/config-telegram4.json
       --config /freqtrade/user_data/config-telegram-general.json
       --config /freqtrade/user_data/config-api4.json
 
-  # binance_proxy:
-  #   image: nightshift2k/binance-proxy:latest
-  #   container_name: binance_proxy
-  #   restart: unless-stopped
-  #   ports:
-  #     - "127.0.0.1:8090:8090"
+  binance_proxy:
+    image: nightshift2k/binance-proxy:latest
+    container_name: binance_proxy
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8090:8090"
 
   # binance_proxy_futures:
   #   image: nightshift2k/binance-proxy:latest
@@ -132,8 +100,8 @@ services:
   #   ports:
   #     - "127.0.0.1:8091:8091"
 
-  kucoin-proxy:
-    image: mikekonan/exchange-proxy:latest-amd64
-    restart: unless-stopped
-    command: -verbose 1
-    container_name: kucoin-proxy
+  # kucoin-proxy:
+  #   image: mikekonan/exchange-proxy:latest-amd64
+  #   restart: unless-stopped
+  #   command: -verbose 1
+  #   container_name: kucoin-proxy
