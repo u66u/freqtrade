@@ -38,6 +38,11 @@ class ExpectancyAvgProfitLoss(IHyperOptLoss):
 
         expectancy = calculate_expectancy(results)
 
+        nb_loss_trades = len(results.loc[results['profit_abs'] < 0])
+
+        if (nb_loss_trades == 0):
+            return 0
+
         if (average_profit < 0) and (expectancy < 0):
             expectancy = expectancy * -1
             
