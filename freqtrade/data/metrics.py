@@ -303,7 +303,7 @@ def calculate_sharpe_new(trades: pd.DataFrame, min_date: datetime, max_date: dat
     up_stdev = np.std(total_profit)
 
     if up_stdev != 0:
-        sharp_ratio = expected_returns_mean / up_stdev * nsp.sqrt(365)
+        sharp_ratio = expected_returns_mean / up_stdev * np.sqrt(365)
     else:
         # Define high (negative) sharpe ratio to be clear that this is NOT optimal.
         sharp_ratio = -100
