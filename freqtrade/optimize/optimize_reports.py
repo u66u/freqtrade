@@ -11,7 +11,7 @@ from freqtrade.constants import (DATETIME_PRINT_FORMAT, LAST_BT_RESULT_FN, UNLIM
                                  Config)
 from freqtrade.data.metrics import (calculate_cagr, calculate_calmar, calculate_csum,
                                     calculate_expectancy, calculate_market_change,
-                                    calculate_max_drawdown, calculate_sharpe, calculate_sortino)
+                                    calculate_max_drawdown, calculate_sharpe, calculate_sharpe_new, calculate_sortino)
 from freqtrade.misc import decimals_per_coin, file_dump_joblib, file_dump_json, round_coin_value
 from freqtrade.optimize.backtest_caching import get_backtest_metadata_filename
 
