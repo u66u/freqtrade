@@ -296,10 +296,10 @@ def calculate_sharpe_new(trades: pd.DataFrame, min_date: datetime, max_date: dat
     if (len(trades) == 0) or (min_date is None) or (max_date is None) or (min_date == max_date):
         return 0
 
-    total_profit = trades['profit_abs']
+    total_profit = trades['profit_abs'] / starting_balance
     days_period = max(1, (max_date - min_date).days)
 
-    expected_returns_mean = (total_profit.sum() / starting_balance) / days_period
+    expected_returns_mean = total_profit.sum() / days_period
     up_stdev = np.std(total_profit)
 
     if up_stdev != 0:
