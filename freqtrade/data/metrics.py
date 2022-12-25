@@ -266,36 +266,6 @@ def calculate_sharpe(trades: pd.DataFrame, min_date: datetime, max_date: datetim
     if (len(trades) == 0) or (min_date is None) or (max_date is None) or (min_date == max_date):
         return 0
 
-    total_profit = trades["profit_ratio"]
-    days_period = (max_date - min_date).days
-
-    if days_period == 0:
-        return 0
-
-    # adding slippage of 0.1% per trade
-    # total_profit = total_profit - 0.0005
-    expected_returns_mean = total_profit.sum() / days_period
-    up_stdev = np.std(total_profit)
-
-    if up_stdev != 0:
-        sharp_ratio = expected_returns_mean / up_stdev * np.sqrt(365)
-    else:
-        # Define high (negative) sharpe ratio to be clear that this is NOT optimal.
-        sharp_ratio = -100
-
-    # print(expected_returns_mean, up_stdev, sharp_ratio)
-    return sharp_ratio
-
-def calculate_sharpe_new(trades: pd.DataFrame, min_date: datetime, max_date: datetime,
-                         starting_balance: float) -> float:
-    """
-    Calculate sharpe
-    :param trades: DataFrame containing trades (requires columns close_date and profit_ratio)
-    :return: sharpe
-    """
-    if (len(trades) == 0) or (min_date is None) or (max_date is None) or (min_date == max_date):
-        return 0
-
     total_profit = trades['profit_abs'] / starting_balance
     days_period = max(1, (max_date - min_date).days)
 
@@ -310,6 +280,34 @@ def calculate_sharpe_new(trades: pd.DataFrame, min_date: datetime, max_date: dat
 
     # print(expected_returns_mean, up_stdev, sharp_ratio)
     return sharp_ratio
+
+def calculate_sortino_new(trades: pd.DataFrame, min_date: datetime, max_date: datetime,
+                         starting_balance: float) -> float:
+    """
+    Calculate sortino
+    :param trades: DataFrame containing trades (requires columns profit_ratio)
+    :return: sortino
+    """
+    if (len(trades) == 0) or (min_date is None) or (max_date is None) or (min_date == max_date):
+        return 0
+
+    total_profit = trades['profit_abs'] / starting_balance
+    days_period = max(1, (max_date - min_date).days)
+
+    expected_returns_mean = total_profit.sum() / days_period
+
+    trades['downside_returns'] = 0
+    trades.loc[total_profit < 0, 'downside_returns'] = (trades['profit_abs'] / starting_balance)
+    down_stdev = np.std(trades['downside_returns'])
+
+    if down_stdev != 0:
+        sortino_ratio = expected_returns_mean / down_stdev * np.sqrt(365)
+    else:
+        # Define high (negative) sortino ratio to be clear that this is NOT optimal.
+        sortino_ratio = -100
+
+    # print(expected_returns_mean, down_stdev, sortino_ratio)
+    return sortino_ratio
 
 
 def calculate_calmar(trades: pd.DataFrame, min_date: datetime, max_date: datetime,
