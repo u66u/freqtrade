@@ -226,7 +226,7 @@ def calculate_sortino(trades: pd.DataFrame, min_date: datetime, max_date: dateti
                       starting_balance: float) -> float:
     """
     Calculate sortino
-    :param trades: DataFrame containing trades (requires columns profit_ratio)
+    :param trades: DataFrame containing trades (requires columns profit_abs)
     :return: sortino
     """
     if (len(trades) == 0) or (min_date is None) or (max_date is None) or (min_date == max_date):
@@ -237,9 +237,7 @@ def calculate_sortino(trades: pd.DataFrame, min_date: datetime, max_date: dateti
 
     expected_returns_mean = total_profit.sum() / days_period
 
-    trades['downside_returns'] = 0
-    trades.loc[total_profit < 0, 'downside_returns'] = (trades['profit_abs'] / starting_balance)
-    down_stdev = np.std(trades['downside_returns'])
+    down_stdev = np.std(trades.loc[trades['profit_abs'] < 0, 'profit_abs'] / starting_balance)
 
     if down_stdev != 0:
         sortino_ratio = expected_returns_mean / down_stdev * np.sqrt(365)
@@ -255,7 +253,7 @@ def calculate_sharpe(trades: pd.DataFrame, min_date: datetime, max_date: datetim
                      starting_balance: float) -> float:
     """
     Calculate sharpe
-    :param trades: DataFrame containing trades (requires columns close_date and profit_ratio)
+    :param trades: DataFrame containing trades (requires column profit_abs)
     :return: sharpe
     """
     if (len(trades) == 0) or (min_date is None) or (max_date is None) or (min_date == max_date):
@@ -276,11 +274,12 @@ def calculate_sharpe(trades: pd.DataFrame, min_date: datetime, max_date: datetim
     # print(expected_returns_mean, up_stdev, sharp_ratio)
     return sharp_ratio
 
+
 def calculate_calmar(trades: pd.DataFrame, min_date: datetime, max_date: datetime,
                      starting_balance: float) -> float:
     """
     Calculate calmar
-    :param trades: DataFrame containing trades (requires columns close_date and profit_ratio)
+    :param trades: DataFrame containing trades (requires columns close_date and profit_abs)
     :return: calmar
     """
     if (len(trades) == 0) or (min_date is None) or (max_date is None) or (min_date == max_date):
