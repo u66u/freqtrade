@@ -540,7 +540,7 @@ class RPC:
         sortino = 0.0
         if len(trades_df) > 0:
             try:
-                sortino = calculate_sortino(trades_df, first_date, last_date)
+                sortino = calculate_sortino(trades_df, first_date, last_date, starting_balance)
             except ValueError:
                 # ValueError if no losing trade.
                 pass
@@ -548,7 +548,7 @@ class RPC:
         sharpe = 0.0
         if len(trades_df) > 0:
             try:
-                sharpe = calculate_sharpe(trades_df, first_date, last_date)
+                sharpe = calculate_sharpe(trades_df, first_date, last_date, starting_balance)
             except ValueError:
                 # ValueError if no losing trade.
                 pass
@@ -556,7 +556,7 @@ class RPC:
         calmar = 0.0
         if len(trades_df) > 0:
             try:
-                calmar = calculate_calmar(trades_df, first_date, last_date)
+                calmar = calculate_calmar(trades_df, first_date, last_date, starting_balance)
             except ValueError:
                 # ValueError if no losing trade.
                 pass
