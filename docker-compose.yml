@@ -93,12 +93,12 @@ services:
     ports:
       - "127.0.0.1:8090:8090"
 
-  # binance_proxy_futures:
-  #   image: nightshift2k/binance-proxy:latest
-  #   container_name: binance_proxy
-  #   restart: unless-stopped
-  #   ports:
-  #     - "127.0.0.1:8091:8091"
+  binance_proxy_futures:
+    image: nightshift2k/binance-proxy:latest
+    container_name: binance_proxy_futures
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8091:8091"
 
   # kucoin-proxy:
   #   image: mikekonan/exchange-proxy:latest-amd64
