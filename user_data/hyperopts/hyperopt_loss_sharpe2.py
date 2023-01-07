@@ -10,7 +10,7 @@ import numpy as np
 from pandas import DataFrame
 
 from freqtrade.optimize.hyperopt import IHyperOptLoss
-
+from freqtrade.constants import Config
 
 class SharpeHyperOptLoss2(IHyperOptLoss):
     """
