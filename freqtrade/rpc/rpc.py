@@ -523,9 +523,9 @@ class RPC:
         # if len(trades_df) > 0:
         #     try:
         expectancy = calculate_expectancy(trades_df)
-            # except ValueError:
-            #     # ValueError if no losing trade.
-            #     pass
+        # except ValueError:
+        #     # ValueError if no losing trade.
+        #     pass
 
         profit_all_fiat = self._fiat_converter.convert_amount(
             profit_all_coin_sum,
@@ -541,25 +541,25 @@ class RPC:
         # if len(trades_df) > 0:
         #     try:
         sortino = calculate_sortino(trades_df, first_date, last_date, starting_balance)
-            # except ValueError:
-            #     # ValueError if no losing trade.
-            #     pass
+        # except ValueError:
+        #     # ValueError if no losing trade.
+        #     pass
 
         # sharpe = 0.0
         # if len(trades_df) > 0:
         #     try:
         sharpe = calculate_sharpe(trades_df, first_date, last_date, starting_balance)
-            # except ValueError:
-            #     # ValueError if no losing trade.
-            #     pass
+        # except ValueError:
+        #     # ValueError if no losing trade.
+        #     pass
 
         # calmar = 0.0
         # if len(trades_df) > 0:
         #     try:
         calmar = calculate_calmar(trades_df, first_date, last_date, starting_balance)
-            # except ValueError:
-            #     # ValueError if no losing trade.
-            #     pass
+        # except ValueError:
+        #     # ValueError if no losing trade.
+        #     pass
 
         return {
             'profit_closed_coin': profit_closed_coin_sum,
