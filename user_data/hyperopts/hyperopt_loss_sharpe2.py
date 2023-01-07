@@ -11,6 +11,7 @@ from pandas import DataFrame
 
 from freqtrade.optimize.hyperopt import IHyperOptLoss
 from freqtrade.constants import Config
+from freqtrade.data.metrics import calculate_sharpe
 
 class SharpeHyperOptLoss2(IHyperOptLoss):
     """
