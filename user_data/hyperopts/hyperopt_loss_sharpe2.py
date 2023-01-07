@@ -1,5 +1,5 @@
 """
-SharpeHyperOptLoss
+SortinoHyperOptLoss
 
 This module defines the alternative HyperOptLoss class which can be used for
 Hyperoptimization.
@@ -11,13 +11,13 @@ from pandas import DataFrame
 
 from freqtrade.optimize.hyperopt import IHyperOptLoss
 from freqtrade.constants import Config
-from freqtrade.data.metrics import calculate_sharpe
+from freqtrade.data.metrics import calculate_sortino
 
-class SharpeHyperOptLoss2(IHyperOptLoss):
+class SortinoHyperOptLoss2(IHyperOptLoss):
     """
     Defines the loss function for hyperopt.
 
-    This implementation uses the Sharpe Ratio calculation.
+    This implementation uses the Sortino Ratio calculation.
     """
 
     @staticmethod
@@ -27,9 +27,9 @@ class SharpeHyperOptLoss2(IHyperOptLoss):
         """
         Objective function, returns smaller number for more optimal results.
 
-        Uses Sharpe Ratio calculation.
+        Uses Sortino Ratio calculation.
         """
         starting_balance = config['dry_run_wallet']
-        sharp_ratio = calculate_sharpe(results, min_date, max_date, starting_balance)
-        # print(expected_returns_mean, up_stdev, sharp_ratio)
-        return -sharp_ratio
+        sortino_ratio = calculate_sortino(results, min_date, max_date, starting_balance)
+        # print(expected_returns_mean, down_stdev, sortino_ratio)
+        return -sortino_ratio
