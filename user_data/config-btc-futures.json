@@ -1,0 +1,64 @@
+{
+    "max_open_trades": 1,
+    "stake_currency": "USDT",
+    "stake_amount" : "unlimited",
+    "amend_last_stake_amount ": true,
+    "available_capital": 4,
+    "fiat_display_currency": "USD",
+    "dry_run": true,
+    "dry_run_wallet": 4,
+    "trading_mode": "futures",
+    "margin_mode": "isolated",
+    "cancel_open_orders_on_exit": false,
+    "unfilledtimeout": {
+        "entry": 10,
+        "exit": 10,
+        "exit_timeout_count": 0,
+        "unit": "minutes"
+    },
+    "order_types": {
+        "entry": "market",
+        "exit": "market",
+        "emergency_exit": "market",
+        "force_exit": "market",
+        "force_entry": "market",
+        "stoploss": "market",
+        "stoploss_on_exchange": false,
+        "stoploss_on_exchange_interval": 60
+    },
+    "entry_pricing": {
+        "price_side": "other",
+        "use_order_book": true,
+        "order_book_top": 1,
+        "price_last_balance": 0.0,
+        "check_depth_of_market": {
+            "enabled": false,
+            "bids_to_ask_delta": 1
+        }
+    },
+    "exit_pricing": {
+        "price_side": "other",
+        "use_order_book": true,
+        "order_book_top": 1
+    },
+    "pairlists": [
+        {"method": "StaticPairList"},
+    ],
+    "dataformat_ohlcv": "feather",
+    "dataformat_trades": "hdf5",
+    "exchange": {
+        "pair_whitelist": [
+            "BTC/USDT",
+        ],
+    },
+    "bot_name": "freqtrade_bot",
+    "initial_state": "running",
+    "force_entry_enable": false,
+    "internals": {
+        "process_throttle_secs": 5
+    },
+    "db_url": "sqlite:////freqtrade/user_data/tradesv3-dry-cend-2-kucoin.sqlite", // docker
+    "user_data_dir" : "user_data",
+    "strategy": "SampleStrategy",
+    "strategy_path": "freqtrade_strategies"
+}
