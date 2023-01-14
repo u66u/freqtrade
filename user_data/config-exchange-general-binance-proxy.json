@@ -4,7 +4,7 @@
             "enableRateLimit": false,
             "urls": {
                 "api": {
-                    "fapiPublic": "http://127.0.0.1:80s91/fapi/v1"
+                    "public": "http://127.0.0.1:8090/api/v3"
                 }
             }
         },
