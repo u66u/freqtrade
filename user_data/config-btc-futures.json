@@ -10,6 +10,7 @@
     "trading_mode": "futures",
     "margin_mode": "isolated",
     "cancel_open_orders_on_exit": false,
+    "ignore_buying_expired_candle_after": 300,
     "unfilledtimeout": {
         "entry": 10,
         "exit": 10,
