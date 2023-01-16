@@ -24,7 +24,7 @@ class AvgProfitDrawDownLoss(IHyperOptLoss):
 
     @staticmethod
     def hyperopt_loss_function(results: DataFrame, trade_count: int,
-                               min_date: datetime, max_date: datetime,
+                               min_date: datetime, max_date: datetime, config: Config,
                                *args, **kwargs) -> float:
 
         """
