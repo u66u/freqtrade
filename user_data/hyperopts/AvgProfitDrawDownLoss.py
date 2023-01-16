@@ -54,4 +54,8 @@ class AvgProfitDrawDownLoss(IHyperOptLoss):
         if (total_profit < 0) and (average_profit < 0):
             average_profit = average_profit * -1
 
-        return  -total_profit * min(average_profit, 15) / (max_drawdown)
+        console.log(f"total profit {total_profit}")
+        console.log(f"average profit {average_profit}")
+        console.log(f"drawdown {max_drawdown}")
+
+        return  -total_profit * min(average_profit, 15) / max_drawdown
