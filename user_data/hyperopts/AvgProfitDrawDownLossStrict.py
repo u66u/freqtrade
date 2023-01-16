@@ -5,7 +5,7 @@ This module defines the alternative HyperOptLoss class which can be used for
 Hyperoptimization.
 """
 from datetime import datetime
-
+import numpy as np
 from pandas import DataFrame
 
 from freqtrade.constants import Config
