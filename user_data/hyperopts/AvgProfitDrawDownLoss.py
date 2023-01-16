@@ -8,11 +8,12 @@ from datetime import datetime
 
 from pandas import DataFrame
 
-from freqtrade.data.metrics import calculate_max_drawdown, calculate_expectancy
+from freqtrade.constants import Config
+from freqtrade.data.metrics import calculate_expectancy
 from freqtrade.optimize.hyperopt import IHyperOptLoss
 
 
-class ExpectancyDrawDownLoss3(IHyperOptLoss):
+class AvgProfitDrawDownDurationLoss(IHyperOptLoss):
 
     """
     Defines the loss function for hyperopt.
@@ -32,23 +33,23 @@ class ExpectancyDrawDownLoss3(IHyperOptLoss):
         Uses profit ratio weighted max_drawdown when drawdown is available.
         Otherwise directly optimizes profit ratio.
         """
-        total_profit = results['profit_abs'].sum()
-        trade_duration = results['trade_duration'].mean()
+        # total_profit = results['profit_abs'].sum()
 
-        if trade_duration == 0:
-            trade_duration = 1
+        starting_balance = config['dry_run_wallet']
+
+        total_profit = results['profit_abs'] / starting_balance
+
+        average_profit = total_profit.mean() * 100
 
         try:
             max_drawdown = calculate_max_drawdown(results, value_col='profit_abs')
         except ValueError:
             # No losing trade, therefore no drawdown.
             # Return 0 because this is bad scenario
-            return -total_profit * 10 / trade_duration
+            return 0
+            # return -total_profit * 1 / trade_duration
+        
+        if (total_profit < 0) and (average_profit < 0):
+            average_profit = average_profit * -1
 
-        expectancy = calculate_expectancy(results)
-        drawdown_loss = -total_profit / max(max_drawdown[0], 1)
-
-        if (drawdown_loss > 0) and (expectancy < 0):
-            expectancy = expectancy * -1
-            
-        return  drawdown_loss * min(expectancy, 2)  / trade_duration
+        return  -total_profit * average_profit / (max_drawdown)

@@ -52,5 +52,8 @@ class AvgProfitDrawDownDurationLoss(IHyperOptLoss):
             # Return 0 because this is bad scenario
             return 0
             # return -total_profit * 1 / trade_duration
-            
-        return  -total_profit / (max_drawdown * trade_duration)
+        
+        if (total_profit < 0) and (average_profit < 0):
+            average_profit = average_profit * -1
+
+        return  -total_profit * average_profit / (max_drawdown * trade_duration)

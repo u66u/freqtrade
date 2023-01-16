@@ -49,7 +49,7 @@
     "dataformat_trades": "hdf5",
     "exchange": {
         "pair_whitelist": [
-            "BTC/USDT",
+            "BTC/USDT:USDT",
         ],
     },
     "bot_name": "freqtrade_bot",

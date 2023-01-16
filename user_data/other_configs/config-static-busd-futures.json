@@ -56,7 +56,7 @@
             "rateLimit": 200
         },
         "pair_whitelist": [
-            ".*/BUSD",
+            ".*/BUSD:BUSD",
         ],
         "pair_blacklist": []
     },
