@@ -13,7 +13,7 @@ from freqtrade.data.metrics import calculate_expectancy
 from freqtrade.optimize.hyperopt import IHyperOptLoss
 
 
-class AvgProfitDrawDownDurationLoss(IHyperOptLoss):
+class AvgProfitDrawDownLoss(IHyperOptLoss):
 
     """
     Defines the loss function for hyperopt.
