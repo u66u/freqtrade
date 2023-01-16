@@ -37,9 +37,11 @@ class AvgProfitDrawDownLoss(IHyperOptLoss):
 
         starting_balance = config['dry_run_wallet']
 
-        total_profit = results['profit_abs'].sum()
+        total_profit = results['profit_abs'] / starting_balance
 
         average_profit = total_profit.mean() * 100
+
+        total_profit = results['profit_abs'].sum()
 
         try:
             max_drawdown = calculate_max_drawdown(results, value_col='profit_abs')
@@ -52,4 +54,4 @@ class AvgProfitDrawDownLoss(IHyperOptLoss):
         if (total_profit < 0) and (average_profit < 0):
             average_profit = average_profit * -1
 
-        return  -total_profit * average_profit / (max_drawdown)
+        return  -total_profit * min(average_profit, 15) / (max_drawdown)
