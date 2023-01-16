@@ -39,11 +39,13 @@ class AvgProfitDrawDownLossStrict(IHyperOptLoss):
         stake_amount = config['stake_amount']
         max_profit_abs = 0.15 * stake_amount
 
-        total_profit = min(results['profit_abs'], max_profit_abs) / starting_balance
+        strict_profit_abs = np.minimum(max_profit_abs, results['profit_abs'])
+
+        total_profit = strict_profit_abs / starting_balance
 
         average_profit = total_profit.mean() * 100
 
-        total_profit = min(results['profit_abs'], max_profit_abs).sum()
+        total_profit = strict_profit_abs.sum()
 
         try:
             max_drawdown = calculate_max_drawdown(results, value_col='profit_abs')
