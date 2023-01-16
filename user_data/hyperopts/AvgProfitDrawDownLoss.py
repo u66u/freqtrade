@@ -37,7 +37,7 @@ class AvgProfitDrawDownLoss(IHyperOptLoss):
 
         starting_balance = config['dry_run_wallet']
 
-        total_profit = results['profit_abs'] / starting_balance
+        total_profit = results['profit_abs'].sum()
 
         average_profit = total_profit.mean() * 100
 
