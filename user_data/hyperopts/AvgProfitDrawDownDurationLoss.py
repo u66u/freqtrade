@@ -40,6 +40,9 @@ class AvgProfitDrawDownDurationLoss(IHyperOptLoss):
         total_profit = results['profit_abs'] / starting_balance
 
         average_profit = total_profit.mean() * 100
+
+        total_profit = results['profit_abs'].sum()
+
         trade_duration = results['trade_duration'].mean()
 
         if trade_duration == 0:
@@ -56,4 +59,4 @@ class AvgProfitDrawDownDurationLoss(IHyperOptLoss):
         if (total_profit < 0) and (average_profit < 0):
             average_profit = average_profit * -1
 
-        return  -total_profit * average_profit / (max_drawdown * trade_duration)
+        return  -total_profit * min(average_profit, 15) / (max_drawdown[0] * trade_duration)
