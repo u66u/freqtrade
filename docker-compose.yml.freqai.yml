@@ -1,0 +1,37 @@
+---
+version: '3'
+services:
+  freqai:
+    image: stash86/freqtrade:linux-arm64-v8-freqai
+    restart: unless-stopped
+    container_name: freqai
+    volumes:
+      - "./user_data:/freqtrade/user_data"
+      - "./freqtrade_strategies:/freqtrade/freqtrade_strategies"
+    ports:
+      - "127.0.0.1:8081:8081"
+    command: >
+      trade
+      --logfile /freqtrade/user_data/logs/freqai1.log
+      --config /freqtrade/user_data/config-freqai.json
+      --freqaimodel LightGBMRegressor
+
+  binance_proxy:
+    image: nightshift2k/binance-proxy:latest
+    container_name: binance_proxy
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8090:8090"
+
+  binance_proxy_futures:
+    image: nightshift2k/binance-proxy:latest
+    container_name: binance_proxy_futures
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8091:8091"
+
+  # kucoin-proxy:
+  #   image: mikekonan/exchange-proxy:latest-amd64
+  #   restart: unless-stopped
+  #   command: -verbose 1
+  #   container_name: kucoin-proxy
