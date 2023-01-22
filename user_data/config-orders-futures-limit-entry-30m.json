@@ -1,6 +1,7 @@
 {
     "trading_mode": "futures",
     "margin_mode": "isolated",
+    "ignore_buying_expired_candle_after": 300,
     "unfilledtimeout": {
         "entry": 30,
         "exit": 10,
