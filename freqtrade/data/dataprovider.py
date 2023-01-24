@@ -281,7 +281,7 @@ class DataProvider:
     def historic_ohlcv(
         self,
         pair: str,
-        timeframe: str = None,
+        timeframe: Optional[str] = None,
         candle_type: str = '',
         startup_candle_count: int = 0
     ) -> DataFrame:
@@ -335,7 +335,7 @@ class DataProvider:
     def get_pair_dataframe(
         self,
         pair: str,
-        timeframe: str = None,
+        timeframe: Optional[str] = None,
         candle_type: str = '',
         startup_candle_count: int = 0
     ) -> DataFrame:
@@ -419,7 +419,7 @@ class DataProvider:
 
     def refresh(self,
                 pairlist: ListPairsWithTimeframes,
-                helping_pairs: ListPairsWithTimeframes = None) -> None:
+                helping_pairs: Optional[ListPairsWithTimeframes] = None) -> None:
         """
         Refresh data, called with each cycle
         """
@@ -443,7 +443,7 @@ class DataProvider:
     def ohlcv(
         self,
         pair: str,
-        timeframe: str = None,
+        timeframe: Optional[str] = None,
         copy: bool = True,
         candle_type: str = ''
     ) -> DataFrame:
