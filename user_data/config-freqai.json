@@ -57,7 +57,7 @@
         "identifier": "papeda",
         "feature_parameters": {
             "include_timeframes": [
-                "3m",
+                "5m",
                 "15m",
                 "1h"
             ],
@@ -70,7 +70,7 @@
             "principal_component_analysis": false,
             "use_SVM_to_remove_outliers": true,
             "indicator_periods_candles": [10, 20],
-            "plot_feature_importances": 10
+            "plot_feature_importances": 0
         },
         "data_split_parameters": {
             "test_size": 0,
