@@ -70,7 +70,7 @@
             "principal_component_analysis": false,
             "use_SVM_to_remove_outliers": true,
             "indicator_periods_candles": [10, 20],
-            "plot_feature_importances": 0
+            "plot_feature_importances": 10
         },
         "data_split_parameters": {
             "test_size": 0,
