@@ -38,6 +38,11 @@ class Binance(Exchange):
             PriceType.MARK: "MARK_PRICE",
         },
         "floor_leverage": True,
+        "stop_price_type_field": "workingType",
+        "stop_price_type_value_mapping": {
+            PriceType.LAST: "CONTRACT_PRICE",
+            PriceType.MARK: "MARK_PRICE",
+        },
     }
 
     _supported_trading_mode_margin_pairs: List[Tuple[TradingMode, MarginMode]] = [
