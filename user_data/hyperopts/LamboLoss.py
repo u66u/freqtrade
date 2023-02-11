@@ -13,15 +13,15 @@ from freqtrade.data.metrics import calculate_expectancy, calculate_max_drawdown
 from freqtrade.optimize.hyperopt import IHyperOptLoss
 
 # Set maximum expectancy used in the calculation
-max_expectancy = 2
-max_avg_profit = 15
+max_expectancy = 40
+max_avg_profit = 200
 
-class GodLossStrict(IHyperOptLoss):
+class LamboLoss(IHyperOptLoss):
 
     """
     Defines the loss function for hyperopt.
     
-    This implementation optimizes for max drawdown, average profit, profit factor, and expectancy
+    This implementation optimizes for max drawdown, average profit, profit factor, expectancy, and high trade count
     Less max drawdown more profit -> Lower return value
     """
 

@@ -40,7 +40,7 @@ class LamboLossStrict(IHyperOptLoss):
 
         starting_balance = config['dry_run_wallet']
         stake_amount = config['stake_amount']
-        max_profit_abs = 0.15 * stake_amount
+        max_profit_abs = (max_avg_profit / 100) * stake_amount
 
         strict_profit_abs = np.minimum(max_profit_abs, results['profit_abs'])
         results['profit_abs'] = strict_profit_abs
