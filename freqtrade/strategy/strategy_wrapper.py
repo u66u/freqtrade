@@ -22,6 +22,8 @@ def strategy_safe_wrapper(f: F, message: str = "", default_retval=None, supress_
     @wraps(f)
     def wrapper(*args, **kwargs):
         try:
+            if not Trade.use_db:
+                logger.info("Live mode")
             if ('trade' in kwargs) and Trade.use_db:
                 # Protect accidental modifications from within the strategy
                 kwargs['trade'] = deepcopy(kwargs['trade'])
