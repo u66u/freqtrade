@@ -4,6 +4,7 @@ from functools import wraps
 from typing import Any, Callable, TypeVar, cast
 
 from freqtrade.exceptions import StrategyError
+from freqtrade.persistence import Trade
 
 
 logger = logging.getLogger(__name__)
@@ -21,7 +22,7 @@ def strategy_safe_wrapper(f: F, message: str = "", default_retval=None, supress_
     @wraps(f)
     def wrapper(*args, **kwargs):
         try:
-            if 'trade' in kwargs:
+            if ('trade' in kwargs) and Trade.use_db:
                 # Protect accidental modifications from within the strategy
                 kwargs['trade'] = deepcopy(kwargs['trade'])
             return f(*args, **kwargs)
