@@ -410,7 +410,8 @@ CONF_SCHEMA = {
                             {"Stake Amount": "{stake_amount} {stake_currency}"},
                             {"Open Date": "{open_date:%Y-%m-%d %H:%M:%S}"},
                             {"Enter Tag": "{enter_tag}"},
-                            {"Strategy": "{strategy} {timeframe}"},
+                            {"Strategy": "{strategy}"},
+                            {"Timeframe": "{timeframe}"},
                         ]},
                         'rows_sub_trade': {'type': 'array', 'items': {'type': 'object'}, 'default': [
                             {"Open Rate": "{open_rate}"},
