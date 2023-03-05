@@ -49,8 +49,8 @@ class Discord(Webhook):
 
             if msg['type'] in (RPCMessageType.EXIT, RPCMessageType.EXIT_FILL):
                 profit_ratio = msg.get('profit_ratio')
-                color = (0x00FF00 if profit_ratio > 0 else 0xFF00FF) if msg['sub_trade']
-                         else (0x008000 if profit_ratio > 0 else 0xFF0000)
+                color = ((0x00FF00 if profit_ratio > 0 else 0xFF00FF) if msg['sub_trade']
+                         else (0x008000 if profit_ratio > 0 else 0xFF0000))
 
             title = msg['type'].value
             if 'pair' in msg:
