@@ -370,9 +370,7 @@ CONF_SCHEMA = {
                     'properties': {
                         'enabled': {'type': 'boolean', 'default': True},
                         'rows': {'type': 'array', 'items': {'type': 'object'}, 'default': [
-                            {"Trade ID": "{trade_id}"},
                             {"Exchange": "{exchange}"},
-                            {"Pair": "{pair}"},
                             {"Direction": "{direction}"},
                             {"Open Rate": "{open_rate}"},
                             {"Close Rate": "{close_rate}"},
@@ -389,8 +387,6 @@ CONF_SCHEMA = {
                             {"Timeframe": "{timeframe}"},
                         ]},
                         'rows_sub_trade': {'type': 'array', 'items': {'type': 'object'}, 'default': [
-                            {"Trade ID": "{trade_id}"},
-                            {"Pair": "{pair}"},
                             {"Open Rate": "{open_rate}"},
                             {"Close Rate": "{close_rate}"},
                             {"Partial Exit Amount": "{amount}"},
@@ -407,9 +403,7 @@ CONF_SCHEMA = {
                     'properties': {
                         'enabled': {'type': 'boolean', 'default': False},
                         'rows': {'type': 'array', 'items': {'type': 'object'}, 'default': [
-                            {"Trade ID": "{trade_id}"},
                             {"Exchange": "{exchange}"},
-                            {"Pair": "{pair}"},
                             {"Direction": "{direction}"},
                             {"Open Rate": "{open_rate}"},
                             {"Amount": "{amount}"},
@@ -419,8 +413,6 @@ CONF_SCHEMA = {
                             {"Strategy": "{strategy} {timeframe}"},
                         ]},
                         'rows_sub_trade': {'type': 'array', 'items': {'type': 'object'}, 'default': [
-                            {"Trade ID": "{trade_id}"},
-                            {"Pair": "{pair}"},
                             {"Open Rate": "{open_rate}"},
                             {"Additional Entry Amount": "{amount}"},
                             {"Total Stake Amount": "{stake_amount} {stake_currency}"},

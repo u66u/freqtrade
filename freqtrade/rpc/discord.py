@@ -54,9 +54,9 @@ class Discord(Webhook):
 
             title = msg['type'].value
             if 'pair' in msg:
-                title = f"Trade: {msg['pair']} {msg['type'].value}"
+                title = f"Trade #{msg['trade_id']}: {msg['pair']} {msg['type'].value}"
             if ('pair' in msg) and msg['sub_trade']:
-                title = f"Trade: {msg['pair']} sub_{msg['type'].value}"
+                title = f"Trade #{msg['trade_id']}: {msg['pair']} sub_{msg['type'].value}"
             
             embeds = [{
                 'title': title,
