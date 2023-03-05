@@ -387,6 +387,20 @@ CONF_SCHEMA = {
                             {"Exit Reason": "{exit_reason}"},
                             {"Strategy": "{strategy}"},
                             {"Timeframe": "{timeframe}"},
+                        ]},
+                        'rows_sub_trade': {'type': 'array', 'items': {'type': 'object'}, 'default': [
+                            {"Trade ID": "{trade_id}"},
+                            {"Pair": "{pair}"},
+                            {"Open rate": "{open_rate}"},
+                            {"Close rate": "{close_rate}"},
+                            {"Amount": "{amount}"},
+                            {"Open date": "{open_date:%Y-%m-%d %H:%M:%S}"},
+                            {"Close date": "{close_date:%Y-%m-%d %H:%M:%S}"},
+                            {"Profit": "{profit_amount} {stake_currency}"},
+                            {"Profit %": "{profit_ratio:.2%}"},
+                            {"Min Profit %": "{min_profit:.2%}"},
+                            {"Max Profit %": "{max_profit:.2%}"},
+                            {"Exit Reason": "{exit_reason}"},
                         ]}
                     }
                 },
@@ -404,6 +418,13 @@ CONF_SCHEMA = {
                             {"Open date": "{open_date:%Y-%m-%d %H:%M:%S}"},
                             {"Enter tag": "{enter_tag}"},
                             {"Strategy": "{strategy} {timeframe}"},
+                        ]},
+                        'rows_sub_trade': {'type': 'array', 'items': {'type': 'object'}, 'default': [
+                            {"Trade ID": "{trade_id}"},
+                            {"Pair": "{pair}"},
+                            {"Open rate": "{open_rate}"},
+                            {"Additional Entry Amount": "{amount}"},
+                            {"Total Stake Amount": "{stake_amount}"},
                         ]}
                     }
                 },

@@ -39,13 +39,25 @@ class Discord(Webhook):
             msg['timeframe'] = self.timeframe
             # fields = self.config['discord'].get(msg['type'].value)
             fields = self._config['discord'][msg['type'].value].get('rows')
+            if msg['sub_trade']:
+                fields = self._config['discord'][msg['type'].value].get('rows_sub_trade')
+            
             color = 0x0000FF
+            if (msg['type'] in (RPCMessageType.ENTRY, RPCMessageType.ENTRY_FILL))
+                and msg['sub_trade']:
+                color = 0x00FFFF
+
             if msg['type'] in (RPCMessageType.EXIT, RPCMessageType.EXIT_FILL):
                 profit_ratio = msg.get('profit_ratio')
-                color = (0x00FF00 if profit_ratio > 0 else 0xFF0000)
+                color = (0x00FF00 if profit_ratio > 0 else 0xFF00FF) if msg['sub_trade']
+                         else (0x008000 if profit_ratio > 0 else 0xFF0000)
+
             title = msg['type'].value
             if 'pair' in msg:
                 title = f"Trade: {msg['pair']} {msg['type'].value}"
+            if ('pair' in msg) and msg['sub_trade']:
+                title = f"Trade: {msg['pair']} sub_{msg['type'].value}"
+            
             embeds = [{
                 'title': title,
                 'color': color,
