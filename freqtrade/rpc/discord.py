@@ -43,8 +43,8 @@ class Discord(Webhook):
                 fields = self._config['discord'][msg['type'].value].get('rows_sub_trade')
             
             color = 0x0000FF
-            if (msg['type'] in (RPCMessageType.ENTRY, RPCMessageType.ENTRY_FILL))
-                and msg['sub_trade']:
+            if ((msg['type'] in (RPCMessageType.ENTRY, RPCMessageType.ENTRY_FILL))
+                and msg['sub_trade']):
                 color = 0x00FFFF
 
             if msg['type'] in (RPCMessageType.EXIT, RPCMessageType.EXIT_FILL):
