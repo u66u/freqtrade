@@ -3,7 +3,7 @@
     // "margin_mode": "isolated",
     "ignore_buying_expired_candle_after": 300,
     "unfilledtimeout": {
-        "entry": 15,
+        "entry": 7,
         "exit": 1,
         "unit": "minutes"
     },
