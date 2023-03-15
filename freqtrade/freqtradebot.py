@@ -586,7 +586,7 @@ class FreqtradeBot(LoggingMixin):
 
         min_entry_stake = self.exchange.get_min_pair_stake_amount(trade.pair,
                                                                   current_entry_rate,
-                                                                  self.strategy.stoploss)
+                                                                  0.0)
         min_exit_stake = self.exchange.get_min_pair_stake_amount(trade.pair,
                                                                  current_exit_rate,
                                                                  self.strategy.stoploss)
@@ -700,7 +700,8 @@ class FreqtradeBot(LoggingMixin):
         pos_adjust = trade is not None
 
         enter_limit_requested, stake_amount, leverage = self.get_valid_enter_price_and_stake(
-            pair, price, stake_amount, trade_side, enter_tag, trade, order_adjust, leverage_)
+            pair, price, stake_amount, trade_side, enter_tag, trade, order_adjust, leverage_,
+            pos_adjust)
 
         if not stake_amount:
             return False
@@ -860,7 +861,12 @@ class FreqtradeBot(LoggingMixin):
         trade: Optional[Trade],
         order_adjust: bool,
         leverage_: Optional[float],
+        pos_adjust: bool,
     ) -> Tuple[float, float, float]:
+        """
+        Validate and eventually adjust (within limits) limit, amount and leverage
+        :return: Tuple with (price, amount, leverage)
+        """
 
         if price:
             enter_limit_requested = price
@@ -906,7 +912,9 @@ class FreqtradeBot(LoggingMixin):
         # We do however also need min-stake to determine leverage, therefore this is ignored as
         # edge-case for now.
         min_stake_amount = self.exchange.get_min_pair_stake_amount(
-            pair, enter_limit_requested, self.strategy.stoploss, leverage)
+            pair, enter_limit_requested,
+            self.strategy.stoploss if not pos_adjust else 0.0,
+            leverage)
         max_stake_amount = self.exchange.get_max_pair_stake_amount(
             pair, enter_limit_requested, leverage)
 
@@ -1122,8 +1130,7 @@ class FreqtradeBot(LoggingMixin):
             trade.stoploss_order_id = None
             logger.error(f'Unable to place a stoploss order on exchange. {e}')
             logger.warning('Exiting the trade forcefully')
-            self.execute_trade_exit(trade, stop_price, exit_check=ExitCheckTuple(
-                exit_type=ExitType.EMERGENCY_EXIT))
+            self.emergency_exit(trade, stop_price)
 
         except ExchangeError:
             trade.stoploss_order_id = None
@@ -1281,13 +1288,16 @@ class FreqtradeBot(LoggingMixin):
             if canceled and max_timeouts > 0 and canceled_count >= max_timeouts:
                 logger.warning(f'Emergency exiting trade {trade}, as the exit order '
                                f'timed out {max_timeouts} times.')
-                try:
-                    self.execute_trade_exit(
-                        trade, order['price'],
-                        exit_check=ExitCheckTuple(exit_type=ExitType.EMERGENCY_EXIT))
-                except DependencyException as exception:
-                    logger.warning(
-                        f'Unable to emergency sell trade {trade.pair}: {exception}')
+                self.emergency_exit(trade, order['price'])
+
+    def emergency_exit(self, trade: Trade, price: float) -> None:
+        try:
+            self.execute_trade_exit(
+                trade, price,
+                exit_check=ExitCheckTuple(exit_type=ExitType.EMERGENCY_EXIT))
+        except DependencyException as exception:
+            logger.warning(
+                f'Unable to emergency exit trade {trade.pair}: {exception}')
 
     def replace_order(self, order: Dict, order_obj: Optional[Order], trade: Trade) -> None:
         """
@@ -1460,34 +1470,32 @@ class FreqtradeBot(LoggingMixin):
                     return False
 
             try:
-                co = self.exchange.cancel_order_with_result(order['id'], trade.pair,
-                                                            trade.amount)
+                order = self.exchange.cancel_order_with_result(order['id'], trade.pair,
+                                                               trade.amount)
             except InvalidOrderException:
                 logger.exception(
                     f"Could not cancel {trade.exit_side} order {trade.open_order_id}")
                 return False
-            trade.close_rate = None
-            trade.close_rate_requested = None
-            trade.close_profit = None
-            trade.close_profit_abs = None
+
             # Set exit_reason for fill message
             exit_reason_prev = trade.exit_reason
             trade.exit_reason = trade.exit_reason + f", {reason}" if trade.exit_reason else reason
-            self.update_trade_state(trade, trade.open_order_id, co)
             # Order might be filled above in odd timing issues.
-            if co.get('status') in ('canceled', 'cancelled'):
+            if order.get('status') in ('canceled', 'cancelled'):
                 trade.exit_reason = None
-                trade.open_order_id = None
             else:
                 trade.exit_reason = exit_reason_prev
-
-            logger.info(f'{trade.exit_side.capitalize()} order {reason} for {trade}.')
             cancelled = True
         else:
             reason = constants.CANCEL_REASON['CANCELLED_ON_EXCHANGE']
-            logger.info(f'{trade.exit_side.capitalize()} order {reason} for {trade}.')
-            self.update_trade_state(trade, trade.open_order_id, order)
-            trade.open_order_id = None
+            trade.exit_reason = None
+
+        self.update_trade_state(trade, trade.open_order_id, order)
+
+        logger.info(f'{trade.exit_side.capitalize()} order {reason} for {trade}.')
+        trade.open_order_id = None
+        trade.close_rate = None
+        trade.close_rate_requested = None
 
         self._notify_exit_cancel(
             trade,
