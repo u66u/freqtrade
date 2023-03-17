@@ -425,18 +425,24 @@ CONF_SCHEMA = {
                         ]}
                     }
                 },
-                "strategy_msg": {
-                    'type': 'object',
-                    'properties': {
-                        'enabled': {'type': 'boolean', 'default': True},
-                        'rows': {'type': 'array', 'items': {'type': 'object'}, 'default': [
-                            {"Exchange": "{exchange}"},
-                            {"Strategy": "{strategy}"},
-                            {"Timeframe": "{timeframe}"},
-                            {"Message": "{msg}"}
-                        ]}
-                    }
-                },
+                'rows_test': {'type': 'array', 'items': {'type': 'object'}, 'default': [
+                    {"Exchange": "{exchange}"},
+                    {"Strategy": "{strategy}"},
+                    {"Timeframe": "{timeframe}"},
+                    {"Message": "{msg}"}
+                ]},
+                # "strategy_msg": {
+                #     'type': 'object',
+                #     'properties': {
+                #         'enabled': {'type': 'boolean', 'default': True},
+                #         'rows': {'type': 'array', 'items': {'type': 'object'}, 'default': [
+                #             {"Exchange": "{exchange}"},
+                #             {"Strategy": "{strategy}"},
+                #             {"Timeframe": "{timeframe}"},
+                #             {"Message": "{msg}"}
+                #         ]}
+                #     }
+                # },
             }
         },
         'api_server': {
