@@ -29,7 +29,7 @@ class Discord(Webhook):
         pass
 
     def send_msg(self, msg) -> None:
-
+        logger.info(f"Sending discord strategy message: {msg}")
         if (isinstance(msg,str)):
             logger.info(f"Sending discord strategy message: {msg}")
             title = "Strategy notif"
