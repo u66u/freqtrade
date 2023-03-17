@@ -395,6 +395,8 @@ CONF_SCHEMA = {
                             {"Profit": "{profit_amount} {stake_currency}"},
                             {"Profit %": "{profit_ratio:.2%}"},
                             {"Cumulative Profit": "{cumulative_profit} {stake_currency}"},
+                            {"Strategy": "{strategy}"},
+                            {"Timeframe": "{timeframe}"},
                         ]}
                     }
                 },
@@ -417,6 +419,8 @@ CONF_SCHEMA = {
                             {"Open Rate": "{open_rate}"},
                             {"Additional Entry Amount": "{amount}"},
                             {"Total Stake Amount": "{stake_amount} {stake_currency}"},
+                            {"Strategy": "{strategy}"},
+                            {"Timeframe": "{timeframe}"},
                         ]}
                     }
                 },
