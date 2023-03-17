@@ -29,23 +29,33 @@ class Discord(Webhook):
         pass
 
     def send_msg(self, msg) -> None:
-        logger.info(f"Sending discord strategy message: {msg}")
-        if (isinstance(msg,str)):
-            logger.info(f"Sending discord strategy message: {msg}")
-            title = "Strategy notif"
+        if (msg['type'].value == "strategy_msg"):
+            logger.info(f"Sending discord strategy message: {msg['msg']}")
+
+            msg['strategy'] = self.strategy
+            msg['timeframe'] = self.timeframe
+            msg['exchange'] = self._config['exchange']['name']
+            # fields = self.config['discord'].get(msg['type'].value)
+            fields = self._config['discord'][msg['type'].value].get('rows')
             color = 0xFF6600
+
+            title = msg['type'].value
+            
             embeds = [{
                 'title': title,
                 'color': color,
-                'content': msg,
+                'fields': [],
 
             }]
+            for f in fields:
+                for k, v in f.items():
+                    v = v.format(**msg)
+                    embeds[0]['fields'].append(
+                        {'name': k, 'value': v, 'inline': True})
 
             # Send the message to discord channel
             payload = {'embeds': embeds}
             self._send_msg(payload)
-
-
         elif ((msg['type'].value in self._config['discord'])
               and (('enabled' not in self._config['discord'][msg['type'].value])
                    or (self._config['discord'][msg['type'].value]['enabled'] is True))):

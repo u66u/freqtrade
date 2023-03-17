@@ -365,6 +365,7 @@ CONF_SCHEMA = {
             'properties': {
                 'enabled': {'type': 'boolean'},
                 'webhook_url': {'type': 'array', 'items': {'type': 'string'}},
+                'allow_custom_messages': {'type': 'boolean', 'default': True},
                 "exit_fill": {
                     'type': 'object',
                     'properties': {
@@ -422,6 +423,18 @@ CONF_SCHEMA = {
                             {"Strategy": "{strategy}"},
                             {"Timeframe": "{timeframe}"},
                         ]}
+                    }
+                },
+                "strategy_msg": {
+                    'type': 'object',
+                    'properties': {
+                        'enabled': {'type': 'boolean', 'default': True},
+                        'rows': {'type': 'array', 'items': {'type': 'object'}, 'default': [
+                            {"Exchange": "{exchange}"},
+                            {"Strategy": "{strategy}"},
+                            {"Timeframe": "{timeframe}"},
+                            {"Message": "{msg}"}
+                        ]},
                     }
                 },
             }
