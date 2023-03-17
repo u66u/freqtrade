@@ -36,6 +36,7 @@ class Discord(Webhook):
             msg['timeframe'] = self.timeframe
             msg['exchange'] = self._config['exchange']['name']
             # fields = self.config['discord'].get(msg['type'].value)
+            logger.info(f"Discord config: {self._config['discord'][msg['type'].value]}")
             fields = self._config['discord'][msg['type'].value].get('rows')
             color = 0xFF6600
 

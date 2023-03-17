@@ -434,7 +434,7 @@ CONF_SCHEMA = {
                             {"Strategy": "{strategy}"},
                             {"Timeframe": "{timeframe}"},
                             {"Message": "{msg}"}
-                        ]},
+                        ]}
                     }
                 },
             }
