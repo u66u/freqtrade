@@ -425,7 +425,7 @@ CONF_SCHEMA = {
                         ]}
                     }
                 },
-                'rows_test': {'type': 'array', 'items': {'type': 'object'}, 'default': [
+                'rows_strategy_msg': {'type': 'array', 'items': {'type': 'object'}, 'default': [
                     {"Exchange": "{exchange}"},
                     {"Strategy": "{strategy}"},
                     {"Timeframe": "{timeframe}"},

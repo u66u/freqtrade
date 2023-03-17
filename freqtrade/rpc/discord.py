@@ -36,8 +36,7 @@ class Discord(Webhook):
             msg['timeframe'] = self.timeframe
             msg['exchange'] = self._config['exchange']['name']
             # fields = self.config['discord'].get(msg['type'].value)
-            logger.info(f"Discord config: {self._config['discord']}")
-            fields = self._config['discord'].get('rows_test')
+            fields = self._config['discord'].get('rows_strategy_msg')
             color = 0xFF6600
 
             title = msg['type'].value
