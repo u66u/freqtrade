@@ -110,15 +110,7 @@ class Webhook(RPCHandler):
                         response = self._post_msg(url, payload)
                 else:
                     response = self._post_msg(self._url, payload)
-                # if self._format == 'form':
-                #     response = post(self._url, data=payload)
-                # elif self._format == 'json':
-                #     response = post(self._url, json=payload)
-                # elif self._format == 'raw':
-                #     response = post(self._url, data=payload['data'],
-                #                     headers={'Content-Type': 'text/plain'})
-                # else:
-                #     raise NotImplementedError('Unknown format: {}'.format(self._format))
+                    # raise NotImplementedError(f'Unknown format: {self._format}')
 
                 # Throw a RequestException if the post was not successful
                 response.raise_for_status()
