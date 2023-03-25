@@ -52,7 +52,7 @@ def test_create_stoploss_order_binance(default_conf, mocker, limitratio, expecte
 
     exchange = get_patched_exchange(mocker, default_conf, api_mock, 'binance')
 
-    with pytest.raises(OperationalException):
+    with pytest.raises(InvalidOrderException):
         order = exchange.create_stoploss(
             pair='ETH/BTC',
             amount=1,
@@ -131,7 +131,7 @@ def test_create_stoploss_order_dry_run_binance(default_conf, mocker):
 
     exchange = get_patched_exchange(mocker, default_conf, api_mock, 'binance')
 
-    with pytest.raises(OperationalException):
+    with pytest.raises(InvalidOrderException):
         order = exchange.create_stoploss(
             pair='ETH/BTC',
             amount=1,
@@ -555,7 +555,6 @@ def test__set_leverage_binance(mocker, default_conf):
         "set_leverage",
         pair="XRP/USDT",
         leverage=5.0,
-        trading_mode=TradingMode.FUTURES
     )
 
 
