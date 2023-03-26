@@ -1,5 +1,6 @@
 import logging
 from copy import deepcopy
+from datetime import date, datetime, timedelta
 from typing import List, Optional
 
 from fastapi import APIRouter, Depends, Query
@@ -83,10 +84,15 @@ def performance(rpc: RPC = Depends(get_rpc)):
 
 
 @router.get('/profit', response_model=Profit, tags=['info'])
-def profit(rpc: RPC = Depends(get_rpc), config=Depends(get_config)):
+def profit(timescale: int = 0, rpc: RPC = Depends(get_rpc), config=Depends(get_config)):
+    start_date = datetime.fromtimestamp(0)
+    if timescale > 0:
+        timescale = timescale - 1
+        today_start = datetime.combine(date.today(), datetime.min.time())
+        start_date = today_start - timedelta(days=timescale)
     return rpc._rpc_trade_statistics(config['stake_currency'],
-                                     config.get('fiat_display_currency')
-                                     )
+                                     config.get('fiat_display_currency'),
+                                     start_date)
 
 
 @router.get('/stats', response_model=Stats, tags=['info'])
