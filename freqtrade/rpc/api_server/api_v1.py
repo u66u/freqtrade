@@ -15,7 +15,7 @@ from freqtrade.rpc.api_server.api_schemas import (AvailablePairs, Balances, Blac
                                                   BlacklistResponse, Count, Daily,
                                                   DeleteLockRequest, DeleteTrade, ForceEnterPayload,
                                                   ForceEnterResponse, ForceExitPayload,
-                                                  FreqAIModelListResponse, Health, Locks, Logs,
+                                                  FreqAIModelListResponse, Health, Locks, Logs, Monthly,
                                                   OpenTradeSchema, PairHistory, PerformanceEntry,
                                                   Ping, PlotConfig, Profit, ResultMsg, ShowConfig,
                                                   Stats, StatusMsg, StrategyListResponse,
