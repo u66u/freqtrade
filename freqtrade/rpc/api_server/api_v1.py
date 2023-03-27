@@ -1,6 +1,5 @@
 import logging
 from copy import deepcopy
-from dataclasses import dataclass
 from datetime import date, datetime, timedelta
 from typing import List, Optional
 
@@ -27,14 +26,6 @@ from freqtrade.rpc.rpc import RPCException
 
 
 logger = logging.getLogger(__name__)
-
-@dataclass
-class TimeunitMappings:
-    header: str
-    message: str
-    message2: str
-    callback: str
-    default: int
 
 # API version
 # Pre-1.1, no version was provided
@@ -116,25 +107,11 @@ def daily(timescale: int = 7, rpc: RPC = Depends(get_rpc), config=Depends(get_co
 
 @router.get('/weekly', response_model=Daily, tags=['info'])
 def weekly(timescale: int = 7, rpc: RPC = Depends(get_rpc), config=Depends(get_config)):
-    vals = {
-        'days': TimeunitMappings('Day', 'Daily', 'days', 'update_daily', 7),
-        'weeks': TimeunitMappings('Monday', 'Weekly', 'weeks (starting from Monday)',
-                                  'update_weekly', 8),
-        'months': TimeunitMappings('Month', 'Monthly', 'months', 'update_monthly', 6),
-    }
-    val = vals['weeks']
     return rpc._rpc_timeunit_profit(timescale, config['stake_currency'],
                                     config.get('fiat_display_currency', 'weeks'))
 
-@router.get('/monthly', response_model=Daily, tags=['info'])
+@router.get('/monthly', response_model=Monthly, tags=['info'])
 def monthly(timescale: int = 7, rpc: RPC = Depends(get_rpc), config=Depends(get_config)):
-    vals = {
-        'days': TimeunitMappings('Day', 'Daily', 'days', 'update_daily', 7),
-        'weeks': TimeunitMappings('Monday', 'Weekly', 'weeks (starting from Monday)',
-                                  'update_weekly', 8),
-        'months': TimeunitMappings('Month', 'Monthly', 'months', 'update_monthly', 6),
-    }
-    val = vals['months']
     return rpc._rpc_timeunit_profit(timescale, config['stake_currency'],
                                     config.get('fiat_display_currency', 'months'))
 

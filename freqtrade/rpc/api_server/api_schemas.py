@@ -131,8 +131,23 @@ class DailyRecord(BaseModel):
     trade_count: int
 
 
+class MonthlyRecord(BaseModel):
+    date: str
+    abs_profit: float
+    rel_profit: float
+    starting_balance: float
+    fiat_value: float
+    trade_count: int
+
+
 class Daily(BaseModel):
     data: List[DailyRecord]
+    fiat_display_currency: str
+    stake_currency: str
+
+
+class Monthly(BaseModel):
+    data: List[MonthlyRecord]
     fiat_display_currency: str
     stake_currency: str
 
