@@ -1,5 +1,6 @@
 import logging
 from copy import deepcopy
+from dataclasses import dataclass
 from datetime import date, datetime, timedelta
 from typing import List, Optional
 
@@ -26,6 +27,14 @@ from freqtrade.rpc.rpc import RPCException
 
 
 logger = logging.getLogger(__name__)
+
+@dataclass
+class TimeunitMappings:
+    header: str
+    message: str
+    message2: str
+    callback: str
+    default: int
 
 # API version
 # Pre-1.1, no version was provided
