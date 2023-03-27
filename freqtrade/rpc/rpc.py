@@ -328,7 +328,6 @@ class RPC:
         """
         :param timeunit: Valid entries are 'days', 'weeks', 'months'
         """
-        logger.info(f"_rpc_timeunit_profit called with timeunit of {timeunit}")
         start_date = datetime.now(timezone.utc).date()
         if timeunit == 'weeks':
             # weekly
@@ -339,7 +338,6 @@ class RPC:
 
         def time_offset(step: int):
             if timeunit == 'months':
-                logger.info("Months time offset called")
                 return relativedelta(months=step)
             return timedelta(**{timeunit: step})
 

@@ -108,13 +108,12 @@ def daily(timescale: int = 7, rpc: RPC = Depends(get_rpc), config=Depends(get_co
 @router.get('/weekly', response_model=Daily, tags=['info'])
 def weekly(timescale: int = 7, rpc: RPC = Depends(get_rpc), config=Depends(get_config)):
     return rpc._rpc_timeunit_profit(timescale, config['stake_currency'],
-                                    config.get('fiat_display_currency', 'weeks'))
+                                    config.get('fiat_display_currency', ''), 'weeks')
 
 @router.get('/monthly', response_model=Monthly, tags=['info'])
 def monthly(timescale: int = 7, rpc: RPC = Depends(get_rpc), config=Depends(get_config)):
-    logger.info(f"Months API called with timescale of {timescale}")
     return rpc._rpc_timeunit_profit(timescale, config['stake_currency'],
-                                    config.get('fiat_display_currency', timeunit='months'))
+                                    config.get('fiat_display_currency', ''), 'months')
 
 
 @router.get('/status', response_model=List[OpenTradeSchema], tags=['info'])
