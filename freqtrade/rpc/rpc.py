@@ -328,6 +328,7 @@ class RPC:
         """
         :param timeunit: Valid entries are 'days', 'weeks', 'months'
         """
+        logger.info(f"_rpc_timeunit_profit called with timeunit of {timeunit}")
         start_date = datetime.now(timezone.utc).date()
         if timeunit == 'weeks':
             # weekly
