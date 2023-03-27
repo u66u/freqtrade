@@ -132,7 +132,7 @@ class DailyRecord(BaseModel):
 
 
 class MonthlyRecord(BaseModel):
-    date: date
+    date: str
     abs_profit: float
     rel_profit: float
     starting_balance: float
