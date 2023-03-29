@@ -30,6 +30,8 @@ from freqtrade.plugins.protectionmanager import ProtectionManager
 from freqtrade.resolvers import ExchangeResolver, StrategyResolver
 from freqtrade.rpc import RPCManager
 from freqtrade.rpc.external_message_consumer import ExternalMessageConsumer
+from freqtrade.rpc.rpc_types import (RPCBuyMsg, RPCCancelMsg, RPCProtectionMsg, RPCSellCancelMsg,
+                                     RPCSellMsg)
 from freqtrade.strategy.interface import IStrategy
 from freqtrade.strategy.strategy_wrapper import strategy_safe_wrapper
 from freqtrade.util import FtPrecise
@@ -212,7 +214,8 @@ class FreqtradeBot(LoggingMixin):
         self.dataprovider.refresh(self.pairlists.create_pair_list(self.active_pair_whitelist),
                                   self.strategy.gather_informative_pairs())
 
-        strategy_safe_wrapper(self.strategy.bot_loop_start, supress_error=True)()
+        strategy_safe_wrapper(self.strategy.bot_loop_start, supress_error=True)(
+            current_time=datetime.now(timezone.utc))
 
         self.strategy.analyze(self.active_pair_whitelist)
 
@@ -947,7 +950,6 @@ class FreqtradeBot(LoggingMixin):
         """
         Sends rpc notification when a entry order occurred.
         """
-        msg_type = RPCMessageType.ENTRY_FILL if fill else RPCMessageType.ENTRY
         open_rate = order.safe_price
 
         if open_rate is None:
@@ -958,9 +960,9 @@ class FreqtradeBot(LoggingMixin):
             current_rate = self.exchange.get_rate(
                 trade.pair, side='entry', is_short=trade.is_short, refresh=False)
 
-        msg = {
+        msg: RPCBuyMsg = {
             'trade_id': trade.id,
-            'type': msg_type,
+            'type': RPCMessageType.ENTRY_FILL if fill else RPCMessageType.ENTRY,
             'buy_tag': trade.enter_tag,
             'enter_tag': trade.enter_tag,
             'exchange': trade.exchange.capitalize(),
@@ -972,6 +974,7 @@ class FreqtradeBot(LoggingMixin):
             'order_type': order_type,
             'stake_amount': trade.stake_amount,
             'stake_currency': self.config['stake_currency'],
+            'base_currency': self.exchange.get_pair_base_currency(trade.pair),
             'fiat_currency': self.config.get('fiat_display_currency', None),
             'amount': order.safe_amount_after_fee if fill else (order.amount or trade.amount),
             'open_date': trade.open_date or datetime.utcnow(),
@@ -990,7 +993,7 @@ class FreqtradeBot(LoggingMixin):
         current_rate = self.exchange.get_rate(
             trade.pair, side='entry', is_short=trade.is_short, refresh=False)
 
-        msg = {
+        msg: RPCCancelMsg = {
             'trade_id': trade.id,
             'type': RPCMessageType.ENTRY_CANCEL,
             'buy_tag': trade.enter_tag,
@@ -1002,7 +1005,9 @@ class FreqtradeBot(LoggingMixin):
             'limit': trade.open_rate,
             'order_type': order_type,
             'stake_amount': trade.stake_amount,
+            'open_rate': trade.open_rate,
             'stake_currency': self.config['stake_currency'],
+            'base_currency': self.exchange.get_pair_base_currency(trade.pair),
             'fiat_currency': self.config.get('fiat_display_currency', None),
             'amount': trade.amount,
             'open_date': trade.open_date,
@@ -1662,7 +1667,7 @@ class FreqtradeBot(LoggingMixin):
             amount = trade.amount
         gain = "profit" if profit_ratio > 0 else "loss"
 
-        msg = {
+        msg: RPCSellMsg = {
             'type': (RPCMessageType.EXIT_FILL if fill
                      else RPCMessageType.EXIT),
             'trade_id': trade.id,
@@ -1688,6 +1693,7 @@ class FreqtradeBot(LoggingMixin):
             'close_date': trade.close_date or datetime.utcnow(),
             'stake_amount': trade.stake_amount,
             'stake_currency': self.config['stake_currency'],
+            'base_currency': self.exchange.get_pair_base_currency(trade.pair),
             'fiat_currency': self.config.get('fiat_display_currency'),
             'sub_trade': sub_trade,
             'cumulative_profit': trade.realized_profit,
@@ -1720,7 +1726,7 @@ class FreqtradeBot(LoggingMixin):
         profit_ratio = trade.calc_profit_ratio(profit_rate)
         gain = "profit" if profit_ratio > 0 else "loss"
 
-        msg = {
+        msg: RPCSellCancelMsg = {
             'type': RPCMessageType.EXIT_CANCEL,
             'trade_id': trade.id,
             'exchange': trade.exchange.capitalize(),
@@ -1742,6 +1748,7 @@ class FreqtradeBot(LoggingMixin):
             'open_date': trade.open_date,
             'close_date': trade.close_date or datetime.now(timezone.utc),
             'stake_currency': self.config['stake_currency'],
+            'base_currency': self.exchange.get_pair_base_currency(trade.pair),
             'fiat_currency': self.config.get('fiat_display_currency', None),
             'reason': reason,
             'sub_trade': sub_trade,
@@ -1849,14 +1856,20 @@ class FreqtradeBot(LoggingMixin):
         self.strategy.lock_pair(pair, datetime.now(timezone.utc), reason='Auto lock')
         prot_trig = self.protections.stop_per_pair(pair, side=side)
         if prot_trig:
-            msg = {'type': RPCMessageType.PROTECTION_TRIGGER, }
-            msg.update(prot_trig.to_json())
+            msg: RPCProtectionMsg = {
+                'type': RPCMessageType.PROTECTION_TRIGGER,
+                'base_currency': self.exchange.get_pair_base_currency(prot_trig.pair),
+                **prot_trig.to_json()  # type: ignore
+            }
             self.rpc.send_msg(msg)
 
         prot_trig_glb = self.protections.global_stop(side=side)
         if prot_trig_glb:
-            msg = {'type': RPCMessageType.PROTECTION_TRIGGER_GLOBAL, }
-            msg.update(prot_trig_glb.to_json())
+            msg = {
+                'type': RPCMessageType.PROTECTION_TRIGGER_GLOBAL,
+                'base_currency': self.exchange.get_pair_base_currency(prot_trig_glb.pair),
+                **prot_trig_glb.to_json()  # type: ignore
+            }
             self.rpc.send_msg(msg)
 
     def apply_fee_conditional(self, trade: Trade, trade_base_currency: str,

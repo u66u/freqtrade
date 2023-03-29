@@ -35,7 +35,7 @@ def test_may_execute_exit_stoploss_on_exchange_multi(default_conf, ticker, fee,
         "type": "stop_loss_limit",
         "side": "sell",
         "price": 1.08801,
-        "amount": 90.99181074,
+        "amount": 91.07468123,
         "cost": 0.0,
         "average": 0.0,
         "filled": 0.0,
@@ -93,7 +93,7 @@ def test_may_execute_exit_stoploss_on_exchange_multi(default_conf, ticker, fee,
     wallets_mock.reset_mock()
 
     trades = Trade.session.scalars(select(Trade)).all()
-    # Make sure stoploss-order is open and trade is bought (since we mock update_trade_state)
+    # Make sure stoploss-order is open and trade is bought
     for trade in trades:
         stoploss_order_closed['id'] = '3'
         oobj = Order.parse_from_ccxt_object(stoploss_order_closed, trade.pair, 'stoploss')
