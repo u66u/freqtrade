@@ -283,6 +283,8 @@ class TradeSchema(BaseModel):
 
     min_rate: Optional[float]
     max_rate: Optional[float]
+    min_profit: Optional[float]
+    max_profit: Optional[float]
     open_order_id: Optional[str]
     orders: List[OrderSchema]
 
