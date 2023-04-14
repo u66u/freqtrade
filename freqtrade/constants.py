@@ -367,6 +367,36 @@ CONF_SCHEMA = {
                 'enabled': {'type': 'boolean'},
                 'webhook_url': {'type': 'array', 'items': {'type': 'string'}},
                 'allow_custom_messages': {'type': 'boolean', 'default': True},
+                'entry_cancel': {'type': 'array', 'items': {'type': 'object'}, 'default': [
+                    {"Exchange": "{exchange}"},
+                    {"Strategy": "{strategy}"},
+                    {"Timeframe": "{timeframe}"},
+                    {"Reason": "{reason}"}
+                ]},
+                "entry_fill": {
+                    'type': 'object',
+                    'properties': {
+                        'enabled': {'type': 'boolean', 'default': False},
+                        'rows': {'type': 'array', 'items': {'type': 'object'}, 'default': [
+                            {"Exchange": "{exchange}"},
+                            {"Direction": "{direction}"},
+                            {"Open Rate": "{open_rate}"},
+                            {"Amount": "{amount}"},
+                            {"Stake Amount": "{stake_amount} {stake_currency}"},
+                            {"Open Date": "{open_date:%Y-%m-%d %H:%M:%S}"},
+                            {"Enter Tag": "{enter_tag}"},
+                            {"Strategy": "{strategy}"},
+                            {"Timeframe": "{timeframe}"},
+                        ]},
+                        'rows_sub_trade': {'type': 'array', 'items': {'type': 'object'}, 'default': [
+                            {"Open Rate": "{open_rate}"},
+                            {"Additional Entry Amount": "{amount}"},
+                            {"Total Stake Amount": "{stake_amount} {stake_currency}"},
+                            {"Strategy": "{strategy}"},
+                            {"Timeframe": "{timeframe}"},
+                        ]}
+                    }
+                },
                 "exit_fill": {
                     'type': 'object',
                     'properties': {
@@ -402,41 +432,17 @@ CONF_SCHEMA = {
                         ]}
                     }
                 },
-                "entry_fill": {
-                    'type': 'object',
-                    'properties': {
-                        'enabled': {'type': 'boolean', 'default': False},
-                        'rows': {'type': 'array', 'items': {'type': 'object'}, 'default': [
-                            {"Exchange": "{exchange}"},
-                            {"Direction": "{direction}"},
-                            {"Open Rate": "{open_rate}"},
-                            {"Amount": "{amount}"},
-                            {"Stake Amount": "{stake_amount} {stake_currency}"},
-                            {"Open Date": "{open_date:%Y-%m-%d %H:%M:%S}"},
-                            {"Enter Tag": "{enter_tag}"},
-                            {"Strategy": "{strategy}"},
-                            {"Timeframe": "{timeframe}"},
-                        ]},
-                        'rows_sub_trade': {'type': 'array', 'items': {'type': 'object'}, 'default': [
-                            {"Open Rate": "{open_rate}"},
-                            {"Additional Entry Amount": "{amount}"},
-                            {"Total Stake Amount": "{stake_amount} {stake_currency}"},
-                            {"Strategy": "{strategy}"},
-                            {"Timeframe": "{timeframe}"},
-                        ]}
-                    }
-                },
-                'rows_strategy_msg': {'type': 'array', 'items': {'type': 'object'}, 'default': [
-                    {"Exchange": "{exchange}"},
-                    {"Strategy": "{strategy}"},
-                    {"Timeframe": "{timeframe}"},
-                    {"Message": "{msg}"}
-                ]},
                 'rows_status': {'type': 'array', 'items': {'type': 'object'}, 'default': [
                     {"Exchange": "{exchange}"},
                     {"Strategy": "{strategy}"},
                     {"Timeframe": "{timeframe}"},
                     {"Status": "{status}"}
+                ]},
+                'rows_strategy_msg': {'type': 'array', 'items': {'type': 'object'}, 'default': [
+                    {"Exchange": "{exchange}"},
+                    {"Strategy": "{strategy}"},
+                    {"Timeframe": "{timeframe}"},
+                    {"Message": "{msg}"}
                 ]},
             }
         },

@@ -44,22 +44,7 @@ class Discord(Webhook):
             
             send_message = True
 
-            # embeds = [{
-            #     'title': title,
-            #     'color': color,
-            #     'fields': [],
-
-            # }]
-            # for f in fields:
-            #     for k, v in f.items():
-            #         v = v.format(**msg)
-            #         embeds[0]['fields'].append(
-            #             {'name': k, 'value': v, 'inline': True})
-
-            # # Send the message to discord channel
-            # payload = {'embeds': embeds}
-            # self._send_msg(payload)
-        elif (msg['type'].value == "status"):
+        elif (msg['type'].value in ["status", "warning"]):
             # logger.info(f"Sending discord strategy message: {msg['msg']}")
 
             msg['strategy'] = self.strategy
@@ -75,21 +60,20 @@ class Discord(Webhook):
             
             send_message = True
 
-            # embeds = [{
-            #     'title': title,
-            #     'color': color,
-            #     'fields': [],
+        elif (msg['type'].value == "entry_cancel"):
+            # logger.info(f"Sending discord strategy message: {msg['msg']}")
 
-            # }]
-            # for f in fields:
-            #     for k, v in f.items():
-            #         v = v.format(**msg)
-            #         embeds[0]['fields'].append(
-            #             {'name': k, 'value': v, 'inline': True})
+            msg['strategy'] = self.strategy
+            msg['timeframe'] = self.timeframe
+            msg['exchange'] = self._config['exchange']['name']
+            # fields = self.config['discord'].get(msg['type'].value)
+            fields = self._config['discord'].get(msg['type'].value)
+            
+            color = 0xFF0000
+            title = msg['type'].value
+            
+            send_message = True
 
-            # # Send the message to discord channel
-            # payload = {'embeds': embeds}
-            # self._send_msg(payload)
         elif ((msg['type'].value in self._config['discord'])
               and (('enabled' not in self._config['discord'][msg['type'].value])
                    or (self._config['discord'][msg['type'].value]['enabled'] is True))):
