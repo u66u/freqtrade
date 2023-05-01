@@ -11,6 +11,7 @@ from pandas import DataFrame
 from freqtrade.constants import Config
 from freqtrade.data.metrics import calculate_expectancy, calculate_max_drawdown
 from freqtrade.optimize.hyperopt import IHyperOptLoss
+import math
 
 # Set maximum expectancy used in the calculation
 max_expectancy = 40
@@ -59,12 +60,17 @@ class YoyoLoss(IHyperOptLoss):
 
         total_trades = len(results)
 
-        nb_loss_trades = len(results.loc[results['profit_abs'] < 0])
-
-        if (nb_loss_trades == 0):
+        try:
+            max_drawdown = calculate_max_drawdown(results, value_col='profit_abs')
+        except ValueError:
+            # No losing trade, therefore no drawdown.
+            # Return 0 because this is unwanted scenario
             return 0
+
+        # if (nb_loss_trades == 0):
+        #     return -total_profit * 100
         
-        loss_value = total_profit * min(average_profit, max_avg_profit) * profit_factor * min(expectancy, max_expectancy) * total_trades
+        loss_value = total_profit * min(average_profit, max_avg_profit) * profit_factor * min(expectancy, max_expectancy) * total_trades / (math.sqrt(max_drawdown[0]) * 1000)
 
         if (total_profit < 0) and (loss_value > 0):
             return loss_value
