@@ -71,7 +71,8 @@ class InitialLoss(IHyperOptLoss):
         #     trade_duration = 1
         
         # loss_value = total_profit * min(average_profit, max_avg_profit) * profit_factor * min(expectancy, max_expectancy) * total_trades / (max_drawdown[0] * 1000 * trade_duration)
-        loss_value = total_profit * min(average_profit, max_avg_profit) * total_trades / (max_drawdown[0] * 1000)
+        # loss_value = total_profit * min(average_profit, max_avg_profit) * total_trades / (max_drawdown[0] * 1000 * trade_duration)
+        loss_value = total_profit * min(average_profit, max_avg_profit) * total_trades / (1000)
 
         if (total_profit < 0) and (loss_value > 0):
             return loss_value
