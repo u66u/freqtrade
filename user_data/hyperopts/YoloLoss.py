@@ -70,7 +70,7 @@ class YoloLoss(IHyperOptLoss):
         # if (nb_loss_trades == 0):
         #     return -total_profit * 100
         
-        loss_value = total_profit * min(average_profit, max_avg_profit) * profit_factor * min(expectancy, max_expectancy) * total_trades / (math.sqrt(max_drawdown[0]) * 1000)
+        loss_value = total_profit * min(average_profit, max_avg_profit) * profit_factor * min(expectancy, max_expectancy) * total_trades / 1000
 
         if (total_profit < 0) and (loss_value > 0):
             return loss_value
