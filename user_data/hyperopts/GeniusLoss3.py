@@ -54,18 +54,10 @@ class GeniusLoss3(IHyperOptLoss):
 
         total_profit = results['profit_abs'].sum()
         total_trades = len(results)
-        average_profit = results['profit_ratio'].mean() * 100
-
-        trade_duration = results['trade_duration'].mean()
-        backtest_days = (max_date - min_date).days or 1
-        average_trades_per_day = round(total_trades / backtest_days, 5)
-
-        if (total_profit < 0) and (average_profit < 0):
-            average_profit = -average_profit
             
-        if trade_duration == 0:
-            trade_duration = 1
-            
-        result = -total_profit * average_trades_per_day / trade_duration
+        loss_value = total_profit * total_trades / 100
 
-        return result
+        if (total_profit < 0) and (loss_value > 0):
+            return loss_value
+
+        return (-1 * loss_value)
