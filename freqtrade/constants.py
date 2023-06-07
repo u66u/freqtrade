@@ -148,7 +148,6 @@ CONF_SCHEMA = {
             'patternProperties': {
                 '^[0-9.]+$': {'type': 'number'}
             },
-            'minProperties': 1
         },
         'amount_reserve_percent': {'type': 'number', 'minimum': 0.0, 'maximum': 0.5},
         'stoploss': {'type': 'number', 'maximum': 0, 'exclusiveMaximum': True, 'minimum': -1},
@@ -734,4 +733,6 @@ BidAsk = Literal['bid', 'ask']
 OBLiteral = Literal['asks', 'bids']
 
 Config = Dict[str, Any]
+# Exchange part of the configuration.
+ExchangeConfig = Dict[str, Any]
 IntOrInf = float
