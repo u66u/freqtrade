@@ -5,6 +5,7 @@ from pydantic import BaseModel
 
 from freqtrade.constants import DATETIME_PRINT_FORMAT, IntOrInf
 from freqtrade.enums import OrderTypeValues, SignalDirection, TradingMode
+from freqtrade.types import ValidExchangesType
 
 
 class Ping(BaseModel):
@@ -100,8 +101,10 @@ class Profit(BaseModel):
     trade_count: int
     closed_trade_count: int
     first_trade_date: str
+    first_trade_humanized: str
     first_trade_timestamp: int
     latest_trade_date: str
+    latest_trade_humanized: str
     latest_trade_timestamp: int
     avg_duration: str
     best_pair: str
@@ -410,6 +413,10 @@ class PlotConfig(BaseModel):
 
 class StrategyListResponse(BaseModel):
     strategies: List[str]
+
+
+class ExchangeListResponse(BaseModel):
+    exchanges: List[ValidExchangesType]
 
 
 class FreqAIModelListResponse(BaseModel):
