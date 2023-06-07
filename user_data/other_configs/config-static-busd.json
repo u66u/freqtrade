@@ -39,11 +39,11 @@
     },
     "pairlists": [
         {"method": "StaticPairList"},
-        {
-            "method": "ShuffleFilter", 
-            "shuffle_frequency": "candle",
-            // "seed": 428
-        },
+        // {
+        //     "method": "ShuffleFilter", 
+        //     "shuffle_frequency": "candle",
+        //     // "seed": 428
+        // },
     ],
     "dataformat_ohlcv": "feather",
     "dataformat_trades": "hdf5",
