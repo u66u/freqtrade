@@ -1,19 +1,19 @@
 {
-    "max_open_trades": 4,
+    "max_open_trades": -1,
     "stake_currency": "BUSD",
     "stake_amount" : 45,
     "amend_last_stake_amount ": true,
     "tradable_balance_ratio": 0.99,
     "fiat_display_currency": "USD",
     "dry_run": true,
-    "dry_run_wallet": 190,
+    "dry_run_wallet": 11500,
     "cancel_open_orders_on_exit": false,
     "unfilledtimeout": {
         "entry": 600,
         "exit": 30
     },
     "order_types": {
-        "entry": "limit",
+        "entry": "market",
         "exit": "market",
         "emergency_exit": "market",
         "trailing_stop_loss": "market",
@@ -22,7 +22,7 @@
         "stoploss_on_exchange_interval": 60
     },
     "entry_pricing": {
-        "price_side": "same",
+        "price_side": "other",
         "ask_last_balance": 0.0,
         "use_order_book": false,
         "order_book_top": 1,
