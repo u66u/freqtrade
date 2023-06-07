@@ -42,7 +42,7 @@
         {
             "method": "ShuffleFilter", 
             "shuffle_frequency": "candle",
-            "seed": 428
+            // "seed": 428
         },
     ],
     "dataformat_ohlcv": "feather",
