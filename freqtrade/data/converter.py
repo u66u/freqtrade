@@ -137,20 +137,20 @@ def reduce_mem_usage(pair: str, df: DataFrame) -> DataFrame:
             c_max = df[col].max()
             if str(col_type)[:3] == "int":
                 if c_min > np.iinfo(np.int8).min and c_max < np.iinfo(np.int8).max:
-                    df[col] = df[col].astype(np.int8)
+                    df[col] = df[col].astype(np.int8, copy=False)
                 elif c_min > np.iinfo(np.int16).min and c_max < np.iinfo(np.int16).max:
-                    df[col] = df[col].astype(np.int16)
+                    df[col] = df[col].astype(np.int16, copy=False)
                 elif c_min > np.iinfo(np.int32).min and c_max < np.iinfo(np.int32).max:
-                    df[col] = df[col].astype(np.int32)
+                    df[col] = df[col].astype(np.int32, copy=False)
                 elif c_min > np.iinfo(np.int64).min and c_max < np.iinfo(np.int64).max:
-                    df[col] = df[col].astype(np.int64)
+                    df[col] = df[col].astype(np.int64, copy=False)
             elif str(col_type)[:5] == "float":
                 if c_min > np.finfo(np.float16).min and c_max < np.finfo(np.float16).max:
-                    df[col] = df[col].astype(np.float16)
+                    df[col] = df[col].astype(np.float16, copy=False)
                 elif c_min > np.finfo(np.float32).min and c_max < np.finfo(np.float32).max:
-                    df[col] = df[col].astype(np.float32)
+                    df[col] = df[col].astype(np.float32, copy=False)
                 else:
-                    df[col] = df[col].astype(np.float64)
+                    df[col] = df[col].astype(np.float64, copy=False)
             # else:
             #     logger.info(f"Column not optimized because the type is {str(col_type)}")
         # else:
