@@ -53,7 +53,7 @@
             "rateLimit": 200
         },
         "pair_whitelist": [
-            "*/USDT",
+            ".*/USDT",
         ], 
         "pair_blacklist": []
     },
