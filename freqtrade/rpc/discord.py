@@ -70,7 +70,8 @@ class Discord(Webhook):
             fields = self._config['discord'].get(msg['type'].value)
             
             color = 0xFF0000
-            title = msg['type'].value
+            # title = msg['type'].value
+            title = f"Trade #{msg['trade_id']}: {msg['pair']} {msg['type'].value}"
             
             send_message = True
 
