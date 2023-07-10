@@ -142,6 +142,7 @@ def text_table_strategy(strategy_results, stake_currency: str) -> str:
     # _get_line_header() is also used for per-pair summary. Per-pair drawdown is mostly useless
     # therefore we slip this column in only for strategy summary here.
     headers.append('Drawdown')
+    headers.append('Expectancy')
 
     # Align drawdown string on the center two space separator.
     if 'max_drawdown_account' in strategy_results[0]:
@@ -158,7 +159,8 @@ def text_table_strategy(strategy_results, stake_currency: str) -> str:
     output = [[
         t['key'], t['trades'], t['profit_mean_pct'], t['profit_sum_pct'], t['profit_total_abs'],
         t['profit_total_pct'], t['duration_avg'],
-        generate_wins_draws_losses(t['wins'], t['draws'], t['losses']), drawdown]
+        generate_wins_draws_losses(t['wins'], t['draws'], t['losses']), drawdown,
+        f'{t["expectancy"]:.3f}']
         for t, drawdown in zip(strategy_results, drawdown)]
     # Ignore type as floatfmt does allow tuples but mypy does not know that
     return tabulate(output, headers=headers,
