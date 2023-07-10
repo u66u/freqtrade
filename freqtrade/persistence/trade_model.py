@@ -121,9 +121,9 @@ class Order(ModelBase):
 
     def __repr__(self):
 
-        return (f"Order(id={self.id}, order_id={self.order_id}, trade_id={self.ft_trade_id}, "
+        return (f"Order(id={self.id}, trade={self.ft_trade_id}, order_id={self.order_id}, "
                 f"side={self.side}, filled={self.safe_filled}, price={self.safe_price}, "
-                f"order_type={self.order_type}, status={self.status})")
+                f"status={self.status}, date={self.order_date:{DATETIME_PRINT_FORMAT}})")
 
     def update_from_ccxt_object(self, order):
         """
@@ -283,7 +283,7 @@ class Order(ModelBase):
         return Order.session.scalars(select(Order).filter(Order.order_id == order_id)).first()
 
 
-class LocalTrade():
+class LocalTrade:
     """
     Trade database model.
     Used in backtesting - must be aligned to Trade model!
@@ -1737,6 +1737,7 @@ class Trade(ModelBase, LocalTrade):
 
             order_obj = Order(
                 amount=order["amount"],
+                ft_amount=order["amount"],
                 ft_order_side=order["ft_order_side"],
                 ft_pair=order["pair"],
                 ft_is_open=order["is_open"],
@@ -1751,6 +1752,7 @@ class Trade(ModelBase, LocalTrade):
                     if order["order_filled_timestamp"] else None),
                 order_type=order["order_type"],
                 price=order["price"],
+                ft_price=order["price"],
                 remaining=order["remaining"],
             )
             trade.orders.append(order_obj)
