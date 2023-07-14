@@ -8,7 +8,7 @@
   "trading_mode": "spot",
   "tradable_balance_ratio": 0.99,
   "fiat_display_currency": "USD",
-  "stake_amount": "unlimited",
+  "stake_amount": 15,
   "stake_currency": "USDT",
   "amend_last_stake_amount": true,
   "entry_pricing": {
