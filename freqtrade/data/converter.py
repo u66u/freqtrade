@@ -165,7 +165,7 @@ def reduce_mem_usage(pair: str, dataframe: DataFrame) -> DataFrame:
     return df
 
 
-def trim_dataframe(df: DataFrame, timerange, df_date_col: str = 'date',
+def trim_dataframe(df: DataFrame, timerange, *, df_date_col: str = 'date',
                    startup_candles: int = 0) -> DataFrame:
     """
     Trim dataframe based on given timerange
