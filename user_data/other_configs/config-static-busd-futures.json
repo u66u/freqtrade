@@ -55,9 +55,7 @@
             "enableRateLimit": true,
             "rateLimit": 200
         },
-        "pair_whitelist": [
-            ".*/BUSD:BUSD",
-        ],
+        "pair_whitelist": ["BTC/BUSD:BUSD","ETH/BUSD:BUSD","BNB/BUSD:BUSD","ADA/BUSD:BUSD","XRP/BUSD:BUSD","DOGE/BUSD:BUSD","SOL/BUSD:BUSD","FTM/BUSD:BUSD","DODO/BUSD:BUSD","GALA/BUSD:BUSD","TRX/BUSD:BUSD","LTC/BUSD:BUSD","MATIC/BUSD:BUSD","LDO/BUSD:BUSD","APT/BUSD:BUSD"],
         "pair_blacklist": []
     },
     "edge": {
