@@ -48,7 +48,7 @@
         "ccxt_async_config": {
         },
         "pair_whitelist": [
-            ".*/USDT:USDT"
+            ".*/BUSD:BUSD"
         ],
         "pair_blacklist": [
         ]
