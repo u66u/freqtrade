@@ -221,6 +221,31 @@ def calculate_expectancy(trades: pd.DataFrame) -> float:
 
     return expectancy
 
+def calculate_expectancy_rate(trades: pd.DataFrame) -> float:
+    """
+    Calculate expectancy rate
+    :param trades: DataFrame containing trades (requires columns close_date and profit_abs)
+    :return: expectancy_rate
+    """
+    if len(trades) == 0:
+        return 0
+
+    expectancy_rate = 0
+
+    winning_trades = trades.loc[trades['profit_abs'] > 0]
+    losing_trades = trades.loc[trades['profit_abs'] < 0]
+    profit_sum = winning_trades['profit_abs'].sum()
+    loss_sum = abs(losing_trades['profit_abs'].sum())
+    nb_win_trades = len(winning_trades)
+    nb_loss_trades = len(losing_trades)
+
+    average_win = profit_sum / nb_win_trades
+    average_loss = loss_sum / nb_loss_trades
+    winrate = nb_win_trades / len(trades)
+    expectancy_rate = (winrate * average_win) - ((1 - winrate) * average_loss)
+
+    return expectancy_rate
+
 
 def calculate_sortino(trades: pd.DataFrame, min_date: datetime, max_date: datetime,
                       starting_balance: float) -> float:
