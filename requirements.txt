@@ -5,11 +5,11 @@ pandas-ta==0.3.14b
 finta>=1.3
 ta>=0.10.1
 
-ccxt==4.0.17
+ccxt==4.0.34
 cryptography==41.0.2; platform_machine != 'armv7l'
 cryptography==40.0.1; platform_machine == 'armv7l'
-aiohttp==3.8.4
-SQLAlchemy==2.0.18
+aiohttp==3.8.5
+SQLAlchemy==2.0.19
 python-telegram-bot==20.4
 # can't be hard-pinned due to telegram-bot pinning httpx with ~
 httpx>=0.24.1
@@ -17,8 +17,8 @@ arrow==1.2.3
 cachetools==5.3.1
 requests==2.31.0
 urllib3==2.0.3
-jsonschema==4.18.0
-TA-Lib==0.4.26
+jsonschema==4.18.3
+TA-Lib==0.4.27
 technical==1.4.0
 tabulate==0.9.0
 pycoingecko==3.1.0
@@ -42,8 +42,8 @@ sdnotify==0.3.2
 
 # API Server
 fastapi==0.100.0
-pydantic==1.10.9
-uvicorn==0.22.0
+pydantic==1.10.11
+uvicorn==0.23.0
 pyjwt==2.7.0
 aiofiles==23.1.0
 psutil==5.9.5
