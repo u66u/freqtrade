@@ -316,7 +316,7 @@ class HyperoptTools:
                 f"Total profit {results_metrics['profit_total_abs']:11.8f} {stake_currency} "
                 f"({results_metrics['profit_total']:8.2%}). "
                 f"Avg duration {results_metrics['holding_avg']} min. "
-                f"Expectancy {results_metrics['expectancy']:6.3f}."
+                f"Expectancy Ratio {results_metrics['expectancy_ratio']:6.3f}."
                 )
 
     @staticmethod
@@ -354,13 +354,13 @@ class HyperoptTools:
                          'results_metrics.max_drawdown',
                          'results_metrics.max_drawdown_account', 'results_metrics.max_drawdown_abs',
                          'loss', 'is_initial_point', 'is_random', 'is_best',
-                         'results_metrics.expectancy']]
+                         'results_metrics.expectancy_ratio']]
 
         trials.columns = [
             'Best', 'Epoch', 'Trades', ' Win  Draw  Loss  Win%', 'Avg profit',
             'Total profit', 'Profit', 'Avg duration', 'max_drawdown', 'max_drawdown_account',
             'max_drawdown_abs', 'Objective', 'is_initial_point', 'is_random', 'is_best',
-            'Expectancy']
+            'Expectancy Ratio']
 
         return trials
 
@@ -405,7 +405,7 @@ class HyperoptTools:
 
         stake_currency = config['stake_currency']
 
-        trials['Expectancy'] = trials['Expectancy'].apply(
+        trials['Expectancy Ratio'] = trials['Expectancy Ratio'].apply(
             lambda x: f'{x:6.3f}'
         )
 

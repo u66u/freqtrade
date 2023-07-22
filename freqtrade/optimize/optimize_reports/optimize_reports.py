@@ -7,8 +7,9 @@ from pandas import DataFrame, concat, to_datetime
 
 from freqtrade.constants import BACKTEST_BREAKDOWNS, DATETIME_PRINT_FORMAT, IntOrInf
 from freqtrade.data.metrics import (calculate_cagr, calculate_calmar, calculate_csum,
-                                    calculate_expectancy, calculate_market_change,
-                                    calculate_max_drawdown, calculate_sharpe, calculate_sortino)
+                                    calculate_expectancy, calculate_expectancy_ratio,
+                                    calculate_market_change, calculate_max_drawdown,
+                                    calculate_sharpe, calculate_sortino)
 from freqtrade.misc import decimals_per_coin, round_coin_value
 
 
@@ -210,7 +211,7 @@ def generate_strategy_comparison(bt_stats: Dict) -> List[Dict]:
         tabular_data.append(deepcopy(result['results_per_pair'][-1]))
         # Update "key" to strategy (results_per_pair has it as "Total").
         tabular_data[-1]['key'] = strategy
-        tabular_data[-1]['expectancy'] = result['expectancy']
+        tabular_data[-1]['expectancy_ratio'] = result['expectancy_ratio']
         tabular_data[-1]['max_drawdown_account'] = result['max_drawdown_account']
         tabular_data[-1]['max_drawdown_abs'] = round_coin_value(
             result['max_drawdown_abs'], result['stake_currency'], False)
@@ -416,6 +417,7 @@ def generate_strategy_stats(pairlist: List[str],
         'profit_total_short_abs': results.loc[results['is_short'], 'profit_abs'].sum(),
         'cagr': calculate_cagr(backtest_days, start_balance, content['final_balance']),
         'expectancy': calculate_expectancy(results),
+        'expectancy_ratio': calculate_expectancy_ratio(results),
         'sortino': calculate_sortino(results, min_date, max_date, start_balance),
         'sharpe': calculate_sharpe(results, min_date, max_date, start_balance),
         'calmar': calculate_calmar(results, min_date, max_date, start_balance),

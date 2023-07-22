@@ -18,7 +18,8 @@ from freqtrade import __version__
 from freqtrade.configuration.timerange import TimeRange
 from freqtrade.constants import CANCEL_REASON, DATETIME_PRINT_FORMAT, Config
 from freqtrade.data.history import load_data
-from freqtrade.data.metrics import (calculate_calmar, calculate_expectancy, calculate_max_drawdown,
+from freqtrade.data.metrics import (calculate_calmar, calculate_expectancy,
+                                    calculate_expectancy_ratio, calculate_max_drawdown,
                                     calculate_sharpe, calculate_sortino)
 from freqtrade.enums import (CandleType, ExitCheckTuple, ExitType, MarketDirection, SignalDirection,
                              State, TradingMode)
@@ -532,16 +533,16 @@ class RPC:
 
         profit_factor = winning_profit / abs(losing_profit) if losing_profit else float('inf')
 
-        mean_winning_profit = (winning_profit / winning_trades) if winning_trades > 0 else 0
-        mean_losing_profit = (abs(losing_profit) / losing_trades) if losing_trades > 0 else 0
+        # mean_winning_profit = (winning_profit / winning_trades) if winning_trades > 0 else 0
+        # mean_losing_profit = (abs(losing_profit) / losing_trades) if losing_trades > 0 else 0
 
         winrate = (winning_trades / closed_trade_count) if closed_trade_count > 0 else 0
-        loserate = (1 - winrate)
+        # loserate = (1 - winrate)
 
-        expectancy, expectancy_ratio = self.__calc_expectancy(mean_winning_profit,
-                                                              mean_losing_profit,
-                                                              winrate,
-                                                              loserate)
+        # expectancy, expectancy_ratio = self.__calc_expectancy(mean_winning_profit,
+        #                                                       mean_losing_profit,
+        #                                                       winrate,
+        #                                                       loserate)
 
         trades_df = DataFrame([{'close_date': trade.close_date.strftime(DATETIME_PRINT_FORMAT),
                                 'profit_abs': trade.close_profit_abs,
@@ -561,6 +562,7 @@ class RPC:
         # if len(trades_df) > 0:
         #     try:
         expectancy = calculate_expectancy(trades_df)
+        expectancy_ratio = calculate_expectancy_ratio(trades_df)
         # except ValueError:
         #     # ValueError if no losing trade.
         #     pass
@@ -616,7 +618,6 @@ class RPC:
             'max_drawdown': max_drawdown,
             'max_drawdown_abs': max_drawdown_abs,
             'trading_volume': trading_volume,
-            'expectancy': expectancy,
             'sortino': sortino,
             'sharpe': sharpe,
             'calmar': calmar,
@@ -650,22 +651,22 @@ class RPC:
 
         return est_stake, est_bot_stake
 
-    def __calc_expectancy(
-            self, mean_winning_profit: float, mean_losing_profit: float,
-            winrate: float, loserate: float) -> Tuple[float, float]:
+    # def __calc_expectancy(
+    #         self, mean_winning_profit: float, mean_losing_profit: float,
+    #         winrate: float, loserate: float) -> Tuple[float, float]:
 
-        expectancy = (
-            (winrate * mean_winning_profit) -
-            (loserate * mean_losing_profit)
-        )
+    #     expectancy = (
+    #         (winrate * mean_winning_profit) -
+    #         (loserate * mean_losing_profit)
+    #     )
 
-        expectancy_ratio = float('inf')
-        if mean_losing_profit > 0:
-            expectancy_ratio = (
-                ((1 + (mean_winning_profit / mean_losing_profit)) * winrate) - 1
-            )
+    #     expectancy_ratio = float('inf')
+    #     if mean_losing_profit > 0:
+    #         expectancy_ratio = (
+    #             ((1 + (mean_winning_profit / mean_losing_profit)) * winrate) - 1
+    #         )
 
-        return expectancy, expectancy_ratio
+    #     return expectancy, expectancy_ratio
 
     def _rpc_balance(self, stake_currency: str, fiat_display_currency: str) -> Dict:
         """ Returns current account balance per crypto """

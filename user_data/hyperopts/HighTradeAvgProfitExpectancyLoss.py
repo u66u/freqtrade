@@ -9,7 +9,7 @@ import numpy as np
 from pandas import DataFrame
 
 from freqtrade.constants import Config
-from freqtrade.data.metrics import calculate_expectancy, calculate_max_drawdown
+from freqtrade.data.metrics import calculate_expectancy, calculate_expectancy_ratio, calculate_max_drawdown
 from freqtrade.optimize.hyperopt import IHyperOptLoss
 
 # Set maximum expectancy used in the calculation
@@ -50,7 +50,7 @@ class HighTradeAvgProfitExpectancyLoss(IHyperOptLoss):
 
         total_profit = strict_profit_abs.sum()
 
-        expectancy = calculate_expectancy(results)
+        expectancy_ratio = calculate_expectancy_ratio(results)
 
         total_trades = len(results)
 
@@ -59,7 +59,7 @@ class HighTradeAvgProfitExpectancyLoss(IHyperOptLoss):
         # if (nb_loss_trades == 0):
         #     return -total_profit * 100
         
-        loss_value = total_profit * min(average_profit, max_avg_profit) * min(expectancy, max_expectancy) * total_trades / 1000
+        loss_value = total_profit * min(average_profit, max_avg_profit) * min(expectancy_ratio, max_expectancy) * total_trades / 1000
 
         if (total_profit < 0) and (loss_value > 0):
             return loss_value

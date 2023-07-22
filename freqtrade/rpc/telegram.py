@@ -883,7 +883,6 @@ class Telegram(RPCHandler):
                 f"*Latest Trade opened:* `{latest_trade_date}`\n"
                 f"*Win / Loss:* `{stats['winning_trades']} / {stats['losing_trades']}`\n"
                 f"*Winrate:* `{winrate:.2%}`\n"
-                f"*Expectancy (Ratio):* `{expectancy:.2f} ({expectancy_ratio:.2f})`"
             )
             if stats['closed_trade_count'] > 0:
                 markdown_msg += (
@@ -891,7 +890,7 @@ class Telegram(RPCHandler):
                     f"*Best Performing:* `{best_pair}: {best_pair_profit_ratio:.2%}`\n"
                     f"*Trading volume:* `{round_coin_value(stats['trading_volume'], stake_cur)}`\n"
                     f"*Profit factor:* `{stats['profit_factor']:.2f}`\n"
-                    f"*Expectancy:* `{stats['expectancy']:.2f}`\n"
+                    f"*Expectancy (Ratio):* `{expectancy:.2f} ({expectancy_ratio:.2f})`"
                     f"*Sortino:* `{stats['sortino']:.2f}`\n"
                     f"*Sharpe:* `{stats['sharpe']:.2f}`\n"
                     f"*Calmar:* `{stats['calmar']:.2f}`\n"

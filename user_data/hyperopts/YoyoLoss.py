@@ -9,7 +9,7 @@ import numpy as np
 from pandas import DataFrame
 
 from freqtrade.constants import Config
-from freqtrade.data.metrics import calculate_expectancy, calculate_max_drawdown
+from freqtrade.data.metrics import calculate_expectancy, calculate_expectancy_ratio, calculate_max_drawdown
 from freqtrade.optimize.hyperopt import IHyperOptLoss
 import math
 
@@ -56,7 +56,7 @@ class YoyoLoss(IHyperOptLoss):
 
         total_profit = strict_profit_abs.sum()
 
-        expectancy = calculate_expectancy(results)
+        expectancy_ratio = calculate_expectancy_ratio(results)
 
         total_trades = len(results)
 
@@ -70,7 +70,7 @@ class YoyoLoss(IHyperOptLoss):
         # if (nb_loss_trades == 0):
         #     return -total_profit * 100
         
-        loss_value = total_profit * min(average_profit, max_avg_profit) * profit_factor * min(expectancy, max_expectancy) * total_trades / (math.sqrt(max_drawdown[0]) * 1000)
+        loss_value = total_profit * min(average_profit, max_avg_profit) * profit_factor * min(expectancy_ratio, max_expectancy) * total_trades / (math.sqrt(max_drawdown[0]) * 1000)
 
         if (total_profit < 0) and (loss_value > 0):
             return loss_value
