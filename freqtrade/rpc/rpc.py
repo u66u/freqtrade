@@ -19,8 +19,7 @@ from freqtrade.configuration.timerange import TimeRange
 from freqtrade.constants import CANCEL_REASON, DATETIME_PRINT_FORMAT, Config
 from freqtrade.data.history import load_data
 from freqtrade.data.metrics import (calculate_calmar, calculate_expectancy,
-                                    calculate_expectancy_ratio, calculate_max_drawdown,
-                                    calculate_sharpe, calculate_sortino)
+                                    calculate_max_drawdown, calculate_sharpe, calculate_sortino)
 from freqtrade.enums import (CandleType, ExitCheckTuple, ExitType, MarketDirection, SignalDirection,
                              State, TradingMode)
 from freqtrade.exceptions import ExchangeError, PricingError
@@ -548,6 +547,8 @@ class RPC:
                                 'profit_abs': trade.close_profit_abs,
                                 'profit_ratio': trade.close_profit}
                                for trade in trades if not trade.is_open and trade.close_date])
+
+        expectancy, expectancy_ratio = calculate_expectancy(trades_df)
         max_drawdown_abs = 0.0
         max_drawdown = 0.0
         if len(trades_df) > 0:
@@ -557,15 +558,6 @@ class RPC:
             except ValueError:
                 # ValueError if no losing trade.
                 pass
-
-        # expectancy = 0.0
-        # if len(trades_df) > 0:
-        #     try:
-        expectancy = calculate_expectancy(trades_df)
-        expectancy_ratio = calculate_expectancy_ratio(trades_df)
-        # except ValueError:
-        #     # ValueError if no losing trade.
-        #     pass
 
         profit_all_fiat = self._fiat_converter.convert_amount(
             profit_all_coin_sum,
