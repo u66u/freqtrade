@@ -339,15 +339,18 @@ def test_calculate_csum(testdatadir):
         csum_min, csum_max = calculate_csum(DataFrame())
 
 
-def test_calculate_expectancy_ratio(testdatadir):
+def test_calculate_expectancy(testdatadir):
     filename = testdatadir / "backtest_results/backtest-result.json"
     bt_data = load_backtest_data(filename)
 
-    expectancy_ratio = calculate_expectancy_ratio(DataFrame())
-    assert expectancy_ratio == 0.0
+    expectancy, expectancy_ratio = calculate_expectancy(DataFrame())
+    assert expectancy == 0.0
+    assert expectancy_ratio == float('inf')
 
-    expectancy_ratio = calculate_expectancy(bt_data)
+    expectancy, expectancy_ratio = calculate_expectancy(bt_data)
+    assert isinstance(expectancy, float)
     assert isinstance(expectancy_ratio, float)
+    assert pytest.approx(expectancy) == 5.820687070932315e-06
     assert pytest.approx(expectancy_ratio) == 0.07151374226574791
 
 

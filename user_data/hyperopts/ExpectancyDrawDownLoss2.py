@@ -40,7 +40,7 @@ class ExpectancyDrawDownLoss2(IHyperOptLoss):
             # Return 0 because this is bad scenario
             return -total_profit * 10
 
-        expectancy_ratio = calculate_expectancy_ratio(results)
+        expectancy, expectancy_ratio = calculate_expectancy(results)
         drawdown_loss = -total_profit / max(max_drawdown[0], 1)
 
         if (drawdown_loss > 0) and (expectancy < 0):
