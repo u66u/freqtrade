@@ -890,7 +890,7 @@ class Telegram(RPCHandler):
                     f"*Best Performing:* `{best_pair}: {best_pair_profit_ratio:.2%}`\n"
                     f"*Trading volume:* `{round_coin_value(stats['trading_volume'], stake_cur)}`\n"
                     f"*Profit factor:* `{stats['profit_factor']:.2f}`\n"
-                    f"*Expectancy (Ratio):* `{expectancy:.2f} ({expectancy_ratio:.2f})`"
+                    f"*Expectancy (Ratio):* `{expectancy:.2f} ({expectancy_ratio:.2f})`\n"
                     f"*Sortino:* `{stats['sortino']:.2f}`\n"
                     f"*Sharpe:* `{stats['sharpe']:.2f}`\n"
                     f"*Calmar:* `{stats['calmar']:.2f}`\n"
