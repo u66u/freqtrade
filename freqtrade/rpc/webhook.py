@@ -109,9 +109,9 @@ class Webhook(RPCHandler):
             try:
                 if isinstance(self._url, list):
                     for url in self._url:
-                        response = self._post_msg(url, payload)
+                        response = self._post_msg(url, payload, self._timeout)
                 else:
-                    response = self._post_msg(self._url, payload)
+                    response = self._post_msg(self._url, payload, self._timeout)
                     # raise NotImplementedError(f'Unknown format: {self._format}')
 
                 # Throw a RequestException if the post was not successful
@@ -121,14 +121,14 @@ class Webhook(RPCHandler):
             except RequestException as exc:
                 logger.warning("Could not call webhook url. Exception: %s", exc)
 
-    def _post_msg(self, url, payload):
+    def _post_msg(self, url, payload, timeout):
         if self._format == 'form':
-            return post(url, data=payload, timeout=self._timeout)
+            return post(url, data=payload, timeout=timeout)
         elif self._format == 'json':
-            return post(url, json=payload, timeout=self._timeout)
+            return post(url, json=payload, timeout=timeout)
         elif self._format == 'raw':
             return post(url, data=payload['data'],
                         headers={'Content-Type': 'text/plain'},
-                        timeout=self._timeout)
+                        timeout=timeout)
         else:
             raise NotImplementedError('Unknown format: {}'.format(self._format))
