@@ -5,8 +5,7 @@ from tabulate import tabulate
 
 from freqtrade.constants import UNLIMITED_STAKE_AMOUNT, Config
 from freqtrade.misc import decimals_per_coin, round_coin_value
-from freqtrade.optimize.optimize_reports.optimize_reports import (generate_periodic_breakdown_stats,
-                                                                  generate_wins_draws_losses)
+from freqtrade.optimize.optimize_reports.optimize_reports import generate_periodic_breakdown_stats
 
 
 logger = logging.getLogger(__name__)
@@ -28,6 +27,16 @@ def _get_line_header(first_column: str, stake_currency: str,
     return [first_column, direction, 'Avg Profit %', 'Cum Profit %',
             f'Tot Profit {stake_currency}', 'Tot Profit %', 'Avg Duration',
             'Win  Draw  Loss  Win%']
+
+
+def generate_wins_draws_losses(wins, draws, losses):
+    if wins > 0 and losses == 0:
+        wl_ratio = '100'
+    elif wins == 0:
+        wl_ratio = '0'
+    else:
+        wl_ratio = f'{100.0 / (wins + draws + losses) * wins:.1f}' if losses > 0 else '100'
+    return f'{wins:>4}  {draws:>4}  {losses:>4}  {wl_ratio:>4}'
 
 
 def text_table_bt_results(pair_results: List[Dict[str, Any]], stake_currency: str) -> str:
@@ -263,6 +272,9 @@ def text_table_add_metrics(strat_results: Dict) -> str:
                 f"{strat_results['draw_days']} / {strat_results['losing_days']}"),
             ('Avg. Duration Winners', f"{strat_results['winner_holding_avg']}"),
             ('Avg. Duration Loser', f"{strat_results['loser_holding_avg']}"),
+            ('Max Consecutive Wins / Loss',
+             f"{strat_results['max_consecutive_wins']} / {strat_results['max_consecutive_losses']}"
+             if 'max_consecutive_losses' in strat_results else 'N/A'),
             ('Rejected Entry signals', strat_results.get('rejected_signals', 'N/A')),
             ('Entry/Exit Timeouts',
              f"{strat_results.get('timedout_entry_orders', 'N/A')} / "

@@ -50,7 +50,8 @@ logger = logging.getLogger(__name__)
 # 2.28: Switch reload endpoint to Post
 # 2.29: Add /exchanges endpoint
 # 2.30: new /pairlists endpoint
-API_VERSION = 2.30
+# 2.31: new /backtest/history/ delete endpoint
+API_VERSION = 2.31
 
 # Public API, requires no auth.
 router_public = APIRouter()
@@ -288,7 +289,10 @@ def pair_history(pair: str, timeframe: str, timerange: str, strategy: str,
         'timerange': timerange,
         'freqaimodel': freqaimodel if freqaimodel else config.get('freqaimodel'),
     })
-    return RPC._rpc_analysed_history_full(config, pair, timeframe, exchange)
+    try:
+        return RPC._rpc_analysed_history_full(config, pair, timeframe, exchange)
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=str(e))
 
 
 @router.get('/plot_config', response_model=PlotConfig, tags=['candle data'])
@@ -303,7 +307,10 @@ def plot_config(strategy: Optional[str] = None, config=Depends(get_config),
         config1.update({
             'strategy': strategy
         })
+    try:
         return PlotConfig.parse_obj(RPC._rpc_plot_config_with_strategy(config1))
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=str(e))
 
 
 @router.get('/strategies', response_model=StrategyListResponse, tags=['strategy'])
@@ -328,7 +335,8 @@ def get_strategy(strategy: str, config=Depends(get_config)):
                                                        extra_dir=config_.get('strategy_path'))
     except OperationalException:
         raise HTTPException(status_code=404, detail='Strategy not found')
-
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=str(e))
     return {
         'strategy': strategy_obj.get_strategy_name(),
         'code': strategy_obj.__source__,
