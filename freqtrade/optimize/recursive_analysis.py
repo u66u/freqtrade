@@ -237,7 +237,10 @@ class RecursiveAnalysis:
                     # print(col_name)
                     if 'other' == col_name:
                         continue
-                    print(values.index)
+                    indicators = values.index
+
+                    for indicator in indicators:
+                        print(values.iloc[indicator])
                     # for indicator, value in values.items():
                     # print(values)
                         # logger.info(f"indicator {indicator} with value {value}")
