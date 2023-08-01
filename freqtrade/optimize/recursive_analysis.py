@@ -232,21 +232,22 @@ class RecursiveAnalysis:
             logger.info(f"Comparing last row of {base_timerange} vs {part_timerange}")
             compare_df = base_last_row.compare(part_last_row)
             if compare_df.shape[0] > 0:
-                for col_name, values in compare_df.items():
-                    col_idx = compare_df.columns.get_loc(col_name)
-                    compare_df_row = compare_df.iloc[0]
-                    # compare_df now comprises tuples with [1] having either 'self' or 'other'
-                    if 'other' in col_name[1]:
-                        continue
-                    self_value = compare_df_row[col_idx]
-                    other_value = compare_df_row[col_idx + 1]
+                logger.info(compare_df.items())
+            #     for col_name, values in compare_df.items():
+            #         col_idx = compare_df.columns.get_loc(col_name)
+            #         compare_df_row = compare_df.iloc[0]
+            #         # compare_df now comprises tuples with [1] having either 'self' or 'other'
+            #         if 'other' in col_name[1]:
+            #             continue
+            #         self_value = compare_df_row[col_idx]
+            #         other_value = compare_df_row[col_idx + 1]
 
-                    # output differences
-                    if self_value != other_value:
-                        difference = (other_value - self_value) / self_value * 100
-                        logger.info(f"=> found difference in indicator "
-                                    f"{col_name[0]}, with difference of "
-                                    "{:.8f}%".format(difference))
+            #         # output differences
+            #         if self_value != other_value:
+            #             difference = (other_value - self_value) / self_value * 100
+            #             logger.info(f"=> found difference in indicator "
+            #                         f"{col_name[0]}, with difference of "
+            #                         "{:.8f}%".format(difference))
             else:
                 logger.info("No difference found. Moving to next comparison")
 
