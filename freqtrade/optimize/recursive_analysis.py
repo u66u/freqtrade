@@ -266,7 +266,8 @@ class RecursiveAnalysis:
                     #                 f"{col_name[0]}, with difference of "
                     #                 "{:.8f}%".format(difference))
             else:
-                logger.info("No difference found. Moving to next comparison")
+                logger.info("No difference found. Stop the process.")
+                break
 
         # if self.current_analysis.total_signals < self.local_config['minimum_trade_amount']:
         #     logger.info(f" -> {self.local_config['strategy']} : too few trades. "
