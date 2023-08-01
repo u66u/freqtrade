@@ -190,7 +190,7 @@ class RecursiveAnalysis:
         # first make a single backtest
         self.fill_full_varholder()
 
-        reduce_verbosity_for_bias_tester()
+        # reduce_verbosity_for_bias_tester()
 
         start_date_full = self.full_varHolder.from_dt
         end_date_full = self.full_varHolder.to_dt
@@ -220,7 +220,7 @@ class RecursiveAnalysis:
         #     break
 
         # Restore verbosity, so it's not too quiet for the next strategy
-        restore_verbosity_for_bias_tester()
+        # restore_verbosity_for_bias_tester()
         # check and report signals
         base_last_row = self.full_varHolder.indicators[pair_to_check].iloc[-1].squeeze()
         base_timerange = (str(self.dt_to_timestamp(self.full_varHolder.from_dt)) + "-" +
