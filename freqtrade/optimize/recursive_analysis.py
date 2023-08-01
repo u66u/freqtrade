@@ -233,7 +233,7 @@ class RecursiveAnalysis:
             compare_df = base_last_row.compare(part_last_row)
             if compare_df.shape[0] > 0:
                 for col_name, values in compare_df.items():
-                    console.log(f"0 {col_name[0]}, 1 {col_name[1]}")
+                    logger.info(f"0 {col_name[0]}, 1 {col_name[1]}")
                     # col_idx = compare_df.columns.get_loc(col_name)
                     # compare_df_row = compare_df.iloc[0]
                     # # compare_df now comprises tuples with [1] having either 'self' or 'other'
