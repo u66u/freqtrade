@@ -235,6 +235,8 @@ class RecursiveAnalysis:
                 # print(compare_df)
                 for col_name, values in compare_df.items():
                     # print(col_name)
+                    if 'other' == col_name:
+                        continue
                     print(values.index)
                     # for indicator, value in values.items():
                     # print(values)
@@ -243,8 +245,7 @@ class RecursiveAnalysis:
                     # col_idx = compare_df.columns.get_loc(col_name)
                     # compare_df_row = compare_df.iloc[0]
                     # # compare_df now comprises tuples with [1] having either 'self' or 'other'
-                    # if 'other' in col_name[1]:
-                    #     continue
+                    
                     # self_value = compare_df_row[col_idx]
                     # other_value = compare_df_row[col_idx + 1]
 
