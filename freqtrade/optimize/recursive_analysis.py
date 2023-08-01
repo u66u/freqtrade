@@ -232,8 +232,10 @@ class RecursiveAnalysis:
             logger.info(f"Comparing last row of {base_timerange} vs {part_timerange}")
             compare_df = base_last_row.compare(part_last_row)
             if compare_df.shape[0] > 0:
-                print(compare_df)
-                # for col_name, values in compare_df.items():
+                # print(compare_df)
+                for col_name, values in compare_df.items():
+                    print(col_name)
+                    print(values)
                     # logger.info(f"0 {col_name[0]}, 1 {col_name[1]}")
                     # col_idx = compare_df.columns.get_loc(col_name)
                     # compare_df_row = compare_df.iloc[0]
