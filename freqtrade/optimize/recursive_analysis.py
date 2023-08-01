@@ -234,8 +234,9 @@ class RecursiveAnalysis:
             if compare_df.shape[0] > 0:
                 # print(compare_df)
                 for col_name, values in compare_df.items():
-                    print(col_name)
+                    # print(col_name)
                     print(values)
+                    logger.info(f"indicator {values[0][0]} with value {values[0][1]}")
                     # logger.info(f"0 {col_name[0]}, 1 {col_name[1]}")
                     # col_idx = compare_df.columns.get_loc(col_name)
                     # compare_df_row = compare_df.iloc[0]
