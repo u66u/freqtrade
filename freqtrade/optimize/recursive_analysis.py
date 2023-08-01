@@ -203,7 +203,7 @@ class RecursiveAnalysis:
 
         while add_date_partial:
             temp_date = end_date_full - timedelta(minutes=int(timeframe_minutes * i))
-            if(temp_date > start_date_full):
+            if(temp_date.timestamp() > start_date_full.timestamp()):
                 start_date_partial.append(temp_date)
                 i = i * 2
             else:
