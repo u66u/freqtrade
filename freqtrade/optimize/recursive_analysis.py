@@ -240,7 +240,7 @@ class RecursiveAnalysis:
                     indicators = values.index
 
                     for indicator in indicators:
-                        print(values.loc[indicator])
+                        print(compare_df.loc[indicator])
                     # for indicator, value in values.items():
                     # print(values)
                         # logger.info(f"indicator {indicator} with value {value}")
