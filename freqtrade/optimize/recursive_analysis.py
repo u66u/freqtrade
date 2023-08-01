@@ -224,10 +224,10 @@ class RecursiveAnalysis:
         logger.info(f"Start checking for recursive bias")
         # check and report signals
         base_last_row = self.full_varHolder.indicators[pair_to_check].iloc[-1].squeeze()
-        base_timerange = self.full_varHolder.from_dt + "-" + self.full_varHolder.to_dt
+        base_timerange = self.full_varHolder.from_dt.strftime('%Y-%m-%dT%H:%M:%S') + "-" + self.full_varHolder.to_dt.strftime('%Y-%m-%dT%H:%M:%S')
         for part in self.partial_varHolder_array:
             part_last_row = part.indicators[pair_to_check].iloc[-1].squeeze()
-            part_timerange = part.from_dt + "-" + part.to_dt
+            part_timerange = part.from_dt.strftime('%Y-%m-%dT%H:%M:%S') + "-" + part.to_dt.strftime('%Y-%m-%dT%H:%M:%S')
 
             logger.info(f"Comparing last row of {base_timerange} vs {part_timerange}")
             compare_df = base_last_row.compare(part_last_row)
