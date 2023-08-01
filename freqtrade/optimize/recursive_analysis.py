@@ -225,7 +225,7 @@ class RecursiveAnalysis:
         base_last_row = self.full_varHolder.indicators[pair_to_check].iloc[-1].squeeze()
         base_timerange = (str(self.dt_to_timestamp(self.full_varHolder.from_dt)) + "-" +
                           str(self.dt_to_timestamp(self.full_varHolder.to_dt)))
-        for part in partial_varHolder_array:
+        for part in self.partial_varHolder_array:
             part_last_row = part.indicators[pair_to_check].iloc[-1].squeeze()
             part_timerange = (str(self.dt_to_timestamp(part.from_dt)) + "-" +
                               str(self.dt_to_timestamp(part.to_dt)))
