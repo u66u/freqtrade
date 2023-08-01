@@ -240,7 +240,14 @@ class RecursiveAnalysis:
                     indicators = values.index
 
                     for indicator in indicators:
-                        print(compare_df.loc[indicator])
+                        values_diff = compare_df.loc[indicator]
+                        values_diff_self = values_diff.loc['self']
+                        values_diff_other = values_diff.loc['other']
+                        difference = (values_diff_other - values_diff_self) / values_diff_self * 100
+                        logger.info(f"=> found difference in indicator "
+                                    f"{indicator}, with difference of "
+                                    "{:.8f}%".format(difference))
+
                     # for indicator, value in values.items():
                     # print(values)
                         # logger.info(f"indicator {indicator} with value {value}")
