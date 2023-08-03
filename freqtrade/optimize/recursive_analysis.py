@@ -28,6 +28,7 @@ class VarHolder:
     to_dt: datetime
     compared_dt: datetime
     timeframe: str
+    startup_candle: int
 
 
 class Analysis:
@@ -175,79 +176,69 @@ class RecursiveAnalysis:
 
         self.prepare_data(self.full_varHolder, self.local_config['pairs'])
 
-    def fill_partial_varholder(self, start_date):
+    def fill_partial_varholder(self, start_date, startup_candle):
         partial_varHolder = VarHolder()
 
         partial_varHolder.from_dt = start_date
         partial_varHolder.to_dt = self.full_varHolder.to_dt
+        partial_varHolder.startup_candle = startup_candle
 
+        self.local_config['startup_candle_count'] = startup_candle
         self.prepare_data(partial_varHolder, self.local_config['pairs'])
 
         self.partial_varHolder_array.append(partial_varHolder)
 
     def start(self) -> None:
 
-        self.local_config['startup_candle_count'] = 245
-        print(self.local_config)
-        
         # first make a single backtest
         self.fill_full_varholder()
 
-        # reduce_verbosity_for_bias_tester()
+        reduce_verbosity_for_bias_tester()
 
-        # start_date_full = self.full_varHolder.from_dt
-        # end_date_full = self.full_varHolder.to_dt
+        startup_candles = [200, 400, 500, 1000, 2000]
+        
+        start_date_full = self.full_varHolder.from_dt
+        end_date_full = self.full_varHolder.to_dt
 
-        # timeframe_minutes = timeframe_to_minutes(self.full_varHolder.timeframe)
+        timeframe_minutes = timeframe_to_minutes(self.full_varHolder.timeframe)
 
-        # start_date_partial = []
-        # add_date_partial = True
-        # i = 125
+        start_date_partial = end_date_full - timedelta(minutes=int(timeframe_minutes))
 
-        # while add_date_partial:
-        #     temp_date = end_date_full - timedelta(minutes=int(timeframe_minutes * i))
-        #     if(temp_date.timestamp() > start_date_full.timestamp()):
-        #         start_date_partial.append(temp_date)
-        #         i = i * 2
-        #     else:
-        #         break
+        for startup_candle in startup_candles:
+            self.fill_partial_varholder(start_date_partial, startup_candle)
 
-        # for start_date in start_date_partial:
-        #     self.fill_partial_varholder(start_date)
+        pair_to_check = self.local_config['pairs'][0]
 
+        # Restore verbosity, so it's not too quiet for the next strategy
+        restore_verbosity_for_bias_tester()
+        logger.info(f"Start checking for recursive bias")
+        # check and report signals
+        base_last_row = self.full_varHolder.indicators[pair_to_check].iloc[-1]
+        base_timerange = self.full_varHolder.from_dt.strftime('%Y-%m-%dT%H:%M:%S') + "-" + self.full_varHolder.to_dt.strftime('%Y-%m-%dT%H:%M:%S')
+        for part in self.partial_varHolder_array:
+            part_last_row = part.indicators[pair_to_check].iloc[-1]
+            part_timerange = part.from_dt.strftime('%Y-%m-%dT%H:%M:%S') + "-" + part.to_dt.strftime('%Y-%m-%dT%H:%M:%S')
 
-        # pair_to_check = self.local_config['pairs'][0]
+            logger.info(f"Comparing last row of {base_timerange} backtest vs {part_timerange} with {part.startup_candle} startup candle")
+            compare_df = base_last_row.compare(part_last_row)
+            if compare_df.shape[0] > 0:
+                # print(compare_df)
+                for col_name, values in compare_df.items():
+                    # print(col_name)
+                    if 'other' == col_name:
+                        continue
+                    indicators = values.index
 
-        # # Restore verbosity, so it's not too quiet for the next strategy
-        # restore_verbosity_for_bias_tester()
-        # logger.info(f"Start checking for recursive bias")
-        # # check and report signals
-        # base_last_row = self.full_varHolder.indicators[pair_to_check].iloc[-1]
-        # base_timerange = self.full_varHolder.from_dt.strftime('%Y-%m-%dT%H:%M:%S') + "-" + self.full_varHolder.to_dt.strftime('%Y-%m-%dT%H:%M:%S')
-        # for part in self.partial_varHolder_array:
-        #     part_last_row = part.indicators[pair_to_check].iloc[-1]
-        #     part_timerange = part.from_dt.strftime('%Y-%m-%dT%H:%M:%S') + "-" + part.to_dt.strftime('%Y-%m-%dT%H:%M:%S')
+                    for indicator in indicators:
+                        values_diff = compare_df.loc[indicator]
+                        values_diff_self = values_diff.loc['self']
+                        values_diff_other = values_diff.loc['other']
+                        difference = (values_diff_other - values_diff_self) / values_diff_self * 100
+                        logger.info(f"=> found difference in indicator "
+                                    f"{indicator}, with difference of "
+                                    "{:.8f}%".format(difference))
 
-        #     logger.info(f"Comparing last row of {base_timerange} vs {part_timerange}")
-        #     compare_df = base_last_row.compare(part_last_row)
-        #     if compare_df.shape[0] > 0:
-        #         # print(compare_df)
-        #         for col_name, values in compare_df.items():
-        #             # print(col_name)
-        #             if 'other' == col_name:
-        #                 continue
-        #             indicators = values.index
-
-        #             for indicator in indicators:
-        #                 values_diff = compare_df.loc[indicator]
-        #                 values_diff_self = values_diff.loc['self']
-        #                 values_diff_other = values_diff.loc['other']
-        #                 difference = (values_diff_other - values_diff_self) / values_diff_self * 100
-        #                 logger.info(f"=> found difference in indicator "
-        #                             f"{indicator}, with difference of "
-        #                             "{:.8f}%".format(difference))
-
-        #     else:
-        #         logger.info("No difference found. Stop the process.")
-        #         break
+            else:
+                logger.info("No difference found. Stop the process.")
+                break
 
