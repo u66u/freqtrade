@@ -190,100 +190,63 @@ class RecursiveAnalysis:
         # first make a single backtest
         self.fill_full_varholder()
 
-        reduce_verbosity_for_bias_tester()
+        print(self.local_config)
 
-        start_date_full = self.full_varHolder.from_dt
-        end_date_full = self.full_varHolder.to_dt
+        # reduce_verbosity_for_bias_tester()
 
-        timeframe_minutes = timeframe_to_minutes(self.full_varHolder.timeframe)
+        # start_date_full = self.full_varHolder.from_dt
+        # end_date_full = self.full_varHolder.to_dt
 
-        start_date_partial = []
-        add_date_partial = True
-        i = 125
+        # timeframe_minutes = timeframe_to_minutes(self.full_varHolder.timeframe)
 
-        while add_date_partial:
-            temp_date = end_date_full - timedelta(minutes=int(timeframe_minutes * i))
-            if(temp_date.timestamp() > start_date_full.timestamp()):
-                start_date_partial.append(temp_date)
-                i = i * 2
-            else:
-                break
+        # start_date_partial = []
+        # add_date_partial = True
+        # i = 125
 
-        for start_date in start_date_partial:
-            self.fill_partial_varholder(start_date)
+        # while add_date_partial:
+        #     temp_date = end_date_full - timedelta(minutes=int(timeframe_minutes * i))
+        #     if(temp_date.timestamp() > start_date_full.timestamp()):
+        #         start_date_partial.append(temp_date)
+        #         i = i * 2
+        #     else:
+        #         break
+
+        # for start_date in start_date_partial:
+        #     self.fill_partial_varholder(start_date)
 
 
-        pair_to_check = self.local_config['pairs'][0]
+        # pair_to_check = self.local_config['pairs'][0]
 
-        print(self.strategy_obj)
+        # # Restore verbosity, so it's not too quiet for the next strategy
+        # restore_verbosity_for_bias_tester()
+        # logger.info(f"Start checking for recursive bias")
+        # # check and report signals
+        # base_last_row = self.full_varHolder.indicators[pair_to_check].iloc[-1]
+        # base_timerange = self.full_varHolder.from_dt.strftime('%Y-%m-%dT%H:%M:%S') + "-" + self.full_varHolder.to_dt.strftime('%Y-%m-%dT%H:%M:%S')
+        # for part in self.partial_varHolder_array:
+        #     part_last_row = part.indicators[pair_to_check].iloc[-1]
+        #     part_timerange = part.from_dt.strftime('%Y-%m-%dT%H:%M:%S') + "-" + part.to_dt.strftime('%Y-%m-%dT%H:%M:%S')
 
-        # for idx, result_row in self.full_varHolder.result['results'].iterrows():
-        #     pair_to_check = result_row['pair']
-        #     break
+        #     logger.info(f"Comparing last row of {base_timerange} vs {part_timerange}")
+        #     compare_df = base_last_row.compare(part_last_row)
+        #     if compare_df.shape[0] > 0:
+        #         # print(compare_df)
+        #         for col_name, values in compare_df.items():
+        #             # print(col_name)
+        #             if 'other' == col_name:
+        #                 continue
+        #             indicators = values.index
 
-        # Restore verbosity, so it's not too quiet for the next strategy
-        restore_verbosity_for_bias_tester()
-        logger.info(f"Start checking for recursive bias")
-        # check and report signals
-        base_last_row = self.full_varHolder.indicators[pair_to_check].iloc[-1]
-        base_timerange = self.full_varHolder.from_dt.strftime('%Y-%m-%dT%H:%M:%S') + "-" + self.full_varHolder.to_dt.strftime('%Y-%m-%dT%H:%M:%S')
-        for part in self.partial_varHolder_array:
-            part_last_row = part.indicators[pair_to_check].iloc[-1]
-            part_timerange = part.from_dt.strftime('%Y-%m-%dT%H:%M:%S') + "-" + part.to_dt.strftime('%Y-%m-%dT%H:%M:%S')
+        #             for indicator in indicators:
+        #                 values_diff = compare_df.loc[indicator]
+        #                 values_diff_self = values_diff.loc['self']
+        #                 values_diff_other = values_diff.loc['other']
+        #                 difference = (values_diff_other - values_diff_self) / values_diff_self * 100
+        #                 logger.info(f"=> found difference in indicator "
+        #                             f"{indicator}, with difference of "
+        #                             "{:.8f}%".format(difference))
 
-            logger.info(f"Comparing last row of {base_timerange} vs {part_timerange}")
-            compare_df = base_last_row.compare(part_last_row)
-            if compare_df.shape[0] > 0:
-                # print(compare_df)
-                for col_name, values in compare_df.items():
-                    # print(col_name)
-                    if 'other' == col_name:
-                        continue
-                    indicators = values.index
+        #     else:
+        #         logger.info("No difference found. Stop the process.")
+        #         break
 
-                    for indicator in indicators:
-                        values_diff = compare_df.loc[indicator]
-                        values_diff_self = values_diff.loc['self']
-                        values_diff_other = values_diff.loc['other']
-                        difference = (values_diff_other - values_diff_self) / values_diff_self * 100
-                        logger.info(f"=> found difference in indicator "
-                                    f"{indicator}, with difference of "
-                                    "{:.8f}%".format(difference))
-
-                    # for indicator, value in values.items():
-                    # print(values)
-                        # logger.info(f"indicator {indicator} with value {value}")
-                    # logger.info(f"0 {col_name[0]}, 1 {col_name[1]}")
-                    # col_idx = compare_df.columns.get_loc(col_name)
-                    # compare_df_row = compare_df.iloc[0]
-                    # # compare_df now comprises tuples with [1] having either 'self' or 'other'
-                    
-                    # self_value = compare_df_row[col_idx]
-                    # other_value = compare_df_row[col_idx + 1]
-
-                    # # output differences
-                    # if self_value != other_value:
-                    #     difference = (other_value - self_value) / self_value * 100
-                    #     logger.info(f"=> found difference in indicator "
-                    #                 f"{col_name[0]}, with difference of "
-                    #                 "{:.8f}%".format(difference))
-            else:
-                logger.info("No difference found. Stop the process.")
-                break
-
-        # if self.current_analysis.total_signals < self.local_config['minimum_trade_amount']:
-        #     logger.info(f" -> {self.local_config['strategy']} : too few trades. "
-        #                 f"We only found {self.current_analysis.total_signals} trades. "
-        #                 f"Hint: Extend the timerange "
-        #                 f"to get at least {self.local_config['minimum_trade_amount']} "
-        #                 f"or lower the value of minimum_trade_amount.")
-        #     self.failed_bias_check = True
-        # elif (self.current_analysis.false_entry_signals > 0 or
-        #       self.current_analysis.false_exit_signals > 0 or
-        #       len(self.current_analysis.false_indicators) > 0):
-        #     logger.info(f" => {self.local_config['strategy']} : bias detected!")
-        #     self.current_analysis.has_bias = True
-        #     self.failed_bias_check = False
-        # else:
-        #     logger.info(self.local_config['strategy'] + ": no bias detected")
-        #     self.failed_bias_check = False
