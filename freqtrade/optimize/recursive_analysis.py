@@ -187,10 +187,11 @@ class RecursiveAnalysis:
 
     def start(self) -> None:
 
+        self.local_config['startup_candle_count'] = 245
+        print(self.local_config)
+        
         # first make a single backtest
         self.fill_full_varholder()
-
-        print(self.local_config)
 
         # reduce_verbosity_for_bias_tester()
 
