@@ -215,6 +215,8 @@ class RecursiveAnalysis:
 
         pair_to_check = self.local_config['pairs'][0]
 
+        print(self.strategy_obj)
+
         # for idx, result_row in self.full_varHolder.result['results'].iterrows():
         #     pair_to_check = result_row['pair']
         #     break
