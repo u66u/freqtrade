@@ -537,6 +537,7 @@ class BacktestResponse(BaseModel):
     backtest_result: Optional[Dict[str, Any]]
 
 
+# TODO: This is a copy of BacktestHistoryEntryType
 class BacktestHistoryEntry(BaseModel):
     filename: str
     strategy: str
