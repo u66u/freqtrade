@@ -184,10 +184,10 @@ class RecursiveAnalysis:
         partial_varHolder.startup_candle = startup_candle
 
         # method 1
-        # self.local_config['startup_candle_count'] = startup_candle
+        self.local_config['startup_candle_count'] = startup_candle
 
         # method 2
-        self.local_config['startup_candle_count'] = 0
+        # self.local_config['startup_candle_count'] = 0
 
         self.prepare_data(partial_varHolder, self.local_config['pairs'])
 
@@ -208,11 +208,12 @@ class RecursiveAnalysis:
         timeframe_minutes = timeframe_to_minutes(self.full_varHolder.timeframe)
 
         # method 1
-        # start_date_partial = end_date_full - timedelta(minutes=int(timeframe_minutes))
+        start_date_partial = end_date_full - timedelta(minutes=int(timeframe_minutes))
 
         for startup_candle in startup_candles:
             # method 2
-            start_date_partial = end_date_full - timedelta(minutes=int(timeframe_minutes * startup_candle))
+            # start_date_partial = end_date_full - timedelta(minutes=int(timeframe_minutes * startup_candle))
+            
             self.fill_partial_varholder(start_date_partial, startup_candle)
 
         pair_to_check = self.local_config['pairs'][0]
@@ -228,10 +229,11 @@ class RecursiveAnalysis:
             part_timerange = part.from_dt.strftime('%Y-%m-%dT%H:%M:%S') + "-" + part.to_dt.strftime('%Y-%m-%dT%H:%M:%S')
 
             # method 1
-            # logger.info(f"Comparing last row of {base_timerange} backtest vs {part_timerange} with {part.startup_candle} startup candle")
+            logger.info(f"Comparing last row of {base_timerange} backtest vs {part_timerange} with {part.startup_candle} startup candle")
             
             # method 2
-            logger.info(f"Comparing last row of {base_timerange} backtest vs {part_timerange} which mimic {part.startup_candle} startup candle on dry/live")
+            # logger.info(f"Comparing last row of {base_timerange} backtest vs {part_timerange} which mimic {part.startup_candle} startup candle on dry/live")
+            
             compare_df = base_last_row.compare(part_last_row)
             if compare_df.shape[0] > 0:
                 # print(compare_df)
