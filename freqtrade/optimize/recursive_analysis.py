@@ -249,8 +249,8 @@ class RecursiveAnalysis:
                         logger.info(f"=> found difference in indicator "
                                     f"{indicator}, with difference of "
                                     "{:.8f}%".format(difference))
-                        logger.info("base value {:.5f}, ".format(values_diff_self)
-                                    "part value {:.5f}%".format(values_diff_other))
+                        logger.info("base value {:.5f}".format(values_diff_self))
+                        logger.info("part value {:.5f}".format(values_diff_other))
 
             else:
                 logger.info("No difference found. Stop the process.")
