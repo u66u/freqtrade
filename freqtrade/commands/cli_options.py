@@ -705,4 +705,8 @@ AVAILABLE_CLI_OPTIONS = {
         help="Use this csv-filename to store lookahead-analysis-results",
         type=str
     ),
+    "startup_candle": Arg(
+        '--startup-candle',
+        help='Specify startup candle to be checked (`199`, `499`, `999`, `1999`).',
+    ),
 }

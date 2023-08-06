@@ -63,7 +63,8 @@ class RecursiveAnalysis:
             part_last_row = part.indicators[pair_to_check].iloc[-1]
             part_timerange = part.from_dt.strftime('%Y-%m-%dT%H:%M:%S') + "-" + part.to_dt.strftime('%Y-%m-%dT%H:%M:%S')
 
-            logger.info(f"Comparing last row of {base_timerange} backtest vs {part_timerange} with {part.startup_candle} startup candle")
+            logger.info(f"Comparing last row of {base_timerange} backtest")
+            logger.info(f"vs {part_timerange} with {part.startup_candle} startup candle")
             
             compare_df = base_last_row.compare(part_last_row)
             if compare_df.shape[0] > 0:
