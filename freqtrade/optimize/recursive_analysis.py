@@ -22,23 +22,10 @@ class VarHolder:
     timerange: TimeRange
     data: DataFrame
     indicators: Dict[str, DataFrame]
-    result: DataFrame
-    compared: DataFrame
     from_dt: datetime
     to_dt: datetime
-    compared_dt: datetime
     timeframe: str
     startup_candle: int
-
-
-class Analysis:
-    def __init__(self) -> None:
-        self.total_signals = 0
-        self.false_entry_signals = 0
-        self.false_exit_signals = 0
-        self.false_indicators: List[str] = []
-        self.has_bias = False
-
 
 class RecursiveAnalysis:
 
@@ -54,9 +41,7 @@ class RecursiveAnalysis:
         # pull variables the scope of the recursive_analysis-instance
         self.local_config = deepcopy(config)
         self.local_config['strategy'] = strategy_obj['name']
-        self.current_analysis = Analysis()
-        self.minimum_trade_amount = config['minimum_trade_amount']
-        self.targeted_trade_amount = config['targeted_trade_amount']
+        self._startup_candle = self.config.get('startup_candle', [199, 399, 499, 999, 1999])
         self.strategy_obj = strategy_obj
 
     @staticmethod
@@ -64,71 +49,45 @@ class RecursiveAnalysis:
         timestamp = int(dt.replace(tzinfo=timezone.utc).timestamp())
         return timestamp
 
-    @staticmethod
-    def get_result(backtesting: Backtesting, processed: DataFrame):
-        min_date, max_date = get_timerange(processed)
-
-        result = backtesting.backtest(
-            processed=deepcopy(processed),
-            start_date=min_date,
-            end_date=max_date
-        )
-        return result
-
-    @staticmethod
-    def report_signal(result: dict, column_name: str, checked_timestamp: datetime):
-        df = result['results']
-        row_count = df[column_name].shape[0]
-
-        if row_count == 0:
-            return False
-        else:
-
-            df_cut = df[(df[column_name] == checked_timestamp)]
-            if df_cut[column_name].shape[0] == 0:
-                return False
-            else:
-                return True
-        return False
-
     # analyzes two data frames with processed indicators and shows differences between them.
-    def analyze_indicators(self, full_vars: VarHolder, cut_vars: VarHolder, current_pair: str):
-        # extract dataframes
-        cut_df: DataFrame = cut_vars.indicators[current_pair]
-        full_df: DataFrame = full_vars.indicators[current_pair]
+    def analyze_indicators(self):
+        
+        pair_to_check = self.local_config['pairs'][0]
+        logger.info(f"Start checking for recursive bias")
 
-        # cut longer dataframe to length of the shorter
-        full_df_cut = full_df[
-            (full_df.date == cut_vars.compared_dt)
-        ].reset_index(drop=True)
-        cut_df_cut = cut_df[
-            (cut_df.date == cut_vars.compared_dt)
-        ].reset_index(drop=True)
+        # check and report signals
+        base_last_row = self.full_varHolder.indicators[pair_to_check].iloc[-1]
+        base_timerange = self.full_varHolder.from_dt.strftime('%Y-%m-%dT%H:%M:%S') + "-" + self.full_varHolder.to_dt.strftime('%Y-%m-%dT%H:%M:%S')
+        
+        for part in self.partial_varHolder_array:
+            part_last_row = part.indicators[pair_to_check].iloc[-1]
+            part_timerange = part.from_dt.strftime('%Y-%m-%dT%H:%M:%S') + "-" + part.to_dt.strftime('%Y-%m-%dT%H:%M:%S')
 
-        # check if dataframes are not empty
-        if full_df_cut.shape[0] != 0 and cut_df_cut.shape[0] != 0:
-
-            # compare dataframes
-            compare_df = full_df_cut.compare(cut_df_cut)
-
+            logger.info(f"Comparing last row of {base_timerange} backtest vs {part_timerange} with {part.startup_candle} startup candle")
+            
+            compare_df = base_last_row.compare(part_last_row)
             if compare_df.shape[0] > 0:
+                # print(compare_df)
                 for col_name, values in compare_df.items():
-                    col_idx = compare_df.columns.get_loc(col_name)
-                    compare_df_row = compare_df.iloc[0]
-                    # compare_df now comprises tuples with [1] having either 'self' or 'other'
-                    if 'other' in col_name[1]:
+                    # print(col_name)
+                    if 'other' == col_name:
                         continue
-                    self_value = compare_df_row[col_idx]
-                    other_value = compare_df_row[col_idx + 1]
+                    indicators = values.index
 
-                    # output differences
-                    if self_value != other_value:
+                    for indicator in indicators:
+                        values_diff = compare_df.loc[indicator]
+                        values_diff_self = values_diff.loc['self']
+                        values_diff_other = values_diff.loc['other']
+                        difference = (values_diff_other - values_diff_self) / values_diff_self * 100
+                        logger.info(f"=> found difference in indicator "
+                                    f"{indicator}, with difference of "
+                                    "{:.8f}%".format(difference))
+                        # logger.info("base value {:.5f}".format(values_diff_self))
+                        # logger.info("part value {:.5f}".format(values_diff_other))
 
-                        if not self.current_analysis.false_indicators.__contains__(col_name[0]):
-                            self.current_analysis.false_indicators.append(col_name[0])
-                            logger.info(f"=> found look ahead bias in indicator "
-                                        f"{col_name[0]}. "
-                                        f"{str(self_value)} != {str(other_value)}")
+            else:
+                logger.info("No difference found. Stop the process.")
+                break
 
     def prepare_data(self, varholder: VarHolder, pairs_to_load: List[DataFrame]):
 
@@ -156,7 +115,6 @@ class RecursiveAnalysis:
         varholder.timeframe = backtesting.timeframe
 
         varholder.indicators = backtesting.strategy.advise_all_indicators(varholder.data)
-        varholder.result = self.get_result(backtesting, varholder.indicators)
 
     def fill_full_varholder(self):
         self.full_varHolder = VarHolder()
@@ -183,11 +141,7 @@ class RecursiveAnalysis:
         partial_varHolder.to_dt = self.full_varHolder.to_dt
         partial_varHolder.startup_candle = startup_candle
 
-        # method 1
         self.local_config['startup_candle_count'] = startup_candle
-
-        # method 2
-        # self.local_config['startup_candle_count'] = 0
 
         self.prepare_data(partial_varHolder, self.local_config['pairs'])
 
@@ -200,61 +154,17 @@ class RecursiveAnalysis:
 
         reduce_verbosity_for_bias_tester()
 
-        startup_candles = [200, 400, 500, 1000, 2000]
-        
         start_date_full = self.full_varHolder.from_dt
         end_date_full = self.full_varHolder.to_dt
 
         timeframe_minutes = timeframe_to_minutes(self.full_varHolder.timeframe)
 
-        # method 1
         start_date_partial = end_date_full - timedelta(minutes=int(timeframe_minutes))
 
-        for startup_candle in startup_candles:
-            # method 2
-            # start_date_partial = end_date_full - timedelta(minutes=int(timeframe_minutes * startup_candle))
-            
+        for startup_candle in self._startup_candle:
             self.fill_partial_varholder(start_date_partial, startup_candle)
-
-        pair_to_check = self.local_config['pairs'][0]
 
         # Restore verbosity, so it's not too quiet for the next strategy
         restore_verbosity_for_bias_tester()
-        logger.info(f"Start checking for recursive bias")
-        # check and report signals
-        base_last_row = self.full_varHolder.indicators[pair_to_check].iloc[-1]
-        base_timerange = self.full_varHolder.from_dt.strftime('%Y-%m-%dT%H:%M:%S') + "-" + self.full_varHolder.to_dt.strftime('%Y-%m-%dT%H:%M:%S')
-        for part in self.partial_varHolder_array:
-            part_last_row = part.indicators[pair_to_check].iloc[-1]
-            part_timerange = part.from_dt.strftime('%Y-%m-%dT%H:%M:%S') + "-" + part.to_dt.strftime('%Y-%m-%dT%H:%M:%S')
 
-            # method 1
-            logger.info(f"Comparing last row of {base_timerange} backtest vs {part_timerange} with {part.startup_candle} startup candle")
-            
-            # method 2
-            # logger.info(f"Comparing last row of {base_timerange} backtest vs {part_timerange} which mimic {part.startup_candle} startup candle on dry/live")
-            
-            compare_df = base_last_row.compare(part_last_row)
-            if compare_df.shape[0] > 0:
-                # print(compare_df)
-                for col_name, values in compare_df.items():
-                    # print(col_name)
-                    if 'other' == col_name:
-                        continue
-                    indicators = values.index
-
-                    for indicator in indicators:
-                        values_diff = compare_df.loc[indicator]
-                        values_diff_self = values_diff.loc['self']
-                        values_diff_other = values_diff.loc['other']
-                        difference = (values_diff_other - values_diff_self) / values_diff_self * 100
-                        logger.info(f"=> found difference in indicator "
-                                    f"{indicator}, with difference of "
-                                    "{:.8f}%".format(difference))
-                        # logger.info("base value {:.5f}".format(values_diff_self))
-                        # logger.info("part value {:.5f}".format(values_diff_other))
-
-            else:
-                logger.info("No difference found. Stop the process.")
-                break
-
+        self.analyze_indicators()
