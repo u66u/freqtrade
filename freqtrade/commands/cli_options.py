@@ -707,6 +707,7 @@ AVAILABLE_CLI_OPTIONS = {
     ),
     "startup_candle": Arg(
         '--startup-candle',
-        help='Specify startup candle to be checked (`199`, `499`, `999`, `1999`).',
+        help='Specify startup candles to be checked (`199`, `499`, `999`, `1999`).',
+        nargs='+',
     ),
 }
