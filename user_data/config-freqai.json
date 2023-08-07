@@ -1,18 +1,18 @@
 {
     "trading_mode": "futures",
     "margin_mode": "isolated",
-    "max_open_trades": 5,
+    "max_open_trades": 10,
     "stake_currency": "USDT",
-    "stake_amount": 200,
+    "stake_amount": 20,
     "tradable_balance_ratio": 1,
     "fiat_display_currency": "USD",
     "dry_run": true,
-    "dry_run_wallet": 1000,
+    "dry_run_wallet": 220,
     "cancel_open_orders_on_exit": true,
     "dataformat_ohlcv": "feather",
     "dataformat_trades": "hdf5",
     "unfilledtimeout": {
-        "entry": 10,
+        "entry": 15,
         "exit": 30
     },
     "exchange": {
@@ -23,7 +23,23 @@
         "ccxt_async_config": {},
         "pair_whitelist": [
             "BTC/USDT:USDT",
-            // "ETH/USDT:USDT"
+            "EGLD/USDT:USDT",
+            "LINK/USDT:USDT",
+            "AVAX/USDT:USDT",
+            "AAVE/USDT:USDT",
+            "SNX/USDT:USDT",
+            "XMR/USDT:USDT",
+            "ZEC/USDT:USDT",
+            "XLM/USDT:USDT",
+            "1INCH/USDT:USDT",
+            "ETH/USDT:USDT",
+            "DOGE/USDT:USDT",
+            "LTC/USDT:USDT",
+            "MATIC/USDT:USDT",
+            "ADA/USDT:USDT",
+            "XRP/USDT:USDT",
+            "SOL/USDT:USDT",       
+            "DOT/USDT:USDT",
         ],
         "pair_blacklist": []
     },
@@ -49,34 +65,47 @@
     ],
     "freqai": {
         "enabled": true,
-        "purge_old_models": true,
-        "train_period_days": 7,
-        "backtest_period_days": 0.25,
-        "live_retrain_hours": 6,
-        "identifier": "papeda",
+        "conv_width": 1,
+        "purge_old_models": 5,
+        "expiration_hours": 10,
+        "train_period_days": 14,
+        "backtest_period_days": 2,
+        "live_retrain_hours": 48,
+        "write_metrics_to_disk": true,
+        "identifier": "noken-30m",
+        "fit_live_predictions_candles": 600,
+        "data_kitchen_thread_count": 10,
+        "track_performance": true,
+        "extra_returns_per_train": {"DI_value_param1":0, "DI_value_param2":0, "DI_value_param3":0, "DI_cutoff": 2, "&s-minima_sort_threshold":-2, "&s-maxima_sort_threshold":2},
         "feature_parameters": {
             "include_timeframes": [
-                "15m",
                 "30m",
-                "1h"
             ],
             "include_corr_pairlist": [
+                "BTC/USDT",
             ],
-            "label_period_candles": 20,
+            "label_period_candles": 100,
             "include_shifted_candles": 3,
-            "DI_threshold": 0.9,
+            "DI_threshold": 10,
             "weight_factor": 0.9,
             "principal_component_analysis": false,
-            "use_SVM_to_remove_outliers": true,
-            "indicator_periods_candles": [14, 28, 56],
-            "plot_feature_importances": 0
+            "use_SVM_to_remove_outliers": false,
+            "use_DBSCAN_to_remove_outliers": false,
+            "indicator_periods_candles": [15, 45, 135],
+            "inlier_metric_window": 0,
+            "noise_standard_deviation": 0.02,
+            "reverse_test_train_order": false,
+            "plot_feature_importances": 0,
+            "buffer_train_data_candles": 100
         },
         "data_split_parameters": {
             "test_size": 0,
-            "random_state": 1
+            "random_state": 1,
+            "shuffle": false
         },
         "model_training_parameters": {
-            "n_estimators": 800
+            "n_jobs": 10,
+            "verbosity": 1
         }
     },
     "bot_name": "freqai",
@@ -85,6 +114,6 @@
     "internals": {
         "process_throttle_secs": 5
     },
-    "strategy": "FreqaiExampleStrategy",
+    "strategy": "Noken_30m",
     "strategy_path": "freqtrade/templates",
 }
