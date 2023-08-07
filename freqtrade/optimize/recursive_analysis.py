@@ -41,7 +41,6 @@ class RecursiveAnalysis:
         # pull variables the scope of the recursive_analysis-instance
         self.local_config = deepcopy(config)
         self.local_config['strategy'] = strategy_obj['name']
-        print(config)
         self._startup_candle = config.get('startup_candle', [199, 399, 499, 999, 1999])
         self.strategy_obj = strategy_obj
 
@@ -151,25 +150,22 @@ class RecursiveAnalysis:
 
     def start(self) -> None:
 
-        print (self._startup_candle)
-        
-        # # first make a single backtest
-        # self.fill_full_varholder()
+        # first make a single backtest
+        self.fill_full_varholder()
 
-        # reduce_verbosity_for_bias_tester()
+        reduce_verbosity_for_bias_tester()
 
-        # start_date_full = self.full_varHolder.from_dt
-        # end_date_full = self.full_varHolder.to_dt
+        start_date_full = self.full_varHolder.from_dt
+        end_date_full = self.full_varHolder.to_dt
 
-        # timeframe_minutes = timeframe_to_minutes(self.full_varHolder.timeframe)
+        timeframe_minutes = timeframe_to_minutes(self.full_varHolder.timeframe)
 
-        # start_date_partial = end_date_full - timedelta(minutes=int(timeframe_minutes))
+        start_date_partial = end_date_full - timedelta(minutes=int(timeframe_minutes))
 
-
-        # for startup_candle in self._startup_candle:
-        #     self.fill_partial_varholder(start_date_partial, startup_candle)
+        for startup_candle in self._startup_candle:
+            self.fill_partial_varholder(start_date_partial, int(startup_candle))
 
         # Restore verbosity, so it's not too quiet for the next strategy
-        # restore_verbosity_for_bias_tester()
+        restore_verbosity_for_bias_tester()
 
-        # self.analyze_indicators()
+        self.analyze_indicators()
