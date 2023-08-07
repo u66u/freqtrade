@@ -41,7 +41,7 @@ class RecursiveAnalysis:
         # pull variables the scope of the recursive_analysis-instance
         self.local_config = deepcopy(config)
         self.local_config['strategy'] = strategy_obj['name']
-        self._startup_candle = self.config.get('startup_candle', [199, 399, 499, 999, 1999])
+        self._startup_candle = config.get('startup_candle', [199, 399, 499, 999, 1999])
         self.strategy_obj = strategy_obj
 
     @staticmethod
