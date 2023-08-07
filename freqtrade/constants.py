@@ -171,9 +171,6 @@ CONF_SCHEMA = {
         'lookahead_analysis_exportfilename': {'type': 'string'},
         'startup_candle': {
             'type': 'array',
-            'items': {
-                'type': 'number',
-            },
             'uniqueItems': True,
             'default': [199, 399, 499, 999, 1999],
         },
