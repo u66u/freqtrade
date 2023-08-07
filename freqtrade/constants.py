@@ -174,7 +174,8 @@ CONF_SCHEMA = {
             'items': {
                 'type': 'number',
             },
-            'uniqueItems': True
+            'uniqueItems': True,
+            'default': [199, 399, 499, 999, 1999],
         },
         'liquidation_buffer': {'type': 'number', 'minimum': 0.0, 'maximum': 0.99},
         'backtest_breakdown': {
