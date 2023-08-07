@@ -151,6 +151,8 @@ class RecursiveAnalysis:
 
     def start(self) -> None:
 
+        print (self._startup_candle)
+        
         # # first make a single backtest
         # self.fill_full_varholder()
 
@@ -163,10 +165,11 @@ class RecursiveAnalysis:
 
         # start_date_partial = end_date_full - timedelta(minutes=int(timeframe_minutes))
 
+
         # for startup_candle in self._startup_candle:
         #     self.fill_partial_varholder(start_date_partial, startup_candle)
 
-        # # Restore verbosity, so it's not too quiet for the next strategy
+        # Restore verbosity, so it's not too quiet for the next strategy
         # restore_verbosity_for_bias_tester()
 
         # self.analyze_indicators()
