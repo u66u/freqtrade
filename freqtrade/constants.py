@@ -169,6 +169,13 @@ CONF_SCHEMA = {
         'minimum_trade_amount': {'type': 'number', 'default': 10},
         'targeted_trade_amount': {'type': 'number', 'default': 20},
         'lookahead_analysis_exportfilename': {'type': 'string'},
+        'startup_candle': {
+            'type': 'array',
+            'items': {
+                'type': 'number',
+            },
+            'uniqueItems': True
+        },
         'liquidation_buffer': {'type': 'number', 'minimum': 0.0, 'maximum': 0.99},
         'backtest_breakdown': {
             'type': 'array',
