@@ -115,5 +115,5 @@
         "process_throttle_secs": 5
     },
     "strategy": "Noken_30m",
-    "strategy_path": "freqtrade/templates",
+    "strategy_path": "freqtrade_strategies",
 }
