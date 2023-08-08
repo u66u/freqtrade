@@ -15,8 +15,8 @@
         "extra_returns_per_train": {"DI_value_param1":0, "DI_value_param2":0, "DI_value_param3":0, "DI_cutoff": 2, "&s-minima_sort_threshold":-2, "&s-maxima_sort_threshold":2},
         "feature_parameters": {
             "include_corr_pairlist": [
-                "BTC/USDT",
-                "ETH/USDT"
+                "BTC/USDT:USDT",
+                "ETH/USDT:USDT"
             ],
             "include_timeframes": [
                 "5m",
