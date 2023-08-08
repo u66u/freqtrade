@@ -81,7 +81,7 @@
         "feature_parameters": {
             "include_timeframes": [],
             "include_corr_pairlist": [
-                "BTC/USDT",
+                "BTC/USDT:USDT",
             ],
             "label_period_candles": 100,
             "include_shifted_candles": 3,
