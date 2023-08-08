@@ -8,6 +8,7 @@
     "fiat_display_currency": "USD",
     "dry_run": true,
     "dry_run_wallet": 220,
+    "timeframe": "30m",
     "cancel_open_orders_on_exit": true,
     "dataformat_ohlcv": "feather",
     "dataformat_trades": "hdf5",
@@ -78,9 +79,7 @@
         "track_performance": true,
         "extra_returns_per_train": {"DI_value_param1":0, "DI_value_param2":0, "DI_value_param3":0, "DI_cutoff": 2, "&s-minima_sort_threshold":-2, "&s-maxima_sort_threshold":2},
         "feature_parameters": {
-            "include_timeframes": [
-                "30m",
-            ],
+            "include_timeframes": [],
             "include_corr_pairlist": [
                 "BTC/USDT",
             ],
