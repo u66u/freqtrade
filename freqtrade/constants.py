@@ -392,6 +392,7 @@ CONF_SCHEMA = {
                         'rows': {'type': 'array', 'items': {'type': 'object'}, 'default': [
                             {"Exchange": "{exchange}"},
                             {"Direction": "{direction}"},
+                            {"Leverage": "{leverage}"},
                             {"Open Rate": "{open_rate}"},
                             {"Amount": "{amount}"},
                             {"Stake Amount": "{stake_amount} {stake_currency}"},
@@ -416,6 +417,7 @@ CONF_SCHEMA = {
                         'rows': {'type': 'array', 'items': {'type': 'object'}, 'default': [
                             {"Exchange": "{exchange}"},
                             {"Direction": "{direction}"},
+                            {"Leverage": "{leverage}"},
                             {"Open Rate": "{open_rate}"},
                             {"Close Rate": "{close_rate}"},
                             {"Amount": "{amount}"},

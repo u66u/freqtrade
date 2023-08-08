@@ -115,6 +115,9 @@ class Discord(Webhook):
             }]
             for f in fields:
                 for k, v in f.items():
+                    if (k == "Leverage"):
+                        if msg.get('leverage', 1.0) == 1.0:
+                            continue
                     v = v.format(**msg)
                     embeds[0]['fields'].append(
                         {'name': k, 'value': v, 'inline': True})
