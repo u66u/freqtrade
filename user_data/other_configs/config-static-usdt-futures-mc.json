@@ -1,12 +1,12 @@
 {
-    "max_open_trades": 4,
+    "max_open_trades": -1,
     "stake_currency": "USDT",
-    "stake_amount" : 15,
+    "stake_amount" : 45,
     "amend_last_stake_amount ": true,
     "tradable_balance_ratio": 0.99,
     "fiat_display_currency": "USD",
     "dry_run": true,
-    "dry_run_wallet": 65,
+    "dry_run_wallet": 11500,
     "trading_mode": "futures",
     "margin_mode": "isolated",
     "cancel_open_orders_on_exit": false,
@@ -17,7 +17,7 @@
         "unit": "minutes"
     },
     "order_types": {
-        "entry": "limit",
+        "entry": "market",
         "exit": "market",
         "emergency_exit": "market",
         "force_exit": "market",
@@ -27,7 +27,7 @@
         "stoploss_on_exchange_interval": 60
     },
     "entry_pricing": {
-        "price_side": "same",
+        "price_side": "other",
         "use_order_book": true,
         "order_book_top": 1,
         "price_last_balance": 0.0,
@@ -55,30 +55,7 @@
             "enableRateLimit": true,
             "rateLimit": 200
         },
-        "pair_whitelist": [
-            "BTC/USDT",
-            "ETH/USDT",
-            "XRP/USDT",
-            "ADA/USDT",
-            "SOL/USDT",
-            "DOT/USDT",
-            "AVAX/USDT",
-            "ETC/USDT",
-            "LTC/USDT",
-            "ATOM/USDT",
-            "LINK/USDT",
-            "NEAR/USDT",
-            "XMR/USDT",
-            "FLOW/USDT",
-            "ALGO/USDT",
-            "THETA/USDT",
-            "EGLD/USDT",
-            "DOGE/USDT",
-            "MATIC/USDT",
-            "XLM/USDT",
-            "1INCH/USDT",
-            "AAVE/USDT",
-        ],
+        "pair_whitelist": ["BTC/USDT:USDT","ETH/USDT:USDT","BNB/USDT:USDT","XRP/USDT:USDT","ADA/USDT:USDT","SOL/USDT:USDT","TRX/USDT:USDT","MATIC/USDT:USDT","LTC/USDT:USDT","DOT/USDT:USDT","BCH/USDT:USDT","AVAX/USDT:USDT","LINK/USDT:USDT","XLM/USDT:USDT","UNI/USDT:USDT","ATOM/USDT:USDT","XMR/USDT:USDT","ETC/USDT:USDT","HBAR/USDT:USDT","FIL/USDT:USDT"],
         "pair_blacklist": []
     },
     "edge": {
