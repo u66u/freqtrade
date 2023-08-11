@@ -1,0 +1,30 @@
+{
+    "max_open_trades": 4,
+    "stake_currency": "USDT",
+    "stake_amount" : "unlimited",
+    "amend_last_stake_amount ": true,
+    // "tradable_balance_ratio": 0.99,
+    "available_capital": 70,
+    "fiat_display_currency": "USD",
+    "dry_run": true,
+    "dry_run_wallet": 70,
+    "exchange": {
+        "pair_whitelist": ["BTC/USDT","ETH/USDT","BNB/USDT","XRP/USDT","ADA/USDT","SOL/USDT","TRX/USDT","MATIC/USDT","LTC/USDT","DOT/USDT","BCH/USDT","AVAX/USDT","LINK/USDT","XLM/USDT","UNI/USDT","ATOM/USDT","XMR/USDT","ETC/USDT","HBAR/USDT","FIL/USDT"],
+        "pair_blacklist": []
+    },
+    "pairlists": [
+        {"method": "StaticPairList"},
+    ],
+    "cancel_open_orders_on_exit": false,
+    "bot_name": "freqtrade_bot",
+    "initial_state": "running",
+    "force_entry_enable": false,
+    "internals": {
+        "process_throttle_secs": 5
+    },
+    // "db_url": "sqlite:///user_data/tradesv3.sqlite",
+    "db_url": "sqlite:///user_data/tradesv3-dry-cend-2-kucoin.sqlite", // docker
+    "user_data_dir" : "user_data",
+    "strategy": "SampleStrategy",
+    "strategy_path": "freqtrade_strategies"
+}
