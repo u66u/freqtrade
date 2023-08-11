@@ -556,41 +556,6 @@ def test_get_min_pair_stake_amount_real_data(mocker, default_conf) -> None:
     assert result == 4000
 
 
-def test_set_sandbox(default_conf, mocker):
-    """
-    Test working scenario
-    """
-    api_mock = MagicMock()
-    api_mock.load_markets = MagicMock(return_value={
-        'ETH/BTC': '', 'LTC/BTC': '', 'XRP/BTC': '', 'NEO/BTC': ''
-    })
-    url_mock = PropertyMock(return_value={'test': "api-public.sandbox.gdax.com",
-                                          'api': 'https://api.gdax.com'})
-    type(api_mock).urls = url_mock
-    exchange = get_patched_exchange(mocker, default_conf, api_mock)
-    liveurl = exchange._api.urls['api']
-    default_conf['exchange']['sandbox'] = True
-    exchange.set_sandbox(exchange._api, default_conf['exchange'], 'Logname')
-    assert exchange._api.urls['api'] != liveurl
-
-
-def test_set_sandbox_exception(default_conf, mocker):
-    """
-    Test Fail scenario
-    """
-    api_mock = MagicMock()
-    api_mock.load_markets = MagicMock(return_value={
-        'ETH/BTC': '', 'LTC/BTC': '', 'XRP/BTC': '', 'NEO/BTC': ''
-    })
-    url_mock = PropertyMock(return_value={'api': 'https://api.gdax.com'})
-    type(api_mock).urls = url_mock
-
-    with pytest.raises(OperationalException, match=r'does not provide a sandbox api'):
-        exchange = get_patched_exchange(mocker, default_conf, api_mock)
-        default_conf['exchange']['sandbox'] = True
-        exchange.set_sandbox(exchange._api, default_conf['exchange'], 'Logname')
-
-
 def test__load_async_markets(default_conf, mocker, caplog):
     mocker.patch(f'{EXMS}._init_ccxt')
     mocker.patch(f'{EXMS}.validate_pairs')
@@ -2100,7 +2065,7 @@ def test_get_historic_ohlcv(default_conf, mocker, caplog, exchange_name, candle_
     exchange._async_get_candle_history = Mock(wraps=mock_candle_hist)
     # one_call calculation * 1.8 should do 2 calls
 
-    since = 5 * 60 * exchange.ohlcv_candle_limit('5m', CandleType.SPOT) * 1.8
+    since = 5 * 60 * exchange.ohlcv_candle_limit('5m', candle_type) * 1.8
     ret = exchange.get_historic_ohlcv(
         pair,
         "5m",
