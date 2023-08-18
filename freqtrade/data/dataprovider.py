@@ -313,8 +313,6 @@ class DataProvider:
             # It is not necessary to add the training candles, as they
             # were already added at the beginning of the backtest.
             startup_candles = self.get_required_startup(str(timeframe), False)
-            if int(startup_candle_count) > 0:
-                startup_candles = startup_candle_count
             tf_seconds = timeframe_to_seconds(str(timeframe))
             timerange.subtract_start(tf_seconds * startup_candles)
             self.__cached_pairs_backtesting[saved_pair] = load_pair_history(
