@@ -718,6 +718,9 @@ SCHEMA_MINIMAL_REQUIRED = [
     'dataformat_ohlcv',
     'dataformat_trades',
 ]
+SCHEMA_MINIMAL_WEBSERVER = SCHEMA_MINIMAL_REQUIRED + [
+    'api_server',
+]
 
 CANCEL_REASON = {
     "TIMEOUT": "cancelled due to timeout",
