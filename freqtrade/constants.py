@@ -450,13 +450,14 @@ CONF_SCHEMA = {
                     {"Exchange": "{exchange}"},
                     {"Strategy": "{strategy}"},
                     {"Timeframe": "{timeframe}"},
-                    {"Status": "{status}"}
+                    {"Status": "{status}"},
+                    {"Strategy Version": "{strategy_version}"},
                 ]},
                 'rows_strategy_msg': {'type': 'array', 'items': {'type': 'object'}, 'default': [
                     {"Exchange": "{exchange}"},
                     {"Strategy": "{strategy}"},
                     {"Timeframe": "{timeframe}"},
-                    {"Message": "{msg}"}
+                    {"Message": "{msg}"},
                 ]},
             }
         },

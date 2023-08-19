@@ -141,14 +141,15 @@ class FreqtradeBot(LoggingMixin):
         # Initialize protections AFTER bot start - otherwise parameters are not loaded.
         self.protections = ProtectionManager(self.config, self.strategy.protections)
 
-    def notify_status(self, msg: str, msg_type=RPCMessageType.STATUS) -> None:
+    def notify_status(self, msg: str, msg_type=RPCMessageType.STATUS, strategy_version: str = '') -> None:
         """
         Public method for users of this class (worker, etc.) to send notifications
         via RPC about changes in the bot status.
         """
         self.rpc.send_msg({
             'type': msg_type,
-            'status': msg
+            'status': msg,
+            'strategy_version': strategy_version,
         })
 
     def cleanup(self) -> None:
