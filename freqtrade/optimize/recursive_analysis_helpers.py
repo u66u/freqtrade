@@ -157,7 +157,10 @@ class RecursiveAnalysisSubFunctions:
         current_instance = RecursiveAnalysis(config, strategy_obj)
         current_instance.start()
         elapsed = time.perf_counter() - start
-        logger.info(f"Checking recursive bias of indicators "
+        current_job = 'recursive bias'
+        if(current_instance._lookahead_bias):
+            current_job = 'lookahead bias'
+        logger.info(f"Checking {current_job} of indicators "
                     f"of {Path(strategy_obj['location']).name} "
                     f"took {elapsed:.0f} seconds.")
         return current_instance
