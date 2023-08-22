@@ -42,6 +42,7 @@ class RecursiveAnalysis:
         self.local_config = deepcopy(config)
         self.local_config['strategy'] = strategy_obj['name']
         self._startup_candle = config.get('startup_candle', [199, 399, 499, 999, 1999])
+        self._lookahead_bias = config.get('lookahead_bias', False)
         self.strategy_obj = strategy_obj
 
     @staticmethod
@@ -49,6 +50,7 @@ class RecursiveAnalysis:
         timestamp = int(dt.replace(tzinfo=timezone.utc).timestamp())
         return timestamp
 
+    # For recursive bias check
     # analyzes two data frames with processed indicators and shows differences between them.
     def analyze_indicators(self):
         
@@ -89,6 +91,47 @@ class RecursiveAnalysis:
             else:
                 logger.info("No difference found. Stop the process.")
                 break
+
+    # For lookahead bias check
+    # analyzes two data frames with processed indicators and shows differences between them.
+    def analyze_indicators_lookahead(self):
+        
+        pair_to_check = self.local_config['pairs'][0]
+        logger.info(f"Start checking for lookahead bias")
+
+        
+
+        # check and report signals
+        # base_last_row = self.full_varHolder.indicators[pair_to_check].iloc[-1]
+        # base_timerange = self.full_varHolder.from_dt.strftime('%Y-%m-%dT%H:%M:%S') + "-" + self.full_varHolder.to_dt.strftime('%Y-%m-%dT%H:%M:%S')
+        
+        part = self.partial_varHolder_array[0]
+        part_last_row = part.indicators[pair_to_check].iloc[-1]
+        date_to_check = part_last_row['date']
+        base_row_to_check = self.full_varHolder.indicators[pair_to_check].loc[(self.full_varHolder.indicators[pair_to_check]['date'] == date_to_check)].iloc[-1]
+
+        check_time = part.to_dt.strftime('%Y-%m-%dT%H:%M:%S')
+
+        logger.info(f"Check indicators at {check_time}")
+        # logger.info(f"vs {part_timerange} with {part.startup_candle} startup candle")
+        
+        compare_df = base_row_to_check.compare(part_last_row)
+        if compare_df.shape[0] > 0:
+            # print(compare_df)
+            for col_name, values in compare_df.items():
+                # print(col_name)
+                if 'other' == col_name:
+                    continue
+                indicators = values.index
+
+                for indicator in indicators:
+                    logger.info(f"=> found lookahead in indicator {indicator}")
+                    # logger.info("base value {:.5f}".format(values_diff_self))
+                    # logger.info("part value {:.5f}".format(values_diff_other))
+
+        else:
+            logger.info("No lookahead bias found. Stop the process.")
+            break
 
     def prepare_data(self, varholder: VarHolder, pairs_to_load: List[DataFrame]):
 
@@ -148,6 +191,19 @@ class RecursiveAnalysis:
 
         self.partial_varHolder_array.append(partial_varHolder)
 
+    def fill_partial_varholder_lookahead(self, end_date):
+        partial_varHolder = VarHolder()
+
+        partial_varHolder.from_dt = self.full_varHolder.from_dt
+        partial_varHolder.to_dt = end_date
+        # partial_varHolder.startup_candle = startup_candle
+
+        # self.local_config['startup_candle_count'] = startup_candle
+
+        self.prepare_data(partial_varHolder, self.local_config['pairs'])
+
+        self.partial_varHolder_array.append(partial_varHolder)
+
     def start(self) -> None:
 
         # first make a single backtest
@@ -160,12 +216,22 @@ class RecursiveAnalysis:
 
         timeframe_minutes = timeframe_to_minutes(self.full_varHolder.timeframe)
 
-        start_date_partial = end_date_full - timedelta(minutes=int(timeframe_minutes))
+        if (self._lookahead_bias):
+            end_date_partial = start_date_full + timedelta(minutes=int(timeframe_minutes * 10))
 
-        for startup_candle in self._startup_candle:
-            self.fill_partial_varholder(start_date_partial, int(startup_candle))
+            self.fill_partial_varholder_lookahead(end_date_partial)
 
-        # Restore verbosity, so it's not too quiet for the next strategy
-        restore_verbosity_for_bias_tester()
+            # Restore verbosity, so it's not too quiet for the next strategy
+            restore_verbosity_for_bias_tester()
 
-        self.analyze_indicators()
+            self.analyze_indicators_lookahead()
+        else:
+            start_date_partial = end_date_full - timedelta(minutes=int(timeframe_minutes))
+
+            for startup_candle in self._startup_candle:
+                self.fill_partial_varholder(start_date_partial, int(startup_candle))
+
+            # Restore verbosity, so it's not too quiet for the next strategy
+            restore_verbosity_for_bias_tester()
+
+            self.analyze_indicators()
