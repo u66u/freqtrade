@@ -131,7 +131,6 @@ class RecursiveAnalysis:
 
         else:
             logger.info("No lookahead bias found. Stop the process.")
-            break
 
     def prepare_data(self, varholder: VarHolder, pairs_to_load: List[DataFrame]):
 
