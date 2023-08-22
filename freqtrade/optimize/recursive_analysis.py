@@ -33,6 +33,7 @@ class RecursiveAnalysis:
         self.failed_bias_check = True
         self.full_varHolder = VarHolder()
         self.partial_varHolder_array = []
+        self.partial_varHolder_lookahead_array = []
 
         self.entry_varHolders: List[VarHolder] = []
         self.exit_varHolders: List[VarHolder] = []
@@ -201,7 +202,7 @@ class RecursiveAnalysis:
 
         self.prepare_data(partial_varHolder, self.local_config['pairs'])
 
-        self.partial_varHolder_array.append(partial_varHolder)
+        self.partial_varHolder_lookahead_array.append(partial_varHolder)
 
     def start(self) -> None:
 
@@ -215,22 +216,19 @@ class RecursiveAnalysis:
 
         timeframe_minutes = timeframe_to_minutes(self.full_varHolder.timeframe)
 
-        if (self._lookahead_bias):
-            end_date_partial = start_date_full + timedelta(minutes=int(timeframe_minutes * 10))
+        end_date_partial = start_date_full + timedelta(minutes=int(timeframe_minutes * 10))
 
-            self.fill_partial_varholder_lookahead(end_date_partial)
+        self.fill_partial_varholder_lookahead(end_date_partial)
 
-            # Restore verbosity, so it's not too quiet for the next strategy
-            restore_verbosity_for_bias_tester()
+        # restore_verbosity_for_bias_tester()
 
-            self.analyze_indicators_lookahead()
-        else:
-            start_date_partial = end_date_full - timedelta(minutes=int(timeframe_minutes))
+        start_date_partial = end_date_full - timedelta(minutes=int(timeframe_minutes))
 
-            for startup_candle in self._startup_candle:
-                self.fill_partial_varholder(start_date_partial, int(startup_candle))
+        for startup_candle in self._startup_candle:
+            self.fill_partial_varholder(start_date_partial, int(startup_candle))
 
-            # Restore verbosity, so it's not too quiet for the next strategy
-            restore_verbosity_for_bias_tester()
+        # Restore verbosity, so it's not too quiet for the next strategy
+        restore_verbosity_for_bias_tester()
 
-            self.analyze_indicators()
+        self.analyze_indicators()
+        self.analyze_indicators_lookahead()
