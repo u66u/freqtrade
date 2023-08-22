@@ -100,13 +100,11 @@ class RecursiveAnalysis:
         pair_to_check = self.local_config['pairs'][0]
         logger.info(f"Start checking for lookahead bias")
 
-        
-
         # check and report signals
         # base_last_row = self.full_varHolder.indicators[pair_to_check].iloc[-1]
         # base_timerange = self.full_varHolder.from_dt.strftime('%Y-%m-%dT%H:%M:%S') + "-" + self.full_varHolder.to_dt.strftime('%Y-%m-%dT%H:%M:%S')
         
-        part = self.partial_varHolder_array[0]
+        part = self.partial_varHolder_lookahead_array[0]
         part_last_row = part.indicators[pair_to_check].iloc[-1]
         date_to_check = part_last_row['date']
         base_row_to_check = self.full_varHolder.indicators[pair_to_check].loc[(self.full_varHolder.indicators[pair_to_check]['date'] == date_to_check)].iloc[-1]
