@@ -51,7 +51,7 @@ class LamboLoss2(IHyperOptLoss):
 
         winning_profit = results.loc[results['profit_abs'] > 0, 'profit_abs'].sum()
         losing_profit = results.loc[results['profit_abs'] < 0, 'profit_abs'].sum()
-        profit_factor = winning_profit / abs(losing_profit) if losing_profit else 100
+        profit_factor = winning_profit / abs(losing_profit) if losing_profit else 10
 
         total_profit = strict_profit_abs.sum()
 
