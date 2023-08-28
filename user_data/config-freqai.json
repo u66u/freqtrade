@@ -69,7 +69,7 @@
         // "fit_live_predictions_candles": 600,
         "data_kitchen_thread_count": 10,
         "track_performance": true,
-        "extra_returns_per_train": {"DI_value_param1":0, "DI_value_param2":0, "DI_value_param3":0, "DI_cutoff": 2, "&s-minima_sort_threshold":-2, "&s-maxima_sort_threshold":2},
+        "extra_returns_per_train": {"DI_value_param1":0, "DI_value_param2":0, "DI_value_param3":0, "DI_cutoff": 1, "&s-minima_sort_threshold":-1, "&s-maxima_sort_threshold":1},
         "feature_parameters": {
             "include_corr_pairlist": [
             ],
