@@ -66,7 +66,7 @@
         "live_retrain_hours": 48,
         "write_metrics_to_disk": true,
         "identifier": "jarvis-xgboost",
-        "fit_live_predictions_candles": 600,
+        // "fit_live_predictions_candles": 600,
         "data_kitchen_thread_count": 10,
         "track_performance": true,
         "extra_returns_per_train": {"DI_value_param1":0, "DI_value_param2":0, "DI_value_param3":0, "DI_cutoff": 2, "&s-minima_sort_threshold":-2, "&s-maxima_sort_threshold":2},
