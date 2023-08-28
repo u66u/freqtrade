@@ -79,7 +79,7 @@
                 "1h",
                 // "4h"
             ],
-            "label_period_candles": 50,
+            "label_period_candles": 25,
             "include_shifted_candles": 3,
             "DI_threshold": 10,
             "weight_factor": 0.9,
