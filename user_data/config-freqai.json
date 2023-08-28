@@ -76,7 +76,7 @@
             "include_timeframes": [
                 "5m",
                 "15m",
-                // "1h",
+                "1h",
                 // "4h"
             ],
             "label_period_candles": 100,
@@ -86,7 +86,7 @@
             "principal_component_analysis": false,
             "use_SVM_to_remove_outliers": false,
             "use_DBSCAN_to_remove_outliers": false,
-            "indicator_periods_candles": [8, 20, 50],
+            "indicator_periods_candles": [15, 45],
             "inlier_metric_window": 0,
             "noise_standard_deviation": 0.02,
             "reverse_test_train_order": false,
