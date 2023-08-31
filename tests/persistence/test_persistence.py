@@ -77,18 +77,28 @@ def test_set_stop_loss_liquidation(fee):
     assert trade.liquidation_price == 0.11
     # Stoploss does not change from liquidation price
     assert trade.stop_loss == 1.8
+    assert trade.stop_loss_pct == -0.2
     assert trade.initial_stop_loss == 1.8
 
     # lower stop doesn't move stoploss
     trade.adjust_stop_loss(1.8, 0.2)
     assert trade.liquidation_price == 0.11
     assert trade.stop_loss == 1.8
+    assert trade.stop_loss_pct == -0.2
+    assert trade.initial_stop_loss == 1.8
+
+    # Lower stop with "allow_refresh" does move stoploss
+    trade.adjust_stop_loss(1.8, 0.22, allow_refresh=True)
+    assert trade.liquidation_price == 0.11
+    assert trade.stop_loss == 1.602
+    assert trade.stop_loss_pct == -0.22
     assert trade.initial_stop_loss == 1.8
 
     # higher stop does move stoploss
     trade.adjust_stop_loss(2.1, 0.1)
     assert trade.liquidation_price == 0.11
     assert pytest.approx(trade.stop_loss) == 1.994999
+    assert trade.stop_loss_pct == -0.1
     assert trade.initial_stop_loss == 1.8
     assert trade.stoploss_or_liquidation == trade.stop_loss
 
@@ -130,12 +140,21 @@ def test_set_stop_loss_liquidation(fee):
     assert trade.liquidation_price == 3.8
     # Stoploss does not change from liquidation price
     assert trade.stop_loss == 2.2
+    assert trade.stop_loss_pct == -0.2
     assert trade.initial_stop_loss == 2.2
 
     # Stop doesn't move stop higher
     trade.adjust_stop_loss(2.0, 0.3)
     assert trade.liquidation_price == 3.8
     assert trade.stop_loss == 2.2
+    assert trade.stop_loss_pct == -0.2
+    assert trade.initial_stop_loss == 2.2
+
+    # Stop does move stop higher with "allow_refresh"
+    trade.adjust_stop_loss(2.0, 0.3, allow_refresh=True)
+    assert trade.liquidation_price == 3.8
+    assert trade.stop_loss == 2.3
+    assert trade.stop_loss_pct == -0.3
     assert trade.initial_stop_loss == 2.2
 
     # Stoploss does move lower
@@ -143,6 +162,7 @@ def test_set_stop_loss_liquidation(fee):
     trade.adjust_stop_loss(1.8, 0.1)
     assert trade.liquidation_price == 1.5
     assert pytest.approx(trade.stop_loss) == 1.89
+    assert trade.stop_loss_pct == -0.1
     assert trade.initial_stop_loss == 2.2
     assert trade.stoploss_or_liquidation == 1.5
 
@@ -1969,9 +1989,9 @@ def test_select_order(fee, is_short):
 
     # Open buy order, no sell order
     order = trades[0].select_order(trades[0].entry_side, True)
-    assert order is None
-    order = trades[0].select_order(trades[0].entry_side, False)
     assert order is not None
+    order = trades[0].select_order(trades[0].entry_side, False)
+    assert order is None
     order = trades[0].select_order(trades[0].exit_side, None)
     assert order is None
 
@@ -2442,7 +2462,16 @@ def test_select_filled_orders(fee):
 
     # Closed buy order, no sell order
     orders = trades[0].select_filled_orders('buy')
+    assert isinstance(orders, list)
+    assert len(orders) == 0
+
+    orders = trades[0].select_filled_orders('sell')
     assert orders is not None
+    assert len(orders) == 0
+
+    # closed buy order, and closed sell order
+    orders = trades[1].select_filled_orders('buy')
+    assert isinstance(orders, list)
     assert len(orders) == 1
     order = orders[0]
     assert order.amount > 0
@@ -2450,33 +2479,25 @@ def test_select_filled_orders(fee):
     assert order.side == 'buy'
     assert order.ft_order_side == 'buy'
     assert order.status == 'closed'
-    orders = trades[0].select_filled_orders('sell')
-    assert orders is not None
-    assert len(orders) == 0
-
-    # closed buy order, and closed sell order
-    orders = trades[1].select_filled_orders('buy')
-    assert orders is not None
-    assert len(orders) == 1
 
     orders = trades[1].select_filled_orders('sell')
-    assert orders is not None
+    assert isinstance(orders, list)
     assert len(orders) == 1
 
     # Has open buy order
     orders = trades[3].select_filled_orders('buy')
-    assert orders is not None
+    assert isinstance(orders, list)
     assert len(orders) == 0
     orders = trades[3].select_filled_orders('sell')
-    assert orders is not None
+    assert isinstance(orders, list)
     assert len(orders) == 0
 
     # Open sell order
     orders = trades[4].select_filled_orders('buy')
-    assert orders is not None
+    assert isinstance(orders, list)
     assert len(orders) == 1
     orders = trades[4].select_filled_orders('sell')
-    assert orders is not None
+    assert isinstance(orders, list)
     assert len(orders) == 0
 
 
