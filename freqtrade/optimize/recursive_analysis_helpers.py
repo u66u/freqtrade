@@ -20,7 +20,7 @@ class RecursiveAnalysisSubFunctions:
     def text_table_recursive_analysis_instances(
             config: Dict[str, Any],
             recursive_instances: List[RecursiveAnalysis]):
-        print(recursive_instances[0])
+        print(recursive_instances[0]._startup_candle.items())
         # startups = recursive_instances[0]._startup_candle.sort()
         # headers = ['strategy', 'indicators']
         # for candle in startups:
