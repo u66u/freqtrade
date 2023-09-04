@@ -8,7 +8,6 @@ from typing import Any, Dict, List, Optional
 from pandas import DataFrame
 
 from freqtrade.configuration import TimeRange
-from freqtrade.data.history import get_timerange
 from freqtrade.exchange import timeframe_to_minutes
 from freqtrade.loggers.set_log_levels import (reduce_verbosity_for_bias_tester,
                                               restore_verbosity_for_bias_tester)
@@ -27,13 +26,14 @@ class VarHolder:
     timeframe: str
     startup_candle: int
 
+
 class RecursiveAnalysis:
 
     def __init__(self, config: Dict[str, Any], strategy_obj: Dict):
         self.failed_bias_check = True
         self.full_varHolder = VarHolder()
-        self.partial_varHolder_array = []
-        self.partial_varHolder_lookahead_array = []
+        self.partial_varHolder_array: List[VarHolder] = []
+        self.partial_varHolder_lookahead_array: List[VarHolder] = []
 
         self.entry_varHolders: List[VarHolder] = []
         self.exit_varHolders: List[VarHolder] = []
@@ -44,7 +44,7 @@ class RecursiveAnalysis:
         self.local_config['strategy'] = strategy_obj['name']
         self._startup_candle = config.get('startup_candle', [199, 399, 499, 999, 1999])
         self.strategy_obj = strategy_obj
-        self.dict_recursive = dict()
+        self.dict_recursive: Dict[str, Any] = dict()
 
     @staticmethod
     def dt_to_timestamp(dt: datetime):
@@ -54,21 +54,16 @@ class RecursiveAnalysis:
     # For recursive bias check
     # analyzes two data frames with processed indicators and shows differences between them.
     def analyze_indicators(self):
-        
+
         pair_to_check = self.local_config['pairs'][0]
-        logger.info(f"Start checking for recursive bias")
+        logger.info("Start checking for recursive bias")
 
         # check and report signals
         base_last_row = self.full_varHolder.indicators[pair_to_check].iloc[-1]
-        base_timerange = self.full_varHolder.from_dt.strftime('%Y-%m-%dT%H:%M:%S') + "-" + self.full_varHolder.to_dt.strftime('%Y-%m-%dT%H:%M:%S')
-        
+
         for part in self.partial_varHolder_array:
             part_last_row = part.indicators[pair_to_check].iloc[-1]
-            part_timerange = part.from_dt.strftime('%Y-%m-%dT%H:%M:%S') + "-" + part.to_dt.strftime('%Y-%m-%dT%H:%M:%S')
 
-            logger.info(f"Comparing last row of {base_timerange} backtest")
-            logger.info(f"vs {part_timerange} with {part.startup_candle} startup candle")
-            
             compare_df = base_last_row.compare(part_last_row)
             if compare_df.shape[0] > 0:
                 # print(compare_df)
@@ -79,19 +74,15 @@ class RecursiveAnalysis:
                     indicators = values.index
 
                     for indicator in indicators:
-                        if(indicator not in self.dict_recursive):
+                        if (indicator not in self.dict_recursive):
                             self.dict_recursive[indicator] = {}
 
                         values_diff = compare_df.loc[indicator]
                         values_diff_self = values_diff.loc['self']
                         values_diff_other = values_diff.loc['other']
-                        difference = (values_diff_other - values_diff_self) / values_diff_self * 100
-                        
-                        self.dict_recursive[indicator][part.startup_candle] = "{:.3f}%".format(difference)
+                        diff = (values_diff_other - values_diff_self) / values_diff_self * 100
 
-                        # logger.info(f"=> found difference in indicator "
-                        #             f"{indicator}, with difference of "
-                        #             "{:.8f}%".format(difference))
+                        self.dict_recursive[indicator][part.startup_candle] = f"{diff:.3f}%"
 
             else:
                 logger.info("No difference found. Stop the process.")
@@ -100,25 +91,22 @@ class RecursiveAnalysis:
     # For lookahead bias check
     # analyzes two data frames with processed indicators and shows differences between them.
     def analyze_indicators_lookahead(self):
-        
-        pair_to_check = self.local_config['pairs'][0]
-        logger.info(f"Start checking for lookahead bias")
 
-        # check and report signals
-        # base_last_row = self.full_varHolder.indicators[pair_to_check].iloc[-1]
-        # base_timerange = self.full_varHolder.from_dt.strftime('%Y-%m-%dT%H:%M:%S') + "-" + self.full_varHolder.to_dt.strftime('%Y-%m-%dT%H:%M:%S')
-        
+        pair_to_check = self.local_config['pairs'][0]
+        logger.info("Start checking for lookahead bias on indicators only")
+
         part = self.partial_varHolder_lookahead_array[0]
         part_last_row = part.indicators[pair_to_check].iloc[-1]
         date_to_check = part_last_row['date']
-        base_row_to_check = self.full_varHolder.indicators[pair_to_check].loc[(self.full_varHolder.indicators[pair_to_check]['date'] == date_to_check)].iloc[-1]
+        index_to_get = (self.full_varHolder.indicators[pair_to_check]['date'] == date_to_check)
+        base_row_check = self.full_varHolder.indicators[pair_to_check].loc[index_to_get].iloc[-1]
 
         check_time = part.to_dt.strftime('%Y-%m-%dT%H:%M:%S')
 
         logger.info(f"Check indicators at {check_time}")
         # logger.info(f"vs {part_timerange} with {part.startup_candle} startup candle")
-        
-        compare_df = base_row_to_check.compare(part_last_row)
+
+        compare_df = base_row_check.compare(part_last_row)
         if compare_df.shape[0] > 0:
             # print(compare_df)
             for col_name, values in compare_df.items():
@@ -133,7 +121,7 @@ class RecursiveAnalysis:
                     # logger.info("part value {:.5f}".format(values_diff_other))
 
         else:
-            logger.info("No lookahead bias found. Stop the process.")
+            logger.info("No lookahead bias on indicators found. Stop the process.")
 
     def prepare_data(self, varholder: VarHolder, pairs_to_load: List[DataFrame]):
 
