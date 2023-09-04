@@ -30,10 +30,7 @@ class RecursiveAnalysisSubFunctions:
             if len(inst.dict_recursive) > 0:
                 for indicator, values in inst.dict_recursive.items():
                     temp_data = [inst.strategy_obj['name'], indicator]
-                    for key, datas in values.items():
-                        print(f"lenght {key}, type key {type(key)}")
                     for candle in startups:
-                        print(f"candle {candle}, type candle key {type(candle)}")
                         temp_data.append(values.get(int(candle), '-'))
                     data.append(temp_data)
 
