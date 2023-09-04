@@ -13,7 +13,8 @@ from freqtrade.data.metrics import calculate_expectancy, calculate_max_drawdown
 from freqtrade.optimize.hyperopt import IHyperOptLoss
 
 # Set maximum expectancy used in the calculation
-max_expectancy = 40
+max_expectancy = 10
+max_profit_ratio = 10
 max_avg_profit = 200
 
 class LamboLoss3(IHyperOptLoss):
@@ -51,7 +52,7 @@ class LamboLoss3(IHyperOptLoss):
 
         winning_profit = results.loc[results['profit_abs'] > 0, 'profit_abs'].sum()
         losing_profit = results.loc[results['profit_abs'] < 0, 'profit_abs'].sum()
-        profit_factor = winning_profit / abs(losing_profit) if losing_profit else 100
+        profit_factor = winning_profit / abs(losing_profit) if losing_profit else 10
 
         total_profit = strict_profit_abs.sum()
 
@@ -59,11 +60,10 @@ class LamboLoss3(IHyperOptLoss):
 
         total_trades = len(results)
 
-        trade_duration = results['trade_duration'].mean()
-        if trade_duration == 0:
-            trade_duration = 0.0001
+        # if (nb_loss_trades == 0):
+        #     return -total_profit * 100
         
-        loss_value = total_profit * min(average_profit, max_avg_profit) * profit_factor * min(expectancy_ratio, max_expectancy) * total_trades / trade_duration
+        loss_value = total_profit * min(average_profit, max_avg_profit) * min(profit_factor, max_profit_ratio) * min(expectancy_ratio, max_expectancy) * total_trades
 
         if (total_profit < 0) and (loss_value > 0):
             return loss_value
