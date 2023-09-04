@@ -34,7 +34,7 @@ class RecursiveAnalysisSubFunctions:
                         print(f"lenght {key}, type key {type(key)}")
                     for candle in startups:
                         print(f"candle {candle}, type candle key {type(candle)}")
-                        temp_data.append(values.get(candle, '-'))
+                        temp_data.append(values.get(int(candle), '-'))
                     data.append(temp_data)
 
         from tabulate import tabulate
