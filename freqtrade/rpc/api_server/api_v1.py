@@ -114,17 +114,6 @@ def daily(timescale: int = 7, rpc: RPC = Depends(get_rpc), config=Depends(get_co
     return rpc._rpc_timeunit_profit(timescale, config['stake_currency'],
                                     config.get('fiat_display_currency', ''))
 
-@router.get('/weekly', response_model=Daily, tags=['info'])
-def weekly(timescale: int = 7, rpc: RPC = Depends(get_rpc), config=Depends(get_config)):
-    return rpc._rpc_timeunit_profit(timescale, config['stake_currency'],
-                                    config.get('fiat_display_currency', ''), 'weeks')
-
-@router.get('/monthly', response_model=Monthly, tags=['info'])
-def monthly(timescale: int = 7, rpc: RPC = Depends(get_rpc), config=Depends(get_config)):
-    return rpc._rpc_timeunit_profit(timescale, config['stake_currency'],
-                                    config.get('fiat_display_currency', ''), 'months')
-
-
 @router.get('/weekly', response_model=DailyWeeklyMonthly, tags=['info'])
 def weekly(timescale: int = 4, rpc: RPC = Depends(get_rpc), config=Depends(get_config)):
     return rpc._rpc_timeunit_profit(timescale, config['stake_currency'],
