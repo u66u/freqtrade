@@ -20,24 +20,25 @@ class RecursiveAnalysisSubFunctions:
     def text_table_recursive_analysis_instances(
             config: Dict[str, Any],
             recursive_instances: List[RecursiveAnalysis]):
-        startups = recursive_instances[0]._startup_candle.sort()
-        headers = ['strategy', 'indicators']
-        for candle in startups:
-            headers.append(candle)
+        print(recursive_instances[0])
+        # startups = recursive_instances[0]._startup_candle.sort()
+        # headers = ['strategy', 'indicators']
+        # for candle in startups:
+        #     headers.append(candle)
 
-        data = []
-        for inst in recursive_instances:
-            if len(inst.dict_recursive) > 0:
-                for indicator, values in inst.dict_recursive.items():
-                    temp_data = [inst.strategy_obj['name'], indicator]
-                    for candle in startups:
-                        temp_data.append(values.get(candle, '-'))
-                    data.append(temp_data)
+        # data = []
+        # for inst in recursive_instances:
+        #     if len(inst.dict_recursive) > 0:
+        #         for indicator, values in inst.dict_recursive.items():
+        #             temp_data = [inst.strategy_obj['name'], indicator]
+        #             for candle in startups:
+        #                 temp_data.append(values.get(candle, '-'))
+        #             data.append(temp_data)
 
-        from tabulate import tabulate
-        table = tabulate(data, headers=headers, tablefmt="orgtbl")
-        print(table)
-        return table, headers, data
+        # from tabulate import tabulate
+        # table = tabulate(data, headers=headers, tablefmt="orgtbl")
+        # print(table)
+        # return table, headers, data
 
     @staticmethod
     def export_to_csv(config: Dict[str, Any], lookahead_analysis: List[RecursiveAnalysis]):
