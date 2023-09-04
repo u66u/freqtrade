@@ -373,7 +373,7 @@ class RPC:
 
         data = [
             {
-                'date': f"{key.year}-{key.month:02d}" if timeunit == 'months' else key,
+                'date': key,
                 'abs_profit': value["amount"],
                 'starting_balance': value["daily_stake"],
                 'rel_profit': value["rel_profit"],
