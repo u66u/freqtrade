@@ -89,11 +89,9 @@ class RecursiveAnalysis:
                         
                         self.dict_recursive[indicator][part.startup_candle] = "{:.3f}%".format(difference)
 
-                        logger.info(f"=> found difference in indicator "
-                                    f"{indicator}, with difference of "
-                                    "{:.8f}%".format(difference))
-                        # logger.info("base value {:.5f}".format(values_diff_self))
-                        # logger.info("part value {:.5f}".format(values_diff_other))
+                        # logger.info(f"=> found difference in indicator "
+                        #             f"{indicator}, with difference of "
+                        #             "{:.8f}%".format(difference))
 
             else:
                 logger.info("No difference found. Stop the process.")
