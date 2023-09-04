@@ -493,9 +493,6 @@ class Configuration:
         self._args_to_config(config, argname='startup_candle',
                              logstring='Startup candle to be used on recursive analysis: {}')
 
-        self._args_to_config(config, argname='lookahead_bias',
-                             logstring='Check lookahead bias using recursive bias check method.')
-
     def _process_runmode(self, config: Config) -> None:
 
         self._args_to_config(config, argname='dry_run',

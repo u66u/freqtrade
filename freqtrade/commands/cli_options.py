@@ -710,10 +710,4 @@ AVAILABLE_CLI_OPTIONS = {
         help='Specify startup candles to be checked (`199`, `499`, `999`, `1999`).',
         nargs='+',
     ),
-    "lookahead_bias": Arg(
-        '--lookahead-bias',
-        help='Check lookahead bias using recursive bias check method.',
-        action='store_true',
-        default=False,
-    ),
 }

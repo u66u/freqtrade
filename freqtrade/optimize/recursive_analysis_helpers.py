@@ -20,40 +20,20 @@ class RecursiveAnalysisSubFunctions:
     def text_table_recursive_analysis_instances(
             config: Dict[str, Any],
             recursive_instances: List[RecursiveAnalysis]):
-        headers = ['timerange', 'strategy', 'has_bias', 'total_signals',
-                   'biased_entry_signals', 'biased_exit_signals', 'biased_indicators']
+        startups = recursive_instances[0]._startup_candle.sort()
+        headers = ['strategy', 'indicators']
+        for candle in startups:
+            headers.append(candle)
+
         data = []
         for inst in recursive_instances:
-            if config['minimum_trade_amount'] > inst.current_analysis.total_signals:
-                data.append(
-                    [
-                        inst.strategy_obj['location'].parts[-1],
-                        inst.strategy_obj['name'],
-                        "too few trades caught "
-                        f"({inst.current_analysis.total_signals}/{config['minimum_trade_amount']})."
-                        f"Test failed."
-                    ]
-                )
-            elif inst.failed_bias_check:
-                data.append(
-                    [
-                        inst.strategy_obj['location'].parts[-1],
-                        inst.strategy_obj['name'],
-                        'error while checking'
-                    ]
-                )
-            else:
-                data.append(
-                    [
-                        inst.strategy_obj['location'].parts[-1],
-                        inst.strategy_obj['name'],
-                        inst.current_analysis.has_bias,
-                        inst.current_analysis.total_signals,
-                        inst.current_analysis.false_entry_signals,
-                        inst.current_analysis.false_exit_signals,
-                        ", ".join(inst.current_analysis.false_indicators)
-                    ]
-                )
+            if len(inst.dict_recursive) > 0:
+                for indicator, values in inst.dict_recursive.items();
+                    temp_data = [inst.strategy_obj['name'], indicator]
+                    for candle in startups:
+                        temp_data.append(values.get(candle, '-'))
+                    data.append(temp_data)
+
         from tabulate import tabulate
         table = tabulate(data, headers=headers, tablefmt="orgtbl")
         print(table)
@@ -189,14 +169,14 @@ class RecursiveAnalysisSubFunctions:
                             config, strategy_obj))
                     break
 
-        # # report the results
-        # if RecursiveAnalysis_instances:
-        #     RecursiveAnalysisSubFunctions.text_table_recursive_analysis_instances(
-        #         config, RecursiveAnalysis_instances)
-        #     if config.get('lookahead_analysis_exportfilename') is not None:
-        #         RecursiveAnalysisSubFunctions.export_to_csv(config, RecursiveAnalysis_instances)
-        # else:
-        #     logger.error("There were no strategies specified neither through "
-        #                  "--strategy nor through "
-        #                  "--strategy_list "
-        #                  "or timeframe was not specified.")
+        # report the results
+        if RecursiveAnalysis_instances:
+            RecursiveAnalysisSubFunctions.text_table_recursive_analysis_instances(
+                config, RecursiveAnalysis_instances)
+            if config.get('lookahead_analysis_exportfilename') is not None:
+                RecursiveAnalysisSubFunctions.export_to_csv(config, RecursiveAnalysis_instances)
+        else:
+            logger.error("There were no strategies specified neither through "
+                         "--strategy nor through "
+                         "--strategy_list "
+                         "or timeframe was not specified.")

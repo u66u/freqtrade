@@ -43,8 +43,8 @@ class RecursiveAnalysis:
         self.local_config = deepcopy(config)
         self.local_config['strategy'] = strategy_obj['name']
         self._startup_candle = config.get('startup_candle', [199, 399, 499, 999, 1999])
-        self._lookahead_bias = config.get('lookahead_bias', False)
         self.strategy_obj = strategy_obj
+        self.dict_recursive = dict()
 
     @staticmethod
     def dt_to_timestamp(dt: datetime):
@@ -79,10 +79,16 @@ class RecursiveAnalysis:
                     indicators = values.index
 
                     for indicator in indicators:
+                        if(indicator not in self.dict_recursive):
+                            self.dict_recursive[indicator] = {}
+
                         values_diff = compare_df.loc[indicator]
                         values_diff_self = values_diff.loc['self']
                         values_diff_other = values_diff.loc['other']
                         difference = (values_diff_other - values_diff_self) / values_diff_self * 100
+                        
+                        self.dict_recursive[indicator][part.startup_candle] = "{:.3f}%".format(difference)
+
                         logger.info(f"=> found difference in indicator "
                                     f"{indicator}, with difference of "
                                     "{:.8f}%".format(difference))

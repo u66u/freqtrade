@@ -182,7 +182,6 @@ CONF_SCHEMA = {
             'uniqueItems': True,
             'default': [199, 399, 499, 999, 1999],
         },
-        'lookahead_bias': {'type': 'boolean', 'default': False},
         'liquidation_buffer': {'type': 'number', 'minimum': 0.0, 'maximum': 0.99},
         'backtest_breakdown': {
             'type': 'array',
