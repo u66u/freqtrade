@@ -17,7 +17,7 @@ max_expectancy = 10
 max_profit_ratio = 10
 max_avg_profit = 200
 
-class LamboLoss3(IHyperOptLoss):
+class LamboLoss4(IHyperOptLoss):
 
     """
     Defines the loss function for hyperopt.
