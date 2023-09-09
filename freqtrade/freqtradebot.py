@@ -1529,17 +1529,18 @@ class FreqtradeBot(LoggingMixin):
         cancelled = False
         # Cancelled orders may have the status of 'canceled' or 'closed'
         if order['status'] not in constants.NON_OPEN_EXCHANGE_STATES:
-            filled_val: float = order.get('filled', 0.0) or 0.0
-            filled_rem_stake = trade.stake_amount - filled_val * trade.open_rate
+            filled_amt: float = order.get('filled', 0.0) or 0.0
+            # Filled val is in quote currency (after leverage)
+            filled_rem_stake = trade.stake_amount - (filled_amt * trade.open_rate / trade.leverage)
             minstake = self.exchange.get_min_pair_stake_amount(
                 trade.pair, trade.open_rate, self.strategy.stoploss)
             # Double-check remaining amount
-            if filled_val > 0:
+            if filled_amt > 0:
                 reason = constants.CANCEL_REASON['PARTIALLY_FILLED']
                 if minstake and filled_rem_stake < minstake:
                     logger.warning(
                         f"Order {trade.open_order_id} for {trade.pair} not cancelled, as "
-                        f"the filled amount of {filled_val} would result in an unexitable trade.")
+                        f"the filled amount of {filled_amt} would result in an unexitable trade.")
                     reason = constants.CANCEL_REASON['PARTIALLY_FILLED_KEEP_OPEN']
 
                     self._notify_exit_cancel(
@@ -1732,14 +1733,12 @@ class FreqtradeBot(LoggingMixin):
             amount = order.safe_filled if fill else order.safe_amount
             order_rate: float = order.safe_price
 
-            profit = trade.calc_profit(rate=order_rate, amount=amount, open_rate=trade.open_rate)
-            profit_ratio = trade.calc_profit_ratio(order_rate, amount, trade.open_rate)
+            profit = trade.calculate_profit(order_rate, amount, trade.open_rate)
         else:
             order_rate = trade.safe_close_rate
-            profit = trade.calc_profit(rate=order_rate) + (0.0 if fill else trade.realized_profit)
-            profit_ratio = trade.calc_profit_ratio(order_rate)
+            profit = trade.calculate_profit(rate=order_rate)
             amount = trade.amount
-        gain = "profit" if profit_ratio > 0 else "loss"
+        gain = "profit" if profit.profit_ratio > 0 else "loss"
 
         msg: RPCSellMsg = {
             'type': (RPCMessageType.EXIT_FILL if fill
@@ -1757,8 +1756,8 @@ class FreqtradeBot(LoggingMixin):
             'open_rate': trade.open_rate,
             'close_rate': order_rate,
             'current_rate': current_rate,
-            'profit_amount': profit,
-            'profit_ratio': profit_ratio,
+            'profit_amount': profit.profit_abs if fill else profit.total_profit,
+            'profit_ratio': profit.profit_ratio,
             'buy_tag': trade.enter_tag,
             'enter_tag': trade.enter_tag,
             'sell_reason': trade.exit_reason,  # Deprecated
@@ -1792,11 +1791,10 @@ class FreqtradeBot(LoggingMixin):
         order = self.order_obj_or_raise(order_id, order_or_none)
 
         profit_rate: float = trade.safe_close_rate
-        profit_trade = trade.calc_profit(rate=profit_rate)
+        profit = trade.calculate_profit(rate=profit_rate)
         current_rate = self.exchange.get_rate(
             trade.pair, side='exit', is_short=trade.is_short, refresh=False)
-        profit_ratio = trade.calc_profit_ratio(profit_rate)
-        gain = "profit" if profit_ratio > 0 else "loss"
+        gain = "profit" if profit.profit_ratio > 0 else "loss"
 
         msg: RPCSellCancelMsg = {
             'type': RPCMessageType.EXIT_CANCEL,
@@ -1811,8 +1809,8 @@ class FreqtradeBot(LoggingMixin):
             'amount': order.safe_amount_after_fee,
             'open_rate': trade.open_rate,
             'current_rate': current_rate,
-            'profit_amount': profit_trade,
-            'profit_ratio': profit_ratio,
+            'profit_amount': profit.profit_abs,
+            'profit_ratio': profit.profit_ratio,
             'buy_tag': trade.enter_tag,
             'enter_tag': trade.enter_tag,
             'sell_reason': trade.exit_reason,  # Deprecated
