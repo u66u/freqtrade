@@ -1,0 +1,9 @@
+{
+    "exchange": {
+        "pair_whitelist": ["ETH/BTC","BNB/BTC","XRP/BTC","ADA/BTC","SOL/BTC","TRX/BTC","DOT/BTC","MATIC/BTC","LTC/BTC","BCH/BTC","LINK/BTC","XLM/BTC","AVAX/BTC","XMR/BTC","ATOM/BTC","UNI/BTC","ETC/BTC","HBAR/BTC","FIL/BTC"],
+        "pair_blacklist": []
+    },
+    "pairlists": [
+        {"method": "StaticPairList"},
+    ],
+}
