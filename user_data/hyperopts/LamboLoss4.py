@@ -23,8 +23,7 @@ class LamboLoss4(IHyperOptLoss):
     """
     Defines the loss function for hyperopt.
     
-    This implementation optimizes for max drawdown, average profit, profit factor, expectancy, and high trade count
-    Less max drawdown more profit -> Lower return value
+    Important params: expectancy ratio, profit factor, avg profit %, total trades and square root of avg trade duration
     """
 
     @staticmethod
