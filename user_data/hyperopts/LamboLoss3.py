@@ -60,10 +60,14 @@ class LamboLoss3(IHyperOptLoss):
 
         total_trades = len(results)
 
+        trade_duration = results['trade_duration'].mean()
+        backtest_days = (max_date - min_date).days or 1
+        average_trades_per_day = round(total_trades / backtest_days, 5)
+
         # if (nb_loss_trades == 0):
         #     return -total_profit * 100
         
-        loss_value = total_profit * min(average_profit, max_avg_profit) * min(profit_factor, max_profit_ratio) * min(expectancy_ratio, max_expectancy) * total_trades
+        loss_value = total_profit * min(average_profit, max_avg_profit) * min(profit_factor, max_profit_ratio) * min(expectancy_ratio, max_expectancy) * average_trades_per_day
 
         if (total_profit < 0) and (loss_value > 0):
             return loss_value
