@@ -16,7 +16,6 @@ class RecursiveAnalysisSubFunctions:
 
     @staticmethod
     def text_table_recursive_analysis_instances(
-            config: Dict[str, Any],
             recursive_instances: List[RecursiveAnalysis]):
         startups = recursive_instances[0]._startup_candle
         headers = ['indicators']
@@ -43,7 +42,7 @@ class RecursiveAnalysisSubFunctions:
             # setting a timerange is enforced here
             raise OperationalException(
                 "Please set a timerange. "
-                "A timerange of 20 candles are enough for recursive analysis."
+                "A timerange of 5000 candles are enough for recursive analysis."
             )
 
         if config.get('backtest_cache') is None:
@@ -78,12 +77,12 @@ class RecursiveAnalysisSubFunctions:
 
         RecursiveAnalysis_instances = []
 
-        # unify --strategy and --strategy_list to one list
+        # unify --strategy and --strategy-list to one list
         if not (strategy_list := config.get('strategy_list', [])):
             if config.get('strategy') is None:
                 raise OperationalException(
                     "No Strategy specified. Please specify a strategy via --strategy or "
-                    "--strategy_list"
+                    "--strategy-list"
                 )
             strategy_list = [config['strategy']]
 
@@ -99,9 +98,9 @@ class RecursiveAnalysisSubFunctions:
         # report the results
         if RecursiveAnalysis_instances:
             RecursiveAnalysisSubFunctions.text_table_recursive_analysis_instances(
-                config, RecursiveAnalysis_instances)
+                RecursiveAnalysis_instances)
         else:
             logger.error("There were no strategies specified neither through "
                          "--strategy nor through "
-                         "--strategy_list "
+                         "--strategy-list "
                          "or timeframe was not specified.")

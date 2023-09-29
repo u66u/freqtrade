@@ -208,8 +208,9 @@ class Arguments:
                                         start_list_strategies, start_list_timeframes,
                                         start_lookahead_analysis, start_new_config,
                                         start_new_strategy, start_plot_dataframe, start_plot_profit,
-                                        start_recursive_analysis, start_show_trades, start_strategy_update,
-                                        start_test_pairlist, start_trading, start_webserver)
+                                        start_recursive_analysis, start_show_trades,
+                                        start_strategy_update, start_test_pairlist, start_trading,
+                                        start_webserver)
 
         subparsers = self.parser.add_subparsers(dest='command',
                                                 # Use custom message when no subhandler is added
@@ -473,7 +474,7 @@ class Arguments:
         # Add recursive_analysis subcommand
         recursive_analayis_cmd = subparsers.add_parser(
             'recursive-analysis',
-            help="Check for potential look ahead bias.",
+            help="Check for potential recursive formula issue.",
             parents=[_common_parser, _strategy_parser])
 
         recursive_analayis_cmd.set_defaults(func=start_recursive_analysis)

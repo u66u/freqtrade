@@ -33,7 +33,7 @@ HYPEROPT_LOSS_BUILTIN = ['ShortTradeDurHyperOptLoss', 'OnlyProfitHyperOptLoss',
                          'MaxDrawDownHyperOptLoss', 'MaxDrawDownRelativeHyperOptLoss',
                          'ProfitDrawDownHyperOptLoss']
 AVAILABLE_PAIRLISTS = ['StaticPairList', 'VolumePairList', 'ProducerPairList', 'RemotePairList',
-                       'AgeFilter', 'OffsetFilter', 'PerformanceFilter',
+                       'AgeFilter', "FullTradesFilter", 'OffsetFilter', 'PerformanceFilter',
                        'PrecisionFilter', 'PriceFilter', 'RangeStabilityFilter',
                        'ShuffleFilter', 'SpreadFilter', 'VolatilityFilter']
 AVAILABLE_PROTECTIONS = ['CooldownPeriod',
@@ -763,3 +763,6 @@ Config = Dict[str, Any]
 # Exchange part of the configuration.
 ExchangeConfig = Dict[str, Any]
 IntOrInf = float
+
+
+EntryExecuteMode = Literal['initial', 'pos_adjust', 'replace']
