@@ -2771,9 +2771,9 @@ def test_manage_open_orders_entry(
 
     order = Order.parse_from_ccxt_object(old_order, 'mocked', 'buy')
     open_trade.orders[0] = order
-    limit_buy_cancel = deepcopy(old_order)
-    limit_buy_cancel['status'] = 'canceled'
-    cancel_order_mock = MagicMock(return_value=limit_buy_cancel)
+    limit_entry_cancel = deepcopy(old_order)
+    limit_entry_cancel['status'] = 'canceled'
+    cancel_order_mock = MagicMock(return_value=limit_entry_cancel)
     patch_exchange(mocker)
     mocker.patch.multiple(
         EXMS,
@@ -2816,9 +2816,9 @@ def test_adjust_entry_cancel(
     freqtrade = get_patched_freqtradebot(mocker, default_conf_usdt)
     old_order = limit_sell_order_old if is_short else limit_buy_order_old
     old_order['id'] = open_trade.open_orders[0].order_id
-    limit_buy_cancel = deepcopy(old_order)
-    limit_buy_cancel['status'] = 'canceled'
-    cancel_order_mock = MagicMock(return_value=limit_buy_cancel)
+    limit_entry_cancel = deepcopy(old_order)
+    limit_entry_cancel['status'] = 'canceled'
+    cancel_order_mock = MagicMock(return_value=limit_entry_cancel)
     mocker.patch.multiple(
         EXMS,
         fetch_ticker=ticker_usdt,
@@ -2854,6 +2854,52 @@ def test_adjust_entry_cancel(
 
 
 @pytest.mark.parametrize("is_short", [False, True])
+def test_adjust_entry_replace_fail(
+    default_conf_usdt, ticker_usdt, limit_buy_order_old, open_trade,
+    limit_sell_order_old, fee, mocker, caplog, is_short
+) -> None:
+    freqtrade = get_patched_freqtradebot(mocker, default_conf_usdt)
+    old_order = limit_sell_order_old if is_short else limit_buy_order_old
+    old_order['id'] = open_trade.open_orders[0].order_id
+    limit_entry_cancel = deepcopy(old_order)
+    limit_entry_cancel['status'] = 'open'
+    cancel_order_mock = MagicMock(return_value=limit_entry_cancel)
+    fetch_order_mock = MagicMock(return_value=old_order)
+    mocker.patch.multiple(
+        EXMS,
+        fetch_ticker=ticker_usdt,
+        fetch_order=fetch_order_mock,
+        cancel_order_with_result=cancel_order_mock,
+        get_fee=fee
+    )
+    mocker.patch('freqtrade.freqtradebot.sleep')
+
+    open_trade.is_short = is_short
+    Trade.session.add(open_trade)
+    Trade.commit()
+
+    # Timeout to not interfere
+    freqtrade.strategy.ft_check_timed_out = MagicMock(return_value=False)
+
+    # Attempt replace order - which fails
+    freqtrade.strategy.adjust_entry_price = MagicMock(return_value=12234)
+    freqtrade.manage_open_orders()
+    trades = Trade.session.scalars(
+        select(Trade)
+        .where(Order.ft_trade_id == Trade.id)
+        ).all()
+
+    assert len(trades) == 0
+    assert len(Order.session.scalars(select(Order)).all()) == 0
+    assert fetch_order_mock.call_count == 4
+    assert log_has_re(
+        r"Could not cancel order.*, therefore not replacing\.", caplog)
+
+    # Entry adjustment is called
+    assert freqtrade.strategy.adjust_entry_price.call_count == 1
+
+
+@pytest.mark.parametrize("is_short", [False, True])
 def test_adjust_entry_maintain_replace(
     default_conf_usdt, ticker_usdt, limit_buy_order_old, open_trade,
     limit_sell_order_old, fee, mocker, caplog, is_short
@@ -2861,9 +2907,9 @@ def test_adjust_entry_maintain_replace(
     freqtrade = get_patched_freqtradebot(mocker, default_conf_usdt)
     old_order = limit_sell_order_old if is_short else limit_buy_order_old
     old_order['id'] = open_trade.open_orders_ids[0]
-    limit_buy_cancel = deepcopy(old_order)
-    limit_buy_cancel['status'] = 'canceled'
-    cancel_order_mock = MagicMock(return_value=limit_buy_cancel)
+    limit_entry_cancel = deepcopy(old_order)
+    limit_entry_cancel['status'] = 'canceled'
+    cancel_order_mock = MagicMock(return_value=limit_entry_cancel)
     mocker.patch.multiple(
         EXMS,
         fetch_ticker=ticker_usdt,
@@ -3334,12 +3380,12 @@ def test_manage_open_orders_exception(default_conf_usdt, ticker_usdt, open_trade
 def test_handle_cancel_enter(mocker, caplog, default_conf_usdt, limit_order, is_short, fee) -> None:
     patch_RPCManager(mocker)
     patch_exchange(mocker)
-    l_order = limit_order[entry_side(is_short)]
-    cancel_buy_order = deepcopy(limit_order[entry_side(is_short)])
-    cancel_buy_order['status'] = 'canceled'
-    del cancel_buy_order['filled']
+    l_order = deepcopy(limit_order[entry_side(is_short)])
+    cancel_entry_order = deepcopy(limit_order[entry_side(is_short)])
+    cancel_entry_order['status'] = 'canceled'
+    del cancel_entry_order['filled']
 
-    cancel_order_mock = MagicMock(return_value=cancel_buy_order)
+    cancel_order_mock = MagicMock(return_value=cancel_entry_order)
     mocker.patch(f'{EXMS}.cancel_order_with_result', cancel_order_mock)
 
     freqtrade = FreqtradeBot(default_conf_usdt)
@@ -3369,8 +3415,8 @@ def test_handle_cancel_enter(mocker, caplog, default_conf_usdt, limit_order, is_
     assert cancel_order_mock.call_count == 1
 
     # Order remained open for some reason (cancel failed)
-    cancel_buy_order['status'] = 'open'
-    cancel_order_mock = MagicMock(return_value=cancel_buy_order)
+    cancel_entry_order['status'] = 'open'
+    cancel_order_mock = MagicMock(return_value=cancel_entry_order)
 
     mocker.patch(f'{EXMS}.cancel_order_with_result', cancel_order_mock)
     assert not freqtrade.handle_cancel_enter(trade, l_order, trade.open_orders_ids[0], reason)
@@ -3380,6 +3426,19 @@ def test_handle_cancel_enter(mocker, caplog, default_conf_usdt, limit_order, is_
     assert not freqtrade.handle_cancel_enter(
         trade, limit_order[entry_side(is_short)], trade.open_orders_ids[0], reason
     )
+
+    # Retry ...
+    cbo = limit_order[entry_side(is_short)]
+
+    mocker.patch('freqtrade.freqtradebot.sleep')
+    cbo['status'] = 'open'
+    co_mock = mocker.patch(f'{EXMS}.cancel_order_with_result', return_value=cbo)
+    fo_mock = mocker.patch(f'{EXMS}.fetch_order', return_value=cbo)
+    assert not freqtrade.handle_cancel_enter(
+        trade, cbo, cbo['id'], reason, replacing=True
+    )
+    assert co_mock.call_count == 1
+    assert fo_mock.call_count == 3
 
 
 @pytest.mark.parametrize("is_short", [False, True])

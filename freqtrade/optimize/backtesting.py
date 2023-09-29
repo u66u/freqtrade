@@ -116,6 +116,7 @@ class Backtesting:
             raise OperationalException("Timeframe needs to be set in either "
                                        "configuration or as cli argument `--timeframe 5m`")
         self.timeframe = str(self.config.get('timeframe'))
+        self.disable_database_use()
         self.timeframe_min = timeframe_to_minutes(self.timeframe)
         self.init_backtest_detail()
         self.pairlists = PairListManager(self.exchange, self.config, self.dataprovider)
@@ -318,13 +319,16 @@ class Backtesting:
         else:
             self.futures_data = {}
 
+    def disable_database_use(self):
+        PairLocks.use_db = False
+        PairLocks.timeframe = self.timeframe
+        Trade.use_db = False
+
     def prepare_backtest(self, enable_protections):
         """
         Backtesting setup method - called once for every call to "backtest()".
         """
-        PairLocks.use_db = False
-        PairLocks.timeframe = self.config['timeframe']
-        Trade.use_db = False
+        self.disable_database_use()
         PairLocks.reset_locks()
         Trade.reset_trades()
         self.rejected_trades = 0
@@ -594,6 +598,16 @@ class Backtesting:
         if order and self._get_order_filled(order.ft_price, row):
             order.close_bt_order(current_date, trade)
             if not (order.ft_order_side == trade.exit_side and order.safe_amount == trade.amount):
+                # trade is still open
+                trade.set_liquidation_price(self.exchange.get_liquidation_price(
+                    pair=trade.pair,
+                    open_rate=trade.open_rate,
+                    is_short=trade.is_short,
+                    amount=trade.amount,
+                    stake_amount=trade.stake_amount,
+                    leverage=trade.leverage,
+                    wallet_balance=trade.stake_amount,
+                ))
                 self._call_adjust_stop(current_date, trade, order.ft_price)
                 # pass
             return True
@@ -889,16 +903,6 @@ class Backtesting:
                 )
 
             trade.adjust_stop_loss(trade.open_rate, self.strategy.stoploss, initial=True)
-
-            trade.set_liquidation_price(self.exchange.get_liquidation_price(
-                pair=pair,
-                open_rate=propose_rate,
-                amount=amount,
-                stake_amount=trade.stake_amount,
-                leverage=trade.leverage,
-                wallet_balance=trade.stake_amount,
-                is_short=is_short,
-            ))
 
             order = Order(
                 id=self.order_id_counter,
