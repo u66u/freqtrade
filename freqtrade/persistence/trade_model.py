@@ -68,6 +68,7 @@ class Order(ModelBase):
     ft_is_open: Mapped[bool] = mapped_column(nullable=False, default=True, index=True)
     ft_amount: Mapped[float] = mapped_column(Float(), nullable=False)
     ft_price: Mapped[float] = mapped_column(Float(), nullable=False)
+    ft_cancel_reason: Mapped[str] = mapped_column(String(CUSTOM_TAG_MAX_LENGTH), nullable=True)
 
     order_id: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
     status: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
@@ -237,6 +238,7 @@ class Order(ModelBase):
                 'price': self.price,
                 'remaining': self.remaining,
                 'ft_fee_base': self.ft_fee_base,
+                'funding_fee': self.funding_fee,
             })
         return resp
 
@@ -1845,6 +1847,7 @@ class Trade(ModelBase, LocalTrade):
                 price=order["price"],
                 ft_price=order["price"],
                 remaining=order["remaining"],
+                funding_fee=order.get("funding_fee", None),
             )
             trade.orders.append(order_obj)
 

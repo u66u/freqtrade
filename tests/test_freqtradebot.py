@@ -2900,6 +2900,51 @@ def test_adjust_entry_replace_fail(
 
 
 @pytest.mark.parametrize("is_short", [False, True])
+def test_adjust_entry_replace_fail_create_order(
+    default_conf_usdt, ticker_usdt, limit_buy_order_old, open_trade,
+    limit_sell_order_old, fee, mocker, caplog, is_short
+) -> None:
+    freqtrade = get_patched_freqtradebot(mocker, default_conf_usdt)
+    old_order = limit_sell_order_old if is_short else limit_buy_order_old
+    old_order['id'] = open_trade.open_orders[0].order_id
+    limit_entry_cancel = deepcopy(old_order)
+    limit_entry_cancel['status'] = 'canceled'
+    cancel_order_mock = MagicMock(return_value=limit_entry_cancel)
+    fetch_order_mock = MagicMock(return_value=old_order)
+    mocker.patch.multiple(
+        EXMS,
+        fetch_ticker=ticker_usdt,
+        fetch_order=fetch_order_mock,
+        cancel_order_with_result=cancel_order_mock,
+        get_fee=fee
+    )
+    mocker.patch('freqtrade.freqtradebot.sleep')
+    mocker.patch('freqtrade.freqtradebot.FreqtradeBot.execute_entry',
+                 side_effect=DependencyException())
+
+    open_trade.is_short = is_short
+    Trade.session.add(open_trade)
+    Trade.commit()
+
+    # Timeout to not interfere
+    freqtrade.strategy.ft_check_timed_out = MagicMock(return_value=False)
+
+    # Attempt replace order - which fails
+    freqtrade.strategy.adjust_entry_price = MagicMock(return_value=12234)
+    freqtrade.manage_open_orders()
+    trades = Trade.session.scalars(
+        select(Trade)
+        .where(Trade.is_open.is_(True))
+        ).all()
+
+    assert len(trades) == 0
+    assert len(Order.session.scalars(select(Order)).all()) == 0
+    assert fetch_order_mock.call_count == 1
+    assert log_has_re(
+        r"Could not replace order for.*", caplog)
+
+
+@pytest.mark.parametrize("is_short", [False, True])
 def test_adjust_entry_maintain_replace(
     default_conf_usdt, ticker_usdt, limit_buy_order_old, open_trade,
     limit_sell_order_old, fee, mocker, caplog, is_short
@@ -3398,20 +3443,20 @@ def test_handle_cancel_enter(mocker, caplog, default_conf_usdt, limit_order, is_
     l_order['filled'] = 0.0
     l_order['status'] = 'open'
     reason = CANCEL_REASON['TIMEOUT']
-    assert freqtrade.handle_cancel_enter(trade, l_order, trade.open_orders_ids[0], reason)
+    assert freqtrade.handle_cancel_enter(trade, l_order, trade.open_orders[0], reason)
     assert cancel_order_mock.call_count == 1
 
     cancel_order_mock.reset_mock()
     caplog.clear()
     l_order['filled'] = 0.01
-    assert not freqtrade.handle_cancel_enter(trade, l_order, trade.open_orders_ids[0], reason)
+    assert not freqtrade.handle_cancel_enter(trade, l_order, trade.open_orders[0], reason)
     assert cancel_order_mock.call_count == 0
     assert log_has_re("Order .* for .* not cancelled, as the filled amount.* unexitable.*", caplog)
 
     caplog.clear()
     cancel_order_mock.reset_mock()
     l_order['filled'] = 2
-    assert not freqtrade.handle_cancel_enter(trade, l_order, trade.open_orders_ids[0], reason)
+    assert not freqtrade.handle_cancel_enter(trade, l_order, trade.open_orders[0], reason)
     assert cancel_order_mock.call_count == 1
 
     # Order remained open for some reason (cancel failed)
@@ -3419,12 +3464,12 @@ def test_handle_cancel_enter(mocker, caplog, default_conf_usdt, limit_order, is_
     cancel_order_mock = MagicMock(return_value=cancel_entry_order)
 
     mocker.patch(f'{EXMS}.cancel_order_with_result', cancel_order_mock)
-    assert not freqtrade.handle_cancel_enter(trade, l_order, trade.open_orders_ids[0], reason)
+    assert not freqtrade.handle_cancel_enter(trade, l_order, trade.open_orders[0], reason)
     assert log_has_re(r"Order .* for .* not cancelled.", caplog)
     # min_pair_stake empty should not crash
     mocker.patch(f'{EXMS}.get_min_pair_stake_amount', return_value=None)
     assert not freqtrade.handle_cancel_enter(
-        trade, limit_order[entry_side(is_short)], trade.open_orders_ids[0], reason
+        trade, limit_order[entry_side(is_short)], trade.open_orders[0], reason
     )
 
     # Retry ...
@@ -3435,7 +3480,7 @@ def test_handle_cancel_enter(mocker, caplog, default_conf_usdt, limit_order, is_
     co_mock = mocker.patch(f'{EXMS}.cancel_order_with_result', return_value=cbo)
     fo_mock = mocker.patch(f'{EXMS}.fetch_order', return_value=cbo)
     assert not freqtrade.handle_cancel_enter(
-        trade, cbo, cbo['id'], reason, replacing=True
+        trade, cbo, trade.open_orders[0], reason, replacing=True
     )
     assert co_mock.call_count == 1
     assert fo_mock.call_count == 3
@@ -3460,7 +3505,7 @@ def test_handle_cancel_enter_exchanges(mocker, caplog, default_conf_usdt, is_sho
     Trade.session.add(trade)
     Trade.commit()
     assert freqtrade.handle_cancel_enter(
-        trade, limit_buy_order_canceled_empty, trade.open_orders_ids[0], reason
+        trade, limit_buy_order_canceled_empty, trade.open_orders[0], reason
     )
     assert cancel_order_mock.call_count == 0
     assert log_has_re(
@@ -3498,7 +3543,7 @@ def test_handle_cancel_enter_corder_empty(mocker, default_conf_usdt, limit_order
     l_order['filled'] = 0.0
     l_order['status'] = 'open'
     reason = CANCEL_REASON['TIMEOUT']
-    assert freqtrade.handle_cancel_enter(trade, l_order, trade.open_orders_ids[0], reason)
+    assert freqtrade.handle_cancel_enter(trade, l_order, trade.open_orders[0], reason)
     assert cancel_order_mock.call_count == 1
 
     cancel_order_mock.reset_mock()
@@ -3506,7 +3551,7 @@ def test_handle_cancel_enter_corder_empty(mocker, default_conf_usdt, limit_order
     order = deepcopy(l_order)
     order['status'] = 'canceled'
     mocker.patch(f'{EXMS}.fetch_order', return_value=order)
-    assert not freqtrade.handle_cancel_enter(trade, l_order, trade.open_orders_ids[0], reason)
+    assert not freqtrade.handle_cancel_enter(trade, l_order, trade.open_orders[0], reason)
     assert cancel_order_mock.call_count == 1
 
 
@@ -3587,8 +3632,9 @@ def test_handle_cancel_exit_limit(mocker, default_conf_usdt, fee, is_short,
              'amount': 1,
              'status': "open"}
     reason = CANCEL_REASON['TIMEOUT']
+    order_obj = trade.open_orders[-1]
     send_msg_mock.reset_mock()
-    assert freqtrade.handle_cancel_exit(trade, order, order['id'], reason)
+    assert freqtrade.handle_cancel_exit(trade, order, order_obj, reason)
     assert cancel_order_mock.call_count == 1
     assert send_msg_mock.call_count == 1
     assert trade.close_rate is None
@@ -3600,14 +3646,14 @@ def test_handle_cancel_exit_limit(mocker, default_conf_usdt, fee, is_short,
     # Partial exit - below exit threshold
     order['amount'] = amount * leverage
     order['filled'] = amount * 0.99 * leverage
-    assert not freqtrade.handle_cancel_exit(trade, order, order['id'], reason)
+    assert not freqtrade.handle_cancel_exit(trade, order, order_obj, reason)
     # Assert cancel_order was not called (callcount remains unchanged)
     assert cancel_order_mock.call_count == 1
     assert send_msg_mock.call_count == 1
     assert (send_msg_mock.call_args_list[0][0][0]['reason']
             == CANCEL_REASON['PARTIALLY_FILLED_KEEP_OPEN'])
 
-    assert not freqtrade.handle_cancel_exit(trade, order, order['id'], reason)
+    assert not freqtrade.handle_cancel_exit(trade, order, order_obj, reason)
 
     assert (send_msg_mock.call_args_list[0][0][0]['reason']
             == CANCEL_REASON['PARTIALLY_FILLED_KEEP_OPEN'])
@@ -3619,7 +3665,7 @@ def test_handle_cancel_exit_limit(mocker, default_conf_usdt, fee, is_short,
     send_msg_mock.reset_mock()
 
     order['filled'] = amount * 0.5 * leverage
-    assert freqtrade.handle_cancel_exit(trade, order, order['id'], reason)
+    assert freqtrade.handle_cancel_exit(trade, order, order_obj, reason)
     assert send_msg_mock.call_count == 1
     assert (send_msg_mock.call_args_list[0][0][0]['reason']
             == CANCEL_REASON['PARTIALLY_FILLED'])
@@ -3635,13 +3681,14 @@ def test_handle_cancel_exit_cancel_exception(mocker, default_conf_usdt) -> None:
 
     # TODO: should not be magicmock
     trade = MagicMock()
-    order_id = '125'
+    order_obj = MagicMock()
+    order_obj.order_id = '125'
     reason = CANCEL_REASON['TIMEOUT']
     order = {'remaining': 1,
              'id': '125',
              'amount': 1,
              'status': "open"}
-    assert not freqtrade.handle_cancel_exit(trade, order, order_id, reason)
+    assert not freqtrade.handle_cancel_exit(trade, order, order_obj, reason)
 
     # mocker.patch(f'{EXMS}.cancel_order_with_result', return_value=order)
     # assert not freqtrade.handle_cancel_exit(trade, order, reason)
@@ -5933,7 +5980,7 @@ def test_update_funding_fees(
         time: 8, mark: 1.2, fundRate: 0.00032715, nominal_value: 147.6, fundFee: 0.04828734
     """
     # SETUP
-    time_machine.move_to("2021-09-01 00:00:00 +00:00")
+    time_machine.move_to("2021-09-01 00:00:16 +00:00")
 
     open_order = limit_order_open[entry_side(is_short)]
     open_exit_order = limit_order_open[exit_side(is_short)]
