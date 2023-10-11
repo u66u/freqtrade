@@ -392,7 +392,11 @@ CONF_SCHEMA = {
                     {"Exchange": "{exchange}"},
                     {"Strategy": "{strategy}"},
                     {"Timeframe": "{timeframe}"},
-                    {"Reason": "{reason}"}
+                    {"Enter Tag": "{enter_tag}"},
+                    {"Direction": "{direction}"},
+                    {"Entry Rate": "{open_rate}"},
+                    {"Current Rate": "{current_rate}"},
+                    {"Reason": "{reason}"},
                 ]},
                 "entry_fill": {
                     'type': 'object',
@@ -419,6 +423,20 @@ CONF_SCHEMA = {
                         ]}
                     }
                 },
+                'exit_cancel': {'type': 'array', 'items': {'type': 'object'}, 'default': [
+                    {"Exchange": "{exchange}"},
+                    {"Strategy": "{strategy}"},
+                    {"Timeframe": "{timeframe}"},
+                    {"Enter Tag": "{enter_tag}"},
+                    {"Direction": "{direction}"},
+                    {"Entry Rate": "{open_rate}"},
+                    {"Exit Reason": "{exit_reason}"},
+                    {"Exit Rate": "{limit}"},
+                    {"Profit": "{profit_amount} {stake_currency}"},
+                    {"Profit %": "{profit_ratio:.2%}"},
+                    {"Current Rate": "{current_rate}"},
+                    {"Reason": "{reason}"},
+                ]},
                 "exit_fill": {
                     'type': 'object',
                     'properties': {

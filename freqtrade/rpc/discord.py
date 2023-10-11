@@ -61,12 +61,12 @@ class Discord(Webhook):
             
             send_message = True
 
-        elif (msg['type'].value == "entry_cancel"):
+        elif (msg['type'].value in ["entry_cancel", "exit_cancel"]):
             # logger.info(f"Sending discord strategy message: {msg['msg']}")
 
             msg['strategy'] = self.strategy
             msg['timeframe'] = self.timeframe
-            msg['exchange'] = self._config['exchange']['name']
+            # msg['exchange'] = self._config['exchange']['name']
             # fields = self.config['discord'].get(msg['type'].value)
             fields = self._config['discord'].get(msg['type'].value)
             
