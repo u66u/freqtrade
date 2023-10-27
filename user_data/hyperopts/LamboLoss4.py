@@ -14,8 +14,8 @@ from freqtrade.optimize.hyperopt import IHyperOptLoss
 import math
 
 # Set maximum expectancy used in the calculation
-max_expectancy = 10
-max_profit_ratio = 10
+max_expectancy = 1
+max_profit_ratio = 5
 max_avg_profit = 200
 
 class LamboLoss4(IHyperOptLoss):
