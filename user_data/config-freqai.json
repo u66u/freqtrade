@@ -36,14 +36,14 @@
             // "plot_feature_importances": 0,
             // "buffer_train_data_candles": 100
         },
-        // "data_split_parameters": {
-        //     "test_size": 0,
-        //     "random_state": 1,
-        //     "shuffle": false
-        // },
-        // "model_training_parameters": {
-        //     "n_jobs": 10,
-        //     "verbosity": 1
-        // }
+        "data_split_parameters": {
+            "test_size": 0,
+            "random_state": 1,
+            "shuffle": false
+        },
+        "model_training_parameters": {
+            "n_jobs": 10,
+            "verbosity": 1
+        }
     },
 }
