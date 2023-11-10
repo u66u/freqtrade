@@ -11,6 +11,7 @@ from pandas import DataFrame, to_datetime
 from freqtrade.constants import DEFAULT_DATAFRAME_COLUMNS, Config
 from freqtrade.enums import CandleType, TradingMode
 
+import time
 
 logger = logging.getLogger(__name__)
 
