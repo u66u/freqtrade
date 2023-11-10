@@ -12,6 +12,7 @@ from freqtrade.constants import DEFAULT_DATAFRAME_COLUMNS, Config
 from freqtrade.enums import CandleType, TradingMode
 
 import time
+import numbers
 
 logger = logging.getLogger(__name__)
 
