@@ -11,9 +11,6 @@ from pandas import DataFrame, to_datetime
 from freqtrade.constants import DEFAULT_DATAFRAME_COLUMNS, Config
 from freqtrade.enums import CandleType, TradingMode
 
-import time
-import numbers
-
 logger = logging.getLogger(__name__)
 
 
@@ -134,10 +131,8 @@ def reduce_mem_usage(pair: str, dataframe: DataFrame) -> DataFrame:
     """
     df = dataframe.copy()
 
-    start_mem = df.memory_usage().sum() / 1024**2
-    logger.info(f"Memory usage of dataframe for {pair} is {start_mem:.2f} MB")
-    logger.info(f"Testing existing code")
-    tik = time.perf_counter()
+    # start_mem = df.memory_usage().sum() / 1024**2
+    # logger.info(f"Memory usage of dataframe for {pair} is {start_mem:.2f} MB")
 
     for col in df.columns[1:]:
         col_type = df[col].dtype
@@ -166,36 +161,9 @@ def reduce_mem_usage(pair: str, dataframe: DataFrame) -> DataFrame:
         # else:
             # df[col] = df[col].astype('category')
 
-    tok = time.perf_counter()
-    logger.info(f"Optimizing {pair} using original method took: {tok - tik:0.4f} seconds.")
-    end_mem = df.memory_usage().sum() / 1024**2
-    logger.info("Memory usage after optimization is: {:.2f} MB".format(end_mem))
-    logger.info("Decreased by {:.1f}%".format(100 * (start_mem - end_mem) / start_mem))
-
-    df2 = dataframe.copy()
-
-    logger.info(f"Testing new code")
-    tik = time.perf_counter()
-
-    for col in df2.columns[1:]:
-        # integers
-        if issubclass(df2[col].dtypes.type, numbers.Integral):
-            # unsigned integers
-            if df2[col].min() >= 0:
-                df2[col] = pd.to_numeric(df2[col], downcast="unsigned")
-            # signed integers
-            else:
-                df2[col] = pd.to_numeric(df2[col], downcast="integer")
-        # other real numbers. only call `to_numeric` if type is float64,
-        # so it won't be called for already optimized columns.
-        elif issubclass(df2[col].dtypes.type, numbers.Real) and df2[col].dtypes.type == np.float64:
-            df2[col] = pd.to_numeric(df2[col], downcast="float")
-
-    tok = time.perf_counter()
-    logger.info(f"Optimizing {pair} using new method took: {tok - tik:0.4f} seconds.")
-    end_mem2 = df2.memory_usage().sum() / 1024**2
-    logger.info("Memory usage after optimization is: {:.2f} MB".format(end_mem2))
-    logger.info("Decreased by {:.1f}%".format(100 * (start_mem - end_mem2) / start_mem))
+    # end_mem = df.memory_usage().sum() / 1024**2
+    # logger.info("Memory usage after optimization is: {:.2f} MB".format(end_mem))
+    # logger.info("Decreased by {:.1f}%".format(100 * (start_mem - end_mem) / start_mem))
 
     return df
 
