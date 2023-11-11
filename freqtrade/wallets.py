@@ -12,6 +12,7 @@ from freqtrade.exceptions import DependencyException
 from freqtrade.exchange import Exchange
 from freqtrade.misc import safe_value_fallback
 from freqtrade.persistence import LocalTrade, Trade
+from freqtrade.rpc import RPCManager
 from freqtrade.util.datetime_helpers import dt_now
 from freqtrade.util import PeriodicCache
 
