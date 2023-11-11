@@ -680,7 +680,7 @@ class FreqtradeBot(LoggingMixin):
                 # This is currently ineffective as remaining would become < min tradable
                 # Fixing this would require checking for 0.0 there -
                 # if we decide that this callback is allowed to "fully exit"
-                msg = f"Adjusting amount to trade.amount as it is higher. {amount} > {trade.amount}"
+                msg = f"Trade #{trade.id} ({trade.pair}) - Adjusting amount to trade.amount as it is higher. {amount} > {trade.amount}"
                 logger.info(msg)
                 amount = trade.amount
 
@@ -694,14 +694,14 @@ class FreqtradeBot(LoggingMixin):
 
             remaining = (trade.amount - amount) * current_exit_rate
             if min_exit_stake and remaining < min_exit_stake:
-                msg = f"Remaining amount of {remaining} would be smaller than the minimum of {min_exit_stake}."
+                msg = f"Trade #{trade.id} ({trade.pair}) - Remaining amount of {remaining} would be smaller than the minimum of {min_exit_stake}."
                 logger.info(f"Remaining amount of {remaining} would be smaller "
                             f"than the minimum of {min_exit_stake}.")
 
                 if msg not in self.__msg_cache:
                     self.dataprovider.send_msg(msg)
                 self.__msg_cache[msg] = True
-                
+
                 return
 
             self.execute_trade_exit(trade, current_exit_rate, exit_check=ExitCheckTuple(
