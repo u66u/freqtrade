@@ -13,15 +13,15 @@ from freqtrade.exceptions import OperationalException
 from freqtrade.rpc import RPC
 from freqtrade.rpc.api_server.api_schemas import (AvailablePairs, Balances, BlacklistPayload,
                                                   BlacklistResponse, Count, DailyWeeklyMonthly,
-                                                  DeleteLockRequest, DeleteTrade,
-                                                  ExchangeListResponse, ForceEnterPayload,
+                                                  DeleteLockRequest, DeleteTrade, Entry,
+                                                  ExchangeListResponse, Exit, ForceEnterPayload,
                                                   ForceEnterResponse, ForceExitPayload,
                                                   FreqAIModelListResponse, Health, Locks, Logs,
-                                                  OpenTradeSchema, PairHistory, PerformanceEntry,
-                                                  Ping, PlotConfig, Profit, ResultMsg, ShowConfig,
-                                                  Stats, StatusMsg, StrategyListResponse,
-                                                  StrategyResponse, SysInfo, Version,
-                                                  WhitelistResponse)
+                                                  MixTag, OpenTradeSchema, PairHistory,
+                                                  PerformanceEntry, Ping, PlotConfig, Profit,
+                                                  ResultMsg, ShowConfig, Stats, StatusMsg,
+                                                  StrategyListResponse, StrategyResponse, SysInfo,
+                                                  Version, WhitelistResponse)
 from freqtrade.rpc.api_server.deps import get_config, get_exchange, get_rpc, get_rpc_optional
 from freqtrade.rpc.rpc import RPCException
 
@@ -88,17 +88,29 @@ def count(rpc: RPC = Depends(get_rpc)):
     return rpc._rpc_count()
 
 
+<<<<<<< HEAD
 @router.get('/entries', tags=['info', 'trading'])
+=======
+@router.get('/entries', response_model=List[Entry], tags=['info'])
+>>>>>>> c7624b1ed6b6e79f41b481f343622d8ad3f1763f
 def entries(pair: Optional[str] = None, rpc: RPC = Depends(get_rpc)):
     return rpc._rpc_enter_tag_performance(pair)
 
 
+<<<<<<< HEAD
 @router.get('/exits', tags=['info', 'trading'])
+=======
+@router.get('/exits', response_model=List[Exit], tags=['info'])
+>>>>>>> c7624b1ed6b6e79f41b481f343622d8ad3f1763f
 def exits(pair: Optional[str] = None, rpc: RPC = Depends(get_rpc)):
     return rpc._rpc_exit_reason_performance(pair)
 
 
+<<<<<<< HEAD
 @router.get('/mix_tags', tags=['info', 'trading'])
+=======
+@router.get('/mix_tags', response_model=List[MixTag], tags=['info'])
+>>>>>>> c7624b1ed6b6e79f41b481f343622d8ad3f1763f
 def mix_tags(pair: Optional[str] = None, rpc: RPC = Depends(get_rpc)):
     return rpc._rpc_mix_tag_performance(pair)
 
