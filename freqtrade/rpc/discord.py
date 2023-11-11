@@ -51,6 +51,7 @@ class Discord(Webhook):
             msg['strategy'] = self.strategy
             msg['timeframe'] = self.timeframe
             msg['exchange'] = self._config['exchange']['name']
+            msg['strategy_version'] = msg['strategy_version'] if msg['strategy_version'] else ''
             # fields = self.config['discord'].get(msg['type'].value)
             fields = self._config['discord'].get('rows_status')
             
