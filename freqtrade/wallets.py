@@ -357,12 +357,7 @@ class Wallets:
                 msg = f"Minimum stake amount > available balance. {min_stake_amount} > {max_allowed_stake}"
                 logger.warning("Minimum stake amount > available balance. "
                                f"{min_stake_amount} > {max_allowed_stake}")
-                if msg not in self.__msg_cache:
-                    self.__rpc.send_msg({
-                        'type': RPCMessageType.WALLET,
-                        'msg': msg,
-                    })
-                self.__msg_cache[msg] = True
+                self.send_dp_message(msg)
                 
             return 0
         if min_stake_amount is not None and stake_amount < min_stake_amount:
@@ -390,3 +385,11 @@ class Wallets:
                 )
             stake_amount = max_allowed_stake
         return stake_amount
+
+    def send_dp_message(self, msg: str) -> None:
+        if msg not in self.__msg_cache:
+            self.__rpc.send_msg({
+                'type': RPCMessageType.WALLET,
+                'msg': msg,
+            })
+        self.__msg_cache[msg] = True

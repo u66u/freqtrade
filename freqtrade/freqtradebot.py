@@ -1220,7 +1220,9 @@ class FreqtradeBot(LoggingMixin):
             trade.stoploss_last_update = datetime.now(timezone.utc)
             return True
         except InsufficientFundsError as e:
-            logger.warning(f"Unable to place stoploss order {e}.")
+            msg = f"Unable to place stoploss order {e}."
+            logger.warning(msg)
+            self.send_dp_message(msg)
             # Try to figure out what went wrong
             self.handle_insufficient_funds(trade)
 
@@ -1228,11 +1230,15 @@ class FreqtradeBot(LoggingMixin):
             trade.stoploss_order_id = None
             logger.error(f'Unable to place a stoploss order on exchange. {e}')
             logger.warning('Exiting the trade forcefully')
+            msg = f'Unable to place a stoploss order on exchange. {e}. Exiting the trade forcefully'
+            self.send_dp_message(msg)
             self.emergency_exit(trade, stop_price)
 
         except ExchangeError:
             trade.stoploss_order_id = None
             logger.exception('Unable to place a stoploss order on exchange.')
+            msg = 'Unable to place a stoploss order on exchange.'
+            self.send_dp_message(msg)
         return False
 
     def handle_stoploss_on_exchange(self, trade: Trade) -> bool:
@@ -1252,7 +1258,9 @@ class FreqtradeBot(LoggingMixin):
             stoploss_order = self.exchange.fetch_stoploss_order(
                 trade.stoploss_order_id, trade.pair) if trade.stoploss_order_id else None
         except InvalidOrderException as exception:
-            logger.warning('Unable to fetch stoploss order: %s', exception)
+            msg = f'Unable to fetch stoploss order: {exception}'
+            logger.warning(msg)
+            self.send_dp_message(msg)
 
         if stoploss_order:
             self.update_trade_state(trade, trade.stoploss_order_id, stoploss_order,
@@ -1295,7 +1303,9 @@ class FreqtradeBot(LoggingMixin):
             if self.create_stoploss_order(trade=trade, stop_price=trade.stoploss_or_liquidation):
                 return False
             else:
-                logger.warning('Stoploss order was cancelled, but unable to recreate one.')
+                msg = 'Stoploss order was cancelled, but unable to recreate one.'
+                logger.warning(msg)
+                self.send_dp_message(msg)
 
         # Finally we check if stoploss on exchange should be moved up because of trailing.
         # Triggered Orders are now real orders - so don't replace stoploss anymore
@@ -1393,8 +1403,10 @@ class FreqtradeBot(LoggingMixin):
             canceled_count = trade.get_canceled_exit_order_count()
             max_timeouts = self.config.get('unfilledtimeout', {}).get('exit_timeout_count', 0)
             if (canceled and max_timeouts > 0 and canceled_count >= max_timeouts):
+                msg = f"Emergency exiting trade {trade}, as the exit order timed out {max_timeouts} times. force selling {order['amount']}."
                 logger.warning(f"Emergency exiting trade {trade}, as the exit order "
                                f"timed out {max_timeouts} times. force selling {order['amount']}.")
+                self.send_dp_message(msg)
                 self.emergency_exit(trade, order['price'], order['amount'])
 
     def emergency_exit(
