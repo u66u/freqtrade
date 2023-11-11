@@ -360,7 +360,7 @@ class Wallets:
                 if msg not in self.__msg_cache:
                     self.__rpc.send_msg({
                         'type': RPCMessageType.WALLET,
-                        'status': msg,
+                        'msg': msg,
                     })
                 self.__msg_cache[msg] = True
                 

@@ -34,14 +34,14 @@ class Discord(Webhook):
         if (msg['type'].value == "strategy_msg"):
             logger.info(f"Sending discord strategy message: {msg['msg']}")
 
-            msg['strategy'] = self.strategy
-            msg['timeframe'] = self.timeframe
-            msg['exchange'] = self._config['exchange']['name']
+            # msg['strategy'] = self.strategy
+            # msg['timeframe'] = self.timeframe
+            # msg['exchange'] = self._config['exchange']['name']
             # fields = self.config['discord'].get(msg['type'].value)
             fields = self._config['discord'].get('rows_strategy_msg')
             color = 0xFF6600
 
-            title = msg['type'].value
+            title = self._config['bot_name'] + " - " + msg['type'].value
             
             send_message = True
 
@@ -60,7 +60,7 @@ class Discord(Webhook):
             color = 0x008000
             if (msg['status'] != 'running'):
                 color = 0xFF0000
-            title = msg['type'].value
+            title = self._config['bot_name'] + " - " + msg['type'].value
             
             send_message = True
 
@@ -75,7 +75,7 @@ class Discord(Webhook):
             
             color = 0xFF0000
             # title = msg['type'].value
-            title = f"Trade #{msg['trade_id']}: {msg['pair']} {msg['type'].value}"
+            title = f"{self._config['bot_name']} - Trade #{msg['trade_id']}: {msg['pair']} {msg['type'].value}"
             
             send_message = True
 
@@ -103,23 +103,19 @@ class Discord(Webhook):
 
             title = msg['type'].value
             if 'pair' in msg:
-                title = f"Trade #{msg['trade_id']}: {msg['pair']} {msg['type'].value}"
+                title = f"{self._config['bot_name']} - Trade #{msg['trade_id']}: {msg['pair']} {msg['type'].value}"
             if ('pair' in msg) and msg['sub_trade']:
-                title = f"Trade #{msg['trade_id']}: {msg['pair']} sub_{msg['type'].value}"
+                title = f"{self._config['bot_name']} - Trade #{msg['trade_id']}: {msg['pair']} sub_{msg['type'].value}"
             
             send_message = True
 
         elif (msg['type'].value in ["wallet"]):
 
-            msg['strategy'] = self.strategy
-            msg['timeframe'] = self.timeframe
-            msg['exchange'] = self._config['exchange']['name']
-
             # fields = self.config['discord'].get(msg['type'].value)
             fields = self._config['discord'].get('rows_wallet')
             
             color = 0xFF0000
-            title = self._config['bot_name'] + " - " + msg['type'].value + " message"
+            title = self._config['bot_name'] + " - " + msg['type'].value
             
             send_message = True
 

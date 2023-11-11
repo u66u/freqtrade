@@ -411,22 +411,22 @@ CONF_SCHEMA = {
                             {"Stake Amount": "{stake_amount} {stake_currency}"},
                             {"Open Date": "{open_date:%Y-%m-%d %H:%M:%S}"},
                             {"Enter Tag": "{enter_tag}"},
-                            {"Strategy": "{strategy}"},
-                            {"Timeframe": "{timeframe}"},
+                            # {"Strategy": "{strategy}"},
+                            # {"Timeframe": "{timeframe}"},
                         ]},
                         'rows_sub_trade': {'type': 'array', 'items': {'type': 'object'}, 'default': [
                             {"Open Rate": "{open_rate}"},
                             {"Additional Entry Amount": "{amount}"},
                             {"Total Stake Amount": "{stake_amount} {stake_currency}"},
-                            {"Strategy": "{strategy}"},
-                            {"Timeframe": "{timeframe}"},
+                            # {"Strategy": "{strategy}"},
+                            # {"Timeframe": "{timeframe}"},
                         ]}
                     }
                 },
                 'exit_cancel': {'type': 'array', 'items': {'type': 'object'}, 'default': [
                     {"Exchange": "{exchange}"},
-                    {"Strategy": "{strategy}"},
-                    {"Timeframe": "{timeframe}"},
+                    # {"Strategy": "{strategy}"},
+                    # {"Timeframe": "{timeframe}"},
                     {"Enter Tag": "{enter_tag}"},
                     {"Direction": "{direction}"},
                     {"Entry Rate": "{open_rate}"},
@@ -456,8 +456,8 @@ CONF_SCHEMA = {
                             {"Max Profit %": "{max_profit:.2%}"},
                             {"Enter Tag": "{enter_tag}"},
                             {"Exit Reason": "{exit_reason}"},
-                            {"Strategy": "{strategy}"},
-                            {"Timeframe": "{timeframe}"},
+                            # {"Strategy": "{strategy}"},
+                            # {"Timeframe": "{timeframe}"},
                         ]},
                         'rows_sub_trade': {'type': 'array', 'items': {'type': 'object'}, 'default': [
                             {"Open Rate": "{open_rate}"},
@@ -468,8 +468,8 @@ CONF_SCHEMA = {
                             {"Profit": "{profit_amount} {stake_currency}"},
                             {"Profit %": "{profit_ratio:.2%}"},
                             {"Cumulative Profit": "{cumulative_profit} {stake_currency}"},
-                            {"Strategy": "{strategy}"},
-                            {"Timeframe": "{timeframe}"},
+                            # {"Strategy": "{strategy}"},
+                            # {"Timeframe": "{timeframe}"},
                         ]}
                     }
                 },
@@ -481,15 +481,12 @@ CONF_SCHEMA = {
                     {"Strategy Version": "{strategy_version}"},
                 ]},
                 'rows_wallet': {'type': 'array', 'items': {'type': 'object'}, 'default': [
-                    {"Exchange": "{exchange}"},
-                    {"Strategy": "{strategy}"},
-                    {"Timeframe": "{timeframe}"},
-                    {"Status": "{status}"},
+                    {"Message": "{msg}"},
                 ]},
                 'rows_strategy_msg': {'type': 'array', 'items': {'type': 'object'}, 'default': [
-                    {"Exchange": "{exchange}"},
-                    {"Strategy": "{strategy}"},
-                    {"Timeframe": "{timeframe}"},
+                    # {"Exchange": "{exchange}"},
+                    # {"Strategy": "{strategy}"},
+                    # {"Timeframe": "{timeframe}"},
                     {"Message": "{msg}"},
                 ]},
             }
