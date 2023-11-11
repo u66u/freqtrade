@@ -309,6 +309,14 @@ class Wallets:
                 f"lower than stake amount ({stake_amount} {self._config['stake_currency']})"
             )
 
+            msg = f"Available balance ({available_amount} {self._config['stake_currency']}) is lower than stake amount ({stake_amount} {self._config['stake_currency']})"
+            if msg not in self.__msg_cache:
+                self.__rpc.send_msg({
+                    'type': RPCMessageType.WALLET,
+                    'msg': msg,
+                })
+            self.__msg_cache[msg] = True
+
         return stake_amount
 
     def get_trade_stake_amount(self, pair: str, edge=None, update: bool = True) -> float:

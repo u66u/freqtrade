@@ -694,7 +694,7 @@ class FreqtradeBot(LoggingMixin):
 
             remaining = (trade.amount - amount) * current_exit_rate
             if min_exit_stake and remaining < min_exit_stake:
-                msg = f"Trade #{trade.id} ({trade.pair}) - Remaining amount of {remaining} would be smaller than the minimum of {min_exit_stake}."
+                msg = f"Trade #{trade.id} ({trade.pair}) - Remaining amount of {remaining} would be smaller than the minimum of {min_exit_stake}. Exit aborted."
                 logger.info(f"Remaining amount of {remaining} would be smaller "
                             f"than the minimum of {min_exit_stake}.")
 
