@@ -142,7 +142,7 @@ class FreqtradeBot(LoggingMixin):
         self.protections = ProtectionManager(self.config, self.strategy.protections)
 
         self.__msg_cache = PeriodicCache(
-            maxsize=1000, ttl=timeframe_to_seconds(self._default_timeframe))
+            maxsize=1000, ttl=timeframe_to_seconds(self.config['timeframe']))
 
     def notify_status(self, msg: str, msg_type=RPCMessageType.STATUS, strategy_version: str = '') -> None:
         """
