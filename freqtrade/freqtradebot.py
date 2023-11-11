@@ -37,7 +37,7 @@ from freqtrade.rpc.rpc_types import (RPCBuyMsg, RPCCancelMsg, RPCProtectionMsg, 
                                      RPCSellMsg)
 from freqtrade.strategy.interface import IStrategy
 from freqtrade.strategy.strategy_wrapper import strategy_safe_wrapper
-from freqtrade.util import FtPrecise
+from freqtrade.util import FtPrecise, PeriodicCache
 from freqtrade.util.binance_mig import migrate_binance_futures_names
 from freqtrade.wallets import Wallets
 
@@ -140,6 +140,9 @@ class FreqtradeBot(LoggingMixin):
         self.strategy.ft_bot_start()
         # Initialize protections AFTER bot start - otherwise parameters are not loaded.
         self.protections = ProtectionManager(self.config, self.strategy.protections)
+
+        self.__msg_cache = PeriodicCache(
+            maxsize=1000, ttl=timeframe_to_seconds(self._default_timeframe))
 
     def notify_status(self, msg: str, msg_type=RPCMessageType.STATUS, strategy_version: str = '') -> None:
         """
@@ -677,18 +680,28 @@ class FreqtradeBot(LoggingMixin):
                 # This is currently ineffective as remaining would become < min tradable
                 # Fixing this would require checking for 0.0 there -
                 # if we decide that this callback is allowed to "fully exit"
-                logger.info(
-                    f"Adjusting amount to trade.amount as it is higher. {amount} > {trade.amount}")
+                msg = f"Adjusting amount to trade.amount as it is higher. {amount} > {trade.amount}"
+                logger.info(msg)
                 amount = trade.amount
 
+                if msg not in self.__msg_cache:
+                    self.dataprovider.send_msg(msg)
+                self.__msg_cache[msg] = True
+                
             if amount == 0.0:
                 logger.info("Amount to exit is 0.0 due to exchange limits - not exiting.")
                 return
 
             remaining = (trade.amount - amount) * current_exit_rate
             if min_exit_stake and remaining < min_exit_stake:
+                msg = f"Remaining amount of {remaining} would be smaller than the minimum of {min_exit_stake}."
                 logger.info(f"Remaining amount of {remaining} would be smaller "
                             f"than the minimum of {min_exit_stake}.")
+
+                if msg not in self.__msg_cache:
+                    self.dataprovider.send_msg(msg)
+                self.__msg_cache[msg] = True
+                
                 return
 
             self.execute_trade_exit(trade, current_exit_rate, exit_check=ExitCheckTuple(

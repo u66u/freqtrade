@@ -389,9 +389,9 @@ CONF_SCHEMA = {
                 'webhook_url': {'type': 'array', 'items': {'type': 'string'}},
                 'allow_custom_messages': {'type': 'boolean', 'default': True},
                 'entry_cancel': {'type': 'array', 'items': {'type': 'object'}, 'default': [
-                    {"Exchange": "{exchange}"},
-                    {"Strategy": "{strategy}"},
-                    {"Timeframe": "{timeframe}"},
+                    # {"Exchange": "{exchange}"},
+                    # {"Strategy": "{strategy}"},
+                    # {"Timeframe": "{timeframe}"},
                     {"Enter Tag": "{enter_tag}"},
                     {"Direction": "{direction}"},
                     {"Entry Rate": "{open_rate}"},
@@ -403,7 +403,7 @@ CONF_SCHEMA = {
                     'properties': {
                         'enabled': {'type': 'boolean', 'default': False},
                         'rows': {'type': 'array', 'items': {'type': 'object'}, 'default': [
-                            {"Exchange": "{exchange}"},
+                            # {"Exchange": "{exchange}"},
                             {"Direction": "{direction}"},
                             {"Leverage": "{leverage}"},
                             {"Open Rate": "{open_rate}"},
@@ -424,7 +424,7 @@ CONF_SCHEMA = {
                     }
                 },
                 'exit_cancel': {'type': 'array', 'items': {'type': 'object'}, 'default': [
-                    {"Exchange": "{exchange}"},
+                    # {"Exchange": "{exchange}"},
                     # {"Strategy": "{strategy}"},
                     # {"Timeframe": "{timeframe}"},
                     {"Enter Tag": "{enter_tag}"},
@@ -442,7 +442,7 @@ CONF_SCHEMA = {
                     'properties': {
                         'enabled': {'type': 'boolean', 'default': True},
                         'rows': {'type': 'array', 'items': {'type': 'object'}, 'default': [
-                            {"Exchange": "{exchange}"},
+                            # {"Exchange": "{exchange}"},
                             {"Direction": "{direction}"},
                             {"Leverage": "{leverage}"},
                             {"Open Rate": "{open_rate}"},
