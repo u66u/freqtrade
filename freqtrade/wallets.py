@@ -7,12 +7,11 @@ from datetime import datetime, timedelta
 from typing import Dict, NamedTuple, Optional
 
 from freqtrade.constants import UNLIMITED_STAKE_AMOUNT, Config
-from freqtrade.enums import RunMode, TradingMode
+from freqtrade.enums import RPCMessageType, RunMode, TradingMode
 from freqtrade.exceptions import DependencyException
-from freqtrade.exchange import Exchange
+from freqtrade.exchange import Exchange, timeframe_to_seconds
 from freqtrade.misc import safe_value_fallback
 from freqtrade.persistence import LocalTrade, Trade
-from freqtrade.rpc import RPCManager
 from freqtrade.util.datetime_helpers import dt_now
 from freqtrade.util import PeriodicCache
 
@@ -43,7 +42,7 @@ class Wallets:
         config: Config,
         exchange: Exchange,
         log: bool = True,
-        rpc: Optional[RPCManager] = None
+        rpc = None
     ) -> None:
         self._config = config
         self._log = log
