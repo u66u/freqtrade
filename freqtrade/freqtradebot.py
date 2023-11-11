@@ -539,6 +539,12 @@ class FreqtradeBot(LoggingMixin):
                 with self._exit_lock:
                     trades_created += self.create_trade(pair)
             except DependencyException as exception:
+                msg = f"Unable to create trade for {pair}: {exception}"
+
+                if msg not in self.__msg_cache:
+                    self.dataprovider.send_msg(msg)
+                self.__msg_cache[msg] = True
+                
                 logger.warning('Unable to create trade for %s: %s', pair, exception)
 
         if not trades_created:
