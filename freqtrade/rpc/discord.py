@@ -109,6 +109,20 @@ class Discord(Webhook):
             
             send_message = True
 
+        elif (msg['type'].value in ["wallet"]):
+
+            msg['strategy'] = self.strategy
+            msg['timeframe'] = self.timeframe
+            msg['exchange'] = self._config['exchange']['name']
+
+            # fields = self.config['discord'].get(msg['type'].value)
+            fields = self._config['discord'].get('rows_wallet')
+            
+            color = 0xFF0000
+            title = self._config['bot_name'] + " - " + msg['type'].value + " message"
+            
+            send_message = True
+
         if send_message:
             embeds = [{
                 'title': title,

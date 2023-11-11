@@ -480,6 +480,12 @@ CONF_SCHEMA = {
                     {"Status": "{status}"},
                     {"Strategy Version": "{strategy_version}"},
                 ]},
+                'rows_wallet': {'type': 'array', 'items': {'type': 'object'}, 'default': [
+                    {"Exchange": "{exchange}"},
+                    {"Strategy": "{strategy}"},
+                    {"Timeframe": "{timeframe}"},
+                    {"Status": "{status}"},
+                ]},
                 'rows_strategy_msg': {'type': 'array', 'items': {'type': 'object'}, 'default': [
                     {"Exchange": "{exchange}"},
                     {"Strategy": "{strategy}"},

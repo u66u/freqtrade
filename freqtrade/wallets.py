@@ -359,7 +359,7 @@ class Wallets:
                                f"{min_stake_amount} > {max_allowed_stake}")
                 if msg not in self.__msg_cache:
                     self.__rpc.send_msg({
-                        'type': RPCMessageType.WARNING,
+                        'type': RPCMessageType.WALLET,
                         'status': msg,
                     })
                 self.__msg_cache[msg] = True
