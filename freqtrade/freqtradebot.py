@@ -2189,7 +2189,7 @@ class FreqtradeBot(LoggingMixin):
             min(valid_custom_price, max_custom_price_allowed),
             min_custom_price_allowed)
 
-    def send_dp_message(self, msg: string) -> None:
+    def send_dp_message(self, msg: str) -> None:
         if msg not in self.__msg_cache:
             self.dataprovider.send_msg(msg)
         self.__msg_cache[msg] = True
