@@ -540,12 +540,9 @@ class FreqtradeBot(LoggingMixin):
                     trades_created += self.create_trade(pair)
             except DependencyException as exception:
                 msg = f"Unable to create trade for {pair}: {exception}"
+                self.send_dp_message(msg)
 
-                if msg not in self.__msg_cache:
-                    self.dataprovider.send_msg(msg)
-                self.__msg_cache[msg] = True
-                
-                logger.warning('Unable to create trade for %s: %s', pair, exception)
+                logger.warning(msg)
 
         if not trades_created:
             logger.debug("Found no enter signals for whitelisted currencies. Trying again...")
@@ -631,8 +628,10 @@ class FreqtradeBot(LoggingMixin):
                 try:
                     self.check_and_call_adjust_trade_position(trade)
                 except DependencyException as exception:
-                    logger.warning(
-                        f"Unable to adjust position of trade for {trade.pair}: {exception}")
+                    msg = f"Unable to adjust position of trade for {trade.pair}: {exception}"
+                    self.send_dp_message(msg)
+
+                    logger.warning(msg)
 
     def check_and_call_adjust_trade_position(self, trade: Trade):
         """
@@ -690,9 +689,7 @@ class FreqtradeBot(LoggingMixin):
                 logger.info(msg)
                 amount = trade.amount
 
-                if msg not in self.__msg_cache:
-                    self.dataprovider.send_msg(msg)
-                self.__msg_cache[msg] = True
+                self.send_dp_message(msg)
                 
             if amount == 0.0:
                 logger.info("Amount to exit is 0.0 due to exchange limits - not exiting.")
@@ -704,9 +701,7 @@ class FreqtradeBot(LoggingMixin):
                 logger.info(f"Remaining amount of {remaining} would be smaller "
                             f"than the minimum of {min_exit_stake}.")
 
-                if msg not in self.__msg_cache:
-                    self.dataprovider.send_msg(msg)
-                self.__msg_cache[msg] = True
+                self.send_dp_message(msg)
 
                 return
 
@@ -1123,14 +1118,19 @@ class FreqtradeBot(LoggingMixin):
                         continue
 
                 except InvalidOrderException as exception:
-                    logger.warning(
-                        f'Unable to handle stoploss on exchange for {trade.pair}: {exception}')
+                    msg = f'Unable to handle stoploss on exchange for {trade.pair}: {exception}'
+                    self.send_dp_message(msg)
+
+                    logger.warning(msg)
                 # Check if we can sell our current pair
                 if not trade.has_open_orders and trade.is_open and self.handle_trade(trade):
                     trades_closed += 1
 
             except DependencyException as exception:
-                logger.warning(f'Unable to exit trade {trade.pair}: {exception}')
+                msg = f'Unable to exit trade {trade.pair}: {exception}'
+                self.send_dp_message(msg)
+
+                logger.warning(msg)
 
         # Updating wallets if any trade occurred
         if trades_closed:
@@ -2188,3 +2188,8 @@ class FreqtradeBot(LoggingMixin):
         return max(
             min(valid_custom_price, max_custom_price_allowed),
             min_custom_price_allowed)
+
+    def send_dp_message(self, msg: string) -> None:
+        if msg not in self.__msg_cache:
+            self.dataprovider.send_msg(msg)
+        self.__msg_cache[msg] = True
