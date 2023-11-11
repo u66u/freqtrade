@@ -86,6 +86,17 @@ def balance(fiat_display_currency: str = '', rpc: RPC = Depends(get_rpc),
 def count(rpc: RPC = Depends(get_rpc)):
     return rpc._rpc_count()
 
+@router.get('/entries', tags=['info', 'trading'])
+def entries(rpc: RPC = Depends(get_rpc)):
+    return rpc._rpc_enter_tag_performance()
+
+@router.get('/exits', tags=['info', 'trading'])
+def exits(rpc: RPC = Depends(get_rpc)):
+    return rpc.get_exit_reason_performance()
+
+@router.get('/mix_tags', tags=['info', 'trading'])
+def mix_tags(rpc: RPC = Depends(get_rpc)):
+    return rpc._rpc_mix_tag_performance()
 
 @router.get('/performance', response_model=List[PerformanceEntry], tags=['info'])
 def performance(rpc: RPC = Depends(get_rpc)):
