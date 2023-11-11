@@ -92,7 +92,7 @@ def entries(rpc: RPC = Depends(get_rpc)):
 
 @router.get('/exits', tags=['info', 'trading'])
 def exits(rpc: RPC = Depends(get_rpc)):
-    return rpc.get_exit_reason_performance(None)
+    return rpc._rpc_exit_reason_performance(None)
 
 @router.get('/mix_tags', tags=['info', 'trading'])
 def mix_tags(rpc: RPC = Depends(get_rpc)):
