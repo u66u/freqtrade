@@ -13,6 +13,7 @@ from freqtrade.exchange import Exchange
 from freqtrade.misc import safe_value_fallback
 from freqtrade.persistence import LocalTrade, Trade
 from freqtrade.util.datetime_helpers import dt_now
+from freqtrade.util import PeriodicCache
 
 
 logger = logging.getLogger(__name__)
@@ -36,14 +37,26 @@ class PositionWallet(NamedTuple):
 
 class Wallets:
 
-    def __init__(self, config: Config, exchange: Exchange, log: bool = True) -> None:
+    def __init__(
+        self,
+        config: Config,
+        exchange: Exchange,
+        log: bool = True,
+        rpc: Optional[RPCManager] = None
+    ) -> None:
         self._config = config
         self._log = log
         self._exchange = exchange
+        self.__rpc = rpc
         self._wallets: Dict[str, Wallet] = {}
         self._positions: Dict[str, PositionWallet] = {}
         self.start_cap = config['dry_run_wallet']
         self._last_wallet_refresh: Optional[datetime] = None
+        
+        self._default_timeframe = self._config.get('timeframe', '1h')
+        self.__msg_cache = PeriodicCache(
+            maxsize=1000, ttl=timeframe_to_seconds(self._default_timeframe))
+
         self.update()
 
     def get_free(self, currency: str) -> float:
@@ -341,8 +354,16 @@ class Wallets:
 
         if min_stake_amount is not None and min_stake_amount > max_allowed_stake:
             if self._log:
+                msg = f"Minimum stake amount > available balance. {min_stake_amount} > {max_allowed_stake}"
                 logger.warning("Minimum stake amount > available balance. "
                                f"{min_stake_amount} > {max_allowed_stake}")
+                if msg not in self.__msg_cache:
+                    self.__rpc.send_msg({
+                        'type': RPCMessageType.WARNING,
+                        'status': msg,
+                    })
+                self.__msg_cache[msg] = True
+                
             return 0
         if min_stake_amount is not None and stake_amount < min_stake_amount:
             if self._log:

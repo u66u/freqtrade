@@ -78,8 +78,6 @@ class FreqtradeBot(LoggingMixin):
 
         init_db(self.config['db_url'])
 
-        self.wallets = Wallets(self.config, self.exchange)
-
         PairLocks.timeframe = self.config['timeframe']
 
         self.pairlists = PairListManager(self.exchange, self.config)
@@ -90,6 +88,8 @@ class FreqtradeBot(LoggingMixin):
         # the initial state of the bot.
         # Keep this at the end of this initialization method.
         self.rpc: RPCManager = RPCManager(self)
+
+        self.wallets = Wallets(self.config, self.exchange, rpc=self.rpc)
 
         self.dataprovider = DataProvider(self.config, self.exchange, rpc=self.rpc)
         self.pairlists = PairListManager(self.exchange, self.config, self.dataprovider)
@@ -149,7 +149,7 @@ class FreqtradeBot(LoggingMixin):
         self.rpc.send_msg({
             'type': msg_type,
             'status': msg,
-            'strategy_version': strategy_version,
+            'strategy_version': strategy_version if strategy_version else '',
         })
 
     def cleanup(self) -> None:
