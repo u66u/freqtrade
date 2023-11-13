@@ -391,7 +391,7 @@ CONF_SCHEMA = {
                 'entry_cancel': {'type': 'array', 'items': {'type': 'object'}, 'default': [
                     # {"Exchange": "{exchange}"},
                     # {"Strategy": "{strategy}"},
-                    # {"Timeframe": "{timeframe}"},
+                    {"Open Date": "{open_date}"},
                     {"Enter Tag": "{enter_tag}"},
                     {"Direction": "{direction}"},
                     {"Entry Rate": "{open_rate}"},
