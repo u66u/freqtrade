@@ -1,9 +1,9 @@
 from datetime import date, datetime
 from typing import Any, Dict, List, Optional, Union
 
-from pydantic import BaseModel, ConfigDict, RootModel, SerializeAsAny
+from pydantic import BaseModel, RootModel, SerializeAsAny
 
-from freqtrade.constants import DATETIME_PRINT_FORMAT, IntOrInf
+from freqtrade.constants import IntOrInf
 from freqtrade.enums import MarginMode, OrderTypeValues, SignalDirection, TradingMode
 from freqtrade.types import ValidExchangesType
 
@@ -501,11 +501,6 @@ class PairHistory(BaseModel):
     data_start: str
     data_stop: str
     data_stop_ts: int
-    # TODO[pydantic]: The following keys were removed: `json_encoders`.
-    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-config for more information.
-    model_config = ConfigDict(json_encoders={
-        datetime: lambda v: v.strftime(DATETIME_PRINT_FORMAT),
-    })
 
 
 class BacktestFreqAIInputs(BaseModel):
