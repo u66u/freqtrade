@@ -1,3 +1,4 @@
+sudo docker-compose pull;
 sudo docker-compose stop freqtrade;
 sudo docker-compose up -d freqtrade;
 sleep 30;
