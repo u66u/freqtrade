@@ -19,5 +19,14 @@
     "db_url": "sqlite:////freqtrade/user_data/tradesv3-cend-2-kucoin.sqlite", // docker
     "user_data_dir" : "user_data",
     "strategy": "SampleStrategy",
-    "strategy_path": "freqtrade_strategies"
+    "strategy_path": "freqtrade_strategies",
+    "add_config_files": [
+        "config-pairlist-usdt-mc.json",
+        "config-orders-limit-entry-15m.json",
+        "config-exchange.json",
+        "config-exchange-general.json",
+        "config-discord.json",
+        "config-discord-general.json",
+        "config-api.json",
+    ]
 }
