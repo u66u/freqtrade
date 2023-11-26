@@ -3,8 +3,16 @@
         // {"method": "StaticPairList"}, // Uncomment if you want to use static list
         {
             "method": "VolumePairList",
+            "number_assets": 70,
+            "sort_key": "quoteVolume",
+        },
+        {
+            "method": "VolumePairList",
             "number_assets": 50,
             "sort_key": "quoteVolume",
+            "min_value": 0,
+            "refresh_period": 86400,
+            "lookback_days": 7
         },
         // {
         //     "method": "OffsetFilter",
