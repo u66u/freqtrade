@@ -6,6 +6,13 @@
             "number_assets": 70,
             "sort_key": "quoteVolume",
         },
+        // {
+        //     "method": "OffsetFilter",
+        //     "offset": 50,
+        //     "number_assets": 50
+        // },
+        {"method": "FullTradesFilter"},
+        {"method": "AgeFilter", "min_days_listed": 30},
         {
             "method": "VolumePairList",
             "number_assets": 50,
@@ -14,12 +21,5 @@
             "refresh_period": 86400,
             "lookback_days": 7
         },
-        // {
-        //     "method": "OffsetFilter",
-        //     "offset": 50,
-        //     "number_assets": 50
-        // },
-        {"method": "FullTradesFilter"},
-        {"method": "AgeFilter", "min_days_listed": 30},
     ],
 }
