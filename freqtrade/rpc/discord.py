@@ -15,6 +15,7 @@ class Discord(Webhook):
         self.rpc = rpc
         self.strategy = config.get('strategy', '')
         self.timeframe = config.get('timeframe', '')
+        self.bot_name = config.get('bot_name', '')
 
         self._url = config['discord']['webhook_url']
         self._format = 'json'
@@ -31,17 +32,14 @@ class Discord(Webhook):
 
     def send_msg(self, msg) -> None:
         send_message = False
+        msg['bot_name'] = self.bot_name
         if (msg['type'].value == "strategy_msg"):
             logger.info(f"Sending discord strategy message: {msg['msg']}")
 
-            # msg['strategy'] = self.strategy
-            # msg['timeframe'] = self.timeframe
-            # msg['exchange'] = self._config['exchange']['name']
-            # fields = self.config['discord'].get(msg['type'].value)
             fields = self._config['discord'].get('rows_strategy_msg')
             color = 0xFF6600
 
-            title = self._config['bot_name'] + " - " + msg['type'].value
+            title = msg['bot_name'] + " - " + msg['type'].value
             
             send_message = True
 
@@ -60,7 +58,7 @@ class Discord(Webhook):
             color = 0x008000
             if (msg['status'] != 'running'):
                 color = 0xFF0000
-            title = self._config['bot_name'] + " - " + msg['type'].value
+            title = msg['bot_name'] + " - " + msg['type'].value
             
             send_message = True
 
@@ -75,7 +73,7 @@ class Discord(Webhook):
             
             color = 0xFF0000
             # title = msg['type'].value
-            title = f"{self._config['bot_name']} - Trade #{msg['trade_id']}: {msg['pair']} {msg['type'].value}"
+            title = f"{msg['bot_name']} - Trade #{msg['trade_id']}: {msg['pair']} {msg['type'].value}"
             
             send_message = True
 
@@ -86,6 +84,7 @@ class Discord(Webhook):
 
             msg['strategy'] = self.strategy
             msg['timeframe'] = self.timeframe
+            
             # fields = self.config['discord'].get(msg['type'].value)
             fields = self._config['discord'][msg['type'].value].get('rows')
             if msg['sub_trade']:
@@ -103,9 +102,9 @@ class Discord(Webhook):
 
             title = msg['type'].value
             if 'pair' in msg:
-                title = f"{self._config['bot_name']} - Trade #{msg['trade_id']}: {msg['pair']} {msg['type'].value}"
+                title = f"{msg['bot_name']} - Trade #{msg['trade_id']}: {msg['pair']} {msg['type'].value}"
             if ('pair' in msg) and msg['sub_trade']:
-                title = f"{self._config['bot_name']} - Trade #{msg['trade_id']}: {msg['pair']} sub_{msg['type'].value}"
+                title = f"{msg['bot_name']} - Trade #{msg['trade_id']}: {msg['pair']} sub_{msg['type'].value}"
             
             send_message = True
 
@@ -115,7 +114,7 @@ class Discord(Webhook):
             fields = self._config['discord'].get('rows_wallet')
             
             color = 0xFF0000
-            title = self._config['bot_name'] + " - " + msg['type'].value
+            title = msg['bot_name'] + " - " + msg['type'].value
             
             send_message = True
 
