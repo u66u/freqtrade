@@ -1,12 +1,12 @@
 {
     "max_open_trades": -1,
-    "stake_currency": "USDT",
-    "stake_amount" : 45,
+    "stake_currency": "BTC",
+    "stake_amount" : 0.05,
     "amend_last_stake_amount ": true,
     "tradable_balance_ratio": 0.99,
     "fiat_display_currency": "USD",
     "dry_run": true,
-    "dry_run_wallet": 20000,
+    "dry_run_wallet": 1,
     "cancel_open_orders_on_exit": false,
     "unfilledtimeout": {
         "buy": 10,
@@ -53,21 +53,8 @@
             "enableRateLimit": true,
             "rateLimit": 200
         },
-        "pair_whitelist": ["BTC/USDT","ETH/USDT","BNB/USDT","XRP/USDT","SOL/USDT","ADA/USDT","AVAX/USDT","LINK/USDT","TRX/USDT","DOT/USDT","MATIC/USDT","WBTC/USDT","LTC/USDT","BCH/USDT","UNI/USDT","XLM/USDT","ETC/USDT","XMR/USDT","ATOM/USDT","FIL/USDT","HBAR/USDT","NEAR/USDT","APT/USDT","ICP/USDT","LDO/USDT","IMX/USDT","VET/USDT","RUNE/USDT","OP/USDT","QNT/USDT","INJ/USDT","GRT/USDT","ARB/USDT","ALGO/USDT","STX/USDT","AAVE/USDT","RNDR/USDT","TIA/USDT","EGLD/USDT","MKR/USDT","SNX/USDT","FLOW/USDT","LUNC/USDT","THETA/USDT","ORDI/USDT","SAND/USDT","FTM/USDT","AXS/USDT","MANA/USDT","GALA/USDT","EOS/USDT","IOTA/USDT"],
-        "pair_blacklist": [
-            // Exchange
-            // "(BNB|KCS)/.*",
-            // Leverage
-            ".*(_PREMIUM|BEAR|BULL|DOWN|HALF|HEDGE|UP|[1235][SL]|2021)/.*",
-            // Timed futures
-            ".*(USDT_|USDT-).*",
-            // Fiat
-            "(AUD|BRZ|CAD|CHF|EUR|GBP|HKD|IDRT|JPY|NGN|RUB|SGD|TRY|UAH|USD|ZAR)/.*",
-            // Stable
-            "(BUSD|CUSD|CUSDT|DAI|PAX|PAXG|SUSD|TUSD|USDC|USDN|USDP|USDT|UST|VAI|USDD|USDJ)/.*",
-            // FAN
-            "(ACM|AFA|ALA|ALL|ALPINE|APL|ASR|ATM|BAR|CAI|CITY|FOR|GAL|GOZ|IBFK|JUV|LAZIO|LEG|LOCK-1|NAVI|NMR|NOV|OG|PFL|PORTO|PSG|ROUSH|SANTOS|STV|TH|TRA|UCH|UFC|YBO)/.*",
-        ]
+        "pair_whitelist": ["ETH/BTC","BNB/BTC","XRP/BTC","SOL/BTC","ADA/BTC","AVAX/BTC","LINK/BTC","TRX/BTC","DOT/BTC","MATIC/BTC","LTC/BTC","BCH/BTC","UNI/BTC","XLM/BTC","ETC/BTC","XMR/BTC","ATOM/BTC","FIL/BTC","HBAR/BTC","NEAR/BTC","APT/BTC","ICP/BTC","LDO/BTC","IMX/BTC","VET/BTC","RUNE/BTC","OP/BTC","QNT/BTC","INJ/BTC","GRT/BTC","ARB/BTC","ALGO/BTC","STX/BTC","AAVE/BTC","RNDR/BTC","TIA/BTC","EGLD/BTC","MKR/BTC","SNX/BTC","FLOW/BTC","THETA/BTC","ORDI/BTC","SAND/BTC","FTM/BTC","AXS/BTC","MANA/BTC","GALA/BTC","EOS/BTC","IOTA/BTC"],
+        "pair_blacklist": []
     },
     "edge": {
         "enabled": false,
