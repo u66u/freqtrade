@@ -150,6 +150,30 @@ def status(rpc: RPC = Depends(get_rpc)):
         return []
 
 
+@router.get('/trade_detail/{tradeid}', tags=['info', 'trading'])
+def trade_detail(tradeid: int = 0, rpc: RPC = Depends(get_rpc)):
+    try:
+        return rpc._rpc_trade_status([tradeid])[0]
+
+        import json
+        from freqtrade.persistence import Trade, init_db
+        
+        config=Depends(get_config)
+
+        if 'db_url' not in config:
+            return ''
+
+        init_db(config['db_url'])
+        tfilter = []
+
+        tfilter.append(Trade.id.in_(tradeid))
+
+        trades = Trade.get_trades(tfilter).all()
+        return trades[0].to_json()
+    except (RPCException, KeyError):
+        raise HTTPException(status_code=404, detail='Trade not found.')
+
+
 # Using the responsemodel here will cause a ~100% increase in response time (from 1s to 2s)
 # on big databases. Correct response model: response_model=TradeResponse,
 @router.get('/trades', tags=['info', 'trading'])
