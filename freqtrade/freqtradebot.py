@@ -33,8 +33,8 @@ from freqtrade.plugins.protectionmanager import ProtectionManager
 from freqtrade.resolvers import ExchangeResolver, StrategyResolver
 from freqtrade.rpc import RPCManager
 from freqtrade.rpc.external_message_consumer import ExternalMessageConsumer
-from freqtrade.rpc.rpc_types import (RPCBuyMsg, RPCCancelMsg, RPCProtectionMsg, RPCSellCancelMsg,
-                                     RPCSellMsg)
+from freqtrade.rpc.rpc_types import (ProfitLossStr, RPCCancelMsg, RPCEntryMsg, RPCExitCancelMsg,
+                                     RPCExitMsg, RPCProtectionMsg)
 from freqtrade.strategy.interface import IStrategy
 from freqtrade.strategy.strategy_wrapper import strategy_safe_wrapper
 from freqtrade.util import FtPrecise, PeriodicCache
@@ -682,25 +682,15 @@ class FreqtradeBot(LoggingMixin):
             amount = self.exchange.amount_to_contract_precision(
                 trade.pair,
                 abs(float(FtPrecise(stake_amount * trade.leverage) / FtPrecise(current_exit_rate))))
-            if amount > trade.amount:
-                # This is currently ineffective as remaining would become < min tradable
-                # Fixing this would require checking for 0.0 there -
-                # if we decide that this callback is allowed to "fully exit"
-                msg = f"Trade #{trade.id} ({trade.pair}) - Adjusting amount to trade.amount as it is higher. {amount} > {trade.amount}"
-                logger.info(msg)
-                amount = trade.amount
-
-                self.send_dp_message(msg)
                 
             if amount == 0.0:
                 logger.info("Amount to exit is 0.0 due to exchange limits - not exiting.")
                 return
 
             remaining = (trade.amount - amount) * current_exit_rate
-            if min_exit_stake and 0 < remaining < min_exit_stake:
+            if min_exit_stake and remaining != 0 and remaining < min_exit_stake:
                 msg = f"Trade #{trade.id} ({trade.pair}) - Remaining amount of {remaining} would be smaller than the minimum of {min_exit_stake}. Exit aborted."
-                logger.info(f"Remaining amount of {remaining} would be smaller "
-                            f"than the minimum of {min_exit_stake}.")
+                logger.info(msg)
 
                 self.send_dp_message(msg)
 
@@ -919,7 +909,7 @@ class FreqtradeBot(LoggingMixin):
         # First cancelling stoploss on exchange ...
         if trade.stoploss_order_id:
             try:
-                logger.info(f"Canceling stoploss on exchange for {trade}")
+                logger.info(f"Cancelling stoploss on exchange for {trade}")
                 co = self.exchange.cancel_stoploss_order_with_result(
                     trade.stoploss_order_id, trade.pair, trade.amount)
                 self.update_trade_state(trade, trade.stoploss_order_id, co, stoploss_order=True)
@@ -1030,7 +1020,7 @@ class FreqtradeBot(LoggingMixin):
             current_rate = self.exchange.get_rate(
                 trade.pair, side='entry', is_short=trade.is_short, refresh=False)
 
-        msg: RPCBuyMsg = {
+        msg: RPCEntryMsg = {
             'trade_id': trade.id,
             'type': RPCMessageType.ENTRY_FILL if fill else RPCMessageType.ENTRY,
             'buy_tag': trade.enter_tag,
@@ -1824,9 +1814,9 @@ class FreqtradeBot(LoggingMixin):
             order_rate = trade.safe_close_rate
             profit = trade.calculate_profit(rate=order_rate)
             amount = trade.amount
-        gain = "profit" if profit.profit_ratio > 0 else "loss"
+        gain: ProfitLossStr = "profit" if profit.profit_ratio > 0 else "loss"
 
-        msg: RPCSellMsg = {
+        msg: RPCExitMsg = {
             'type': (RPCMessageType.EXIT_FILL if fill
                      else RPCMessageType.EXIT),
             'trade_id': trade.id,
@@ -1880,9 +1870,9 @@ class FreqtradeBot(LoggingMixin):
         profit = trade.calculate_profit(rate=profit_rate)
         current_rate = self.exchange.get_rate(
             trade.pair, side='exit', is_short=trade.is_short, refresh=False)
-        gain = "profit" if profit.profit_ratio > 0 else "loss"
+        gain: ProfitLossStr = "profit" if profit.profit_ratio > 0 else "loss"
 
-        msg: RPCSellCancelMsg = {
+        msg: RPCExitCancelMsg = {
             'type': RPCMessageType.EXIT_CANCEL,
             'trade_id': trade.id,
             'exchange': trade.exchange.capitalize(),
