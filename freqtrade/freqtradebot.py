@@ -18,7 +18,7 @@ from freqtrade.constants import BuySell, Config, EntryExecuteMode, ExchangeConfi
 from freqtrade.data.converter import order_book_to_dataframe
 from freqtrade.data.dataprovider import DataProvider
 from freqtrade.edge import Edge
-from freqtrade.enums import (ExitCheckTuple, ExitType, RPCMessageType, RunMode, SignalDirection,
+from freqtrade.enums import (ExitCheckTuple, ExitType, RPCMessageType, SignalDirection,
                              State, TradingMode)
 from freqtrade.exceptions import (DependencyException, ExchangeError, InsufficientFundsError,
                                   InvalidOrderException, PricingError)
@@ -38,7 +38,7 @@ from freqtrade.rpc.rpc_types import (ProfitLossStr, RPCCancelMsg, RPCEntryMsg, R
 from freqtrade.strategy.interface import IStrategy
 from freqtrade.strategy.strategy_wrapper import strategy_safe_wrapper
 from freqtrade.util import FtPrecise, PeriodicCache
-from freqtrade.util.binance_mig import migrate_binance_futures_names
+from freqtrade.util.migrations import migrate_binance_futures_names
 from freqtrade.wallets import Wallets
 
 
@@ -81,6 +81,8 @@ class FreqtradeBot(LoggingMixin):
         PairLocks.timeframe = self.config['timeframe']
 
         self.pairlists = PairListManager(self.exchange, self.config)
+        self.trading_mode: TradingMode = self.config.get('trading_mode', TradingMode.SPOT)
+        self.last_process: Optional[datetime] = None
 
         # RPC runs in separate threads, can start handling external commands just after
         # initialization, even before Freqtradebot has a chance to start its throttling,
@@ -119,8 +121,6 @@ class FreqtradeBot(LoggingMixin):
         self._exit_lock = Lock()
         LoggingMixin.__init__(self, logger, timeframe_to_seconds(self.strategy.timeframe))
 
-        self.trading_mode: TradingMode = self.config.get('trading_mode', TradingMode.SPOT)
-
         self._schedule = Scheduler()
 
         if self.trading_mode == TradingMode.FUTURES:
@@ -135,7 +135,6 @@ class FreqtradeBot(LoggingMixin):
                 for minutes in [1, 31]:
                     t = str(time(time_slot, minutes, 2))
                     self._schedule.every().day.at(t).do(update)
-        self.last_process: Optional[datetime] = None
 
         self.strategy.ft_bot_start()
         # Initialize protections AFTER bot start - otherwise parameters are not loaded.
@@ -1015,10 +1014,8 @@ class FreqtradeBot(LoggingMixin):
         if open_rate is None:
             open_rate = trade.open_rate
 
-        current_rate = trade.open_rate_requested
-        if self.dataprovider.runmode in (RunMode.DRY_RUN, RunMode.LIVE):
-            current_rate = self.exchange.get_rate(
-                trade.pair, side='entry', is_short=trade.is_short, refresh=False)
+        current_rate = self.exchange.get_rate(
+            trade.pair, side='entry', is_short=trade.is_short, refresh=False)
 
         msg: RPCEntryMsg = {
             'trade_id': trade.id,
@@ -1035,6 +1032,7 @@ class FreqtradeBot(LoggingMixin):
             'stake_amount': trade.stake_amount,
             'stake_currency': self.config['stake_currency'],
             'base_currency': self.exchange.get_pair_base_currency(trade.pair),
+            'quote_currency': self.exchange.get_pair_quote_currency(trade.pair),
             'fiat_currency': self.config.get('fiat_display_currency', None),
             'amount': order.safe_amount_after_fee if fill else (order.amount or trade.amount),
             'open_date': trade.open_date_utc or datetime.now(timezone.utc),
@@ -1068,6 +1066,7 @@ class FreqtradeBot(LoggingMixin):
             'open_rate': trade.open_rate,
             'stake_currency': self.config['stake_currency'],
             'base_currency': self.exchange.get_pair_base_currency(trade.pair),
+            'quote_currency': self.exchange.get_pair_quote_currency(trade.pair),
             'fiat_currency': self.config.get('fiat_display_currency', None),
             'amount': trade.amount,
             'open_date': trade.open_date,
@@ -1368,9 +1367,11 @@ class FreqtradeBot(LoggingMixin):
                 not_closed = order['status'] == 'open' or fully_cancelled
 
                 if not_closed:
-                    if fully_cancelled or (
-                        open_order and self.strategy.ft_check_timed_out(
-                            trade, open_order, datetime.now(timezone.utc)
+                    if (
+                        fully_cancelled or (
+                            open_order and self.strategy.ft_check_timed_out(
+                                trade, open_order, datetime.now(timezone.utc)
+                            )
                         )
                     ):
                         self.handle_cancel_order(
@@ -1832,22 +1833,24 @@ class FreqtradeBot(LoggingMixin):
             'open_rate': trade.open_rate,
             'close_rate': order_rate,
             'current_rate': current_rate,
-            'profit_amount': profit.profit_abs if fill else profit.total_profit,
+            'profit_amount': profit.profit_abs,
             'profit_ratio': profit.profit_ratio,
             'buy_tag': trade.enter_tag,
             'enter_tag': trade.enter_tag,
-            'sell_reason': trade.exit_reason,  # Deprecated
             'exit_reason': trade.exit_reason,
             'open_date': trade.open_date_utc,
             'close_date': trade.close_date_utc or datetime.now(timezone.utc),
             'stake_amount': trade.stake_amount,
             'stake_currency': self.config['stake_currency'],
             'base_currency': self.exchange.get_pair_base_currency(trade.pair),
+            'quote_currency': self.exchange.get_pair_quote_currency(trade.pair),
             'fiat_currency': self.config.get('fiat_display_currency'),
             'sub_trade': sub_trade,
             'cumulative_profit': trade.realized_profit,
             'min_profit': trade.min_profit,
             'max_profit': trade.max_profit,
+            'final_profit_ratio': trade.close_profit if not trade.is_open else None,
+            'is_final_exit': trade.is_open is False,
         }
 
         # Send the message
@@ -1889,12 +1892,12 @@ class FreqtradeBot(LoggingMixin):
             'profit_ratio': profit.profit_ratio,
             'buy_tag': trade.enter_tag,
             'enter_tag': trade.enter_tag,
-            'sell_reason': trade.exit_reason,  # Deprecated
             'exit_reason': trade.exit_reason,
             'open_date': trade.open_date,
             'close_date': trade.close_date or datetime.now(timezone.utc),
             'stake_currency': self.config['stake_currency'],
             'base_currency': self.exchange.get_pair_base_currency(trade.pair),
+            'quote_currency': self.exchange.get_pair_quote_currency(trade.pair),
             'fiat_currency': self.config.get('fiat_display_currency', None),
             'reason': reason,
             'sub_trade': sub_trade,
@@ -2002,15 +2005,16 @@ class FreqtradeBot(LoggingMixin):
             self, trade: Trade, order: Order, stoploss_order: bool, send_msg: bool):
         """send "fill" notifications"""
 
-        sub_trade = not isclose(order.safe_amount_after_fee,
-                                trade.amount, abs_tol=constants.MATH_CLOSE_PREC)
         if order.ft_order_side == trade.exit_side:
             # Exit notification
             if send_msg and not stoploss_order and order.order_id not in trade.open_orders_ids:
-                self._notify_exit(trade, '', fill=True, sub_trade=sub_trade, order=order)
+                self._notify_exit(trade, order.order_type, fill=True,
+                                  sub_trade=trade.is_open, order=order)
             if not trade.is_open:
                 self.handle_protections(trade.pair, trade.trade_direction)
         elif send_msg and order.order_id not in trade.open_orders_ids and not stoploss_order:
+            sub_trade = not isclose(order.safe_amount_after_fee,
+                                    trade.amount, abs_tol=constants.MATH_CLOSE_PREC)
             # Enter fill
             self._notify_enter(trade, order, order.order_type, fill=True, sub_trade=sub_trade)
 
