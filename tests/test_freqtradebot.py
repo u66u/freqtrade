@@ -438,6 +438,7 @@ def test_enter_positions_no_pairs_left(default_conf_usdt, ticker_usdt, limit_buy
         create_order=MagicMock(return_value=limit_buy_order_usdt_open),
         get_fee=fee,
     )
+    mocker.patch('freqtrade.configuration.config_validation._validate_whitelist')
     default_conf_usdt['exchange']['pair_whitelist'] = whitelist
     freqtrade = FreqtradeBot(default_conf_usdt)
     patch_get_signal(freqtrade)
@@ -857,7 +858,7 @@ def test_execute_entry(mocker, default_conf_usdt, fee, limit_order,
     open_order['id'] = '22'
     freqtrade.strategy.confirm_trade_entry = MagicMock(return_value=True)
     assert freqtrade.execute_entry(pair, stake_amount)
-    assert enter_rate_mock.call_count == 1
+    assert enter_rate_mock.call_count == 2
     assert enter_mm.call_count == 1
     call_args = enter_mm.call_args_list[0][1]
     assert call_args['pair'] == pair
@@ -879,7 +880,7 @@ def test_execute_entry(mocker, default_conf_usdt, fee, limit_order,
     fix_price = 0.06
     assert freqtrade.execute_entry(pair, stake_amount, fix_price, is_short=is_short)
     # Make sure get_rate wasn't called again
-    assert enter_rate_mock.call_count == 0
+    assert enter_rate_mock.call_count == 1
 
     assert enter_mm.call_count == 2
     call_args = enter_mm.call_args_list[1][1]
@@ -1556,7 +1557,7 @@ def test_create_stoploss_order_invalid_order(
 
     # Rpc is sending first buy, then sell
     assert rpc_mock.call_count == 2
-    assert rpc_mock.call_args_list[0][0][0]['sell_reason'] == ExitType.EMERGENCY_EXIT.value
+    assert rpc_mock.call_args_list[0][0][0]['exit_reason'] == ExitType.EMERGENCY_EXIT.value
     assert rpc_mock.call_args_list[0][0][0]['order_type'] == 'market'
     assert rpc_mock.call_args_list[0][0][0]['type'] == 'exit'
     assert rpc_mock.call_args_list[1][0][0]['type'] == 'exit_fill'
@@ -2240,6 +2241,7 @@ def test_update_trade_state(mocker, default_conf_usdt, limit_order, is_short, ca
     order = limit_order[entry_side(is_short)]
 
     mocker.patch('freqtrade.freqtradebot.FreqtradeBot.handle_trade', MagicMock(return_value=True))
+    mocker.patch('freqtrade.freqtradebot.FreqtradeBot._notify_enter')
     mocker.patch(f'{EXMS}.fetch_order', return_value=order)
     mocker.patch(f'{EXMS}.get_trades_for_order', return_value=[])
     mocker.patch('freqtrade.freqtradebot.FreqtradeBot.get_real_amount', return_value=0.0)
@@ -2309,6 +2311,7 @@ def test_update_trade_state_withorderdict(
     order_id = "oid_123456"
     order['id'] = order_id
     mocker.patch(f'{EXMS}.get_trades_for_order', return_value=trades_for_order)
+    mocker.patch('freqtrade.freqtradebot.FreqtradeBot._notify_enter')
     # fetch_order should not be called!!
     mocker.patch(f'{EXMS}.fetch_order', MagicMock(side_effect=ValueError))
     patch_exchange(mocker)
@@ -2352,6 +2355,7 @@ def test_update_trade_state_exception(mocker, default_conf_usdt, is_short, limit
     order = limit_order[entry_side(is_short)]
     freqtrade = get_patched_freqtradebot(mocker, default_conf_usdt)
     mocker.patch(f'{EXMS}.fetch_order', return_value=order)
+    mocker.patch('freqtrade.freqtradebot.FreqtradeBot._notify_enter')
 
     # TODO: should not be magicmock
     trade = MagicMock()
@@ -3779,9 +3783,9 @@ def test_execute_trade_exit_up(default_conf_usdt, ticker_usdt, fee, ticker_usdt_
         'profit_amount': 0.29554455 if is_short else 5.685,
         'profit_ratio': 0.00493809 if is_short else 0.09451372,
         'stake_currency': 'USDT',
+        'quote_currency': 'USDT',
         'fiat_currency': 'USD',
         'base_currency': 'ETH',
-        'sell_reason': ExitType.ROI.value,
         'exit_reason': ExitType.ROI.value,
         'open_date': ANY,
         'close_date': ANY,
@@ -3789,6 +3793,8 @@ def test_execute_trade_exit_up(default_conf_usdt, ticker_usdt, fee, ticker_usdt_
         'sub_trade': False,
         'cumulative_profit': 0.0,
         'stake_amount': pytest.approx(60),
+        'is_final_exit': False,
+        'final_profit_ratio': None,
     } == last_msg
 
 
@@ -3844,9 +3850,9 @@ def test_execute_trade_exit_down(default_conf_usdt, ticker_usdt, fee, ticker_usd
         'profit_amount': -5.65990099 if is_short else -0.00075,
         'profit_ratio': -0.0945681 if is_short else -1.247e-05,
         'stake_currency': 'USDT',
+        'quote_currency': 'USDT',
         'base_currency': 'ETH',
         'fiat_currency': 'USD',
-        'sell_reason': ExitType.STOP_LOSS.value,
         'exit_reason': ExitType.STOP_LOSS.value,
         'open_date': ANY,
         'close_date': ANY,
@@ -3854,6 +3860,8 @@ def test_execute_trade_exit_down(default_conf_usdt, ticker_usdt, fee, ticker_usd
         'sub_trade': False,
         'cumulative_profit': 0.0,
         'stake_amount': pytest.approx(60),
+        'is_final_exit': False,
+        'final_profit_ratio': None,
     } == last_msg
 
 
@@ -3930,9 +3938,9 @@ def test_execute_trade_exit_custom_exit_price(
         'profit_amount': pytest.approx(profit_amount),
         'profit_ratio': profit_ratio,
         'stake_currency': 'USDT',
+        'quote_currency': 'USDT',
         'base_currency': 'ETH',
         'fiat_currency': 'USD',
-        'sell_reason': 'foo',
         'exit_reason': 'foo',
         'open_date': ANY,
         'close_date': ANY,
@@ -3940,6 +3948,8 @@ def test_execute_trade_exit_custom_exit_price(
         'sub_trade': False,
         'cumulative_profit': 0.0,
         'stake_amount': pytest.approx(60),
+        'is_final_exit': False,
+        'final_profit_ratio': None,
     } == last_msg
 
 
@@ -4003,9 +4013,9 @@ def test_execute_trade_exit_down_stoploss_on_exchange_dry_run(
         'profit_amount': -0.3 if is_short else -0.8985,
         'profit_ratio': -0.00501253 if is_short else -0.01493766,
         'stake_currency': 'USDT',
+        'quote_currency': 'USDT',
         'fiat_currency': 'USD',
         'base_currency': 'ETH',
-        'sell_reason': ExitType.STOP_LOSS.value,
         'exit_reason': ExitType.STOP_LOSS.value,
         'open_date': ANY,
         'close_date': ANY,
@@ -4013,6 +4023,8 @@ def test_execute_trade_exit_down_stoploss_on_exchange_dry_run(
         'sub_trade': False,
         'cumulative_profit': 0.0,
         'stake_amount': pytest.approx(60),
+        'is_final_exit': False,
+        'final_profit_ratio': None,
     } == last_msg
 
 
@@ -4269,9 +4281,9 @@ def test_execute_trade_exit_market_order(
         'profit_amount': pytest.approx(profit_amount),
         'profit_ratio': profit_ratio,
         'stake_currency': 'USDT',
+        'quote_currency': 'USDT',
         'base_currency': 'ETH',
         'fiat_currency': 'USD',
-        'sell_reason': ExitType.ROI.value,
         'exit_reason': ExitType.ROI.value,
         'open_date': ANY,
         'close_date': ANY,
@@ -4279,7 +4291,8 @@ def test_execute_trade_exit_market_order(
         'sub_trade': False,
         'cumulative_profit': 0.0,
         'stake_amount': pytest.approx(60),
-
+        'is_final_exit': False,
+        'final_profit_ratio': None,
     } == last_msg
 
 
