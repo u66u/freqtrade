@@ -1,0 +1,10 @@
+{
+    "exchange": {
+        "pair_whitelist": ["BTC/USDT","ETH/USDT","SOL/USDT","XRP/USDT","BNB/USDT","AVAX/USDT","OP/USDT","MATIC/USDT","ADA/USDT","INJ/USDT","ICP/USDT","NEAR/USDT","LINK/USDT","DOT/USDT","LTC/USDT","ATOM/USDT","BCH/USDT","TRX/USDT","UNI/USDT","XLM/USDT"],
+        "pair_blacklist": []
+    },
+    "pairlists": [
+        {"method": "StaticPairList"},
+        {"method": "FullTradesFilter"},
+    ],
+}
