@@ -95,33 +95,17 @@ services:
     #  --config /freqtrade/user_data/config-discord3.json
   freqtrade4:
     image: stash86/freqtrade:linux-arm64-v8
-    # build:
-    #   context: .
-    #   dockerfile: "./docker/Dockerfile.custom"
-    # links:
-    #   - "binance_proxy"
-    # depends_on:
-    #   - "binance_proxy"
     restart: unless-stopped
     container_name: freqtrade4
     volumes:
       - "./user_data:/freqtrade/user_data"
       - "./freqtrade_strategies:/freqtrade/freqtrade_strategies"
-    # ports:
-    #   - "127.0.0.1:8084:8081"
+    ports:
+      - "127.0.0.1:8084:8081"
     command: >
       trade
       --logfile /freqtrade/user_data/logs/freqtrade4.log
       --config /freqtrade/user_data/config4.json
-      --config /freqtrade/user_data/config-exchange4.json
-      --config /freqtrade/user_data/config-exchange-general.json
-    #  --config /freqtrade/user_data/config-exchange-general-binance-proxy-docker.json
-    #  --config /freqtrade/user_data/config-exchange-general-binance-proxy-futures.json
-    #  --config /freqtrade/user_data/config-exchange-general-docker-kucoin.json
-      --config /freqtrade/user_data/config-exchange-blacklist.json
-      --config /freqtrade/user_data/config-telegram4.json
-      --config /freqtrade/user_data/config-telegram-general.json
-    #  --config /freqtrade/user_data/config-discord4.json
 
   # binance_proxy:
   #   image: nightshift2k/binance-proxy:latest
