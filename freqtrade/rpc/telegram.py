@@ -1353,7 +1353,7 @@ class Telegram(RPCHandler):
         output = "<b>Performance:</b>\n"
         for i, trade in enumerate(trades):
             stat_line = (
-                f"{i+1}.\t <code>{trade['pair']}\t"
+                f"{i + 1}.\t <code>{trade['pair']}\t"
                 f"{fmt_coin(trade['profit_abs'], self._config['stake_currency'])} "
                 f"({trade['profit_ratio']:.2%}) "
                 f"({trade['count']})</code>\n")
@@ -1385,7 +1385,7 @@ class Telegram(RPCHandler):
         output = "<b>Entry Tag Performance:</b>\n"
         for i, trade in enumerate(trades):
             stat_line = (
-                f"{i+1}.\t <code>{trade['enter_tag']}\t"
+                f"{i + 1}.\t <code>{trade['enter_tag']}\t"
                 f"{fmt_coin(trade['profit_abs'], self._config['stake_currency'])} "
                 f"({trade['profit_ratio']:.2%}) "
                 f"({trade['count']})</code>\n")
@@ -1417,7 +1417,7 @@ class Telegram(RPCHandler):
         output = "<b>Exit Reason Performance:</b>\n"
         for i, trade in enumerate(trades):
             stat_line = (
-                f"{i+1}.\t <code>{trade['exit_reason']}\t"
+                f"{i + 1}.\t <code>{trade['exit_reason']}\t"
                 f"{fmt_coin(trade['profit_abs'], self._config['stake_currency'])} "
                 f"({trade['profit_ratio']:.2%}) "
                 f"({trade['count']})</code>\n")
@@ -1449,7 +1449,7 @@ class Telegram(RPCHandler):
         output = "<b>Mix Tag Performance:</b>\n"
         for i, trade in enumerate(trades):
             stat_line = (
-                f"{i+1}.\t <code>{trade['mix_tag']}\t"
+                f"{i + 1}.\t <code>{trade['mix_tag']}\t"
                 f"{fmt_coin(trade['profit_abs'], self._config['stake_currency'])} "
                 f"({trade['profit_ratio']:.2%}) "
                 f"({trade['count']})</code>\n")
