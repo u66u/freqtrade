@@ -6,7 +6,7 @@
     "fiat_display_currency": "USD",
     "dry_run": true,
     "dry_run_wallet": 65,
-    "trading_mode": "spot",
+    "trading_mode": "futures",
     "cancel_open_orders_on_exit": false,
     "unfilledtimeout": {
         "entry": 10,
@@ -47,7 +47,7 @@
         "ccxt_async_config": {
         },
         "pair_whitelist": [
-            ".*/USDT"
+            ".*/USDT:USDT"
         ],
         "pair_blacklist": [
             // Bad

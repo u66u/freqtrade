@@ -25,6 +25,7 @@
         "config-orders-limit-entry-15m.json",
         "config-exchange.json",
         "config-exchange-general.json",
+        "config-exchange-blacklist.json",
         "config-discord.json",
         "config-discord-general.json",
         "config-api.json",
