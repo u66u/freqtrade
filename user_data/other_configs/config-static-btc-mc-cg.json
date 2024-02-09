@@ -53,7 +53,7 @@
             "enableRateLimit": true,
             "rateLimit": 200
         },
-        "pair_whitelist": ["ETH/BTC","SOL/BTC","XRP/BTC","BNB/BTC","WBTC/BTC","MATIC/BTC","ADA/BTC","AVAX/BTC","DOT/BTC","INJ/BTC","LINK/BTC","LTC/BTC","OP/BTC","NEAR/BTC","ICP/BTC","ATOM/BTC","XLM/BTC","BCH/BTC","TRX/BTC","UNI/BTC"],
+        "pair_whitelist": ["ETH/BTC","BNB/BTC","SOL/BTC","XRP/BTC","ADA/BTC","AVAX/BTC","TRX/BTC","LINK/BTC","DOT/BTC","MATIC/BTC","WBTC/BTC","ICP/BTC","LTC/BTC","BCH/BTC","UNI/BTC","ATOM/BTC","ETC/BTC","TIA/BTC","OP/BTC","XLM/BTC","IMX/BTC","NEAR/BTC","APT/BTC","INJ/BTC","FIL/BTC","STX/BTC","LDO/BTC","HBAR/BTC","ARB/BTC","VET/BTC"],
         "pair_blacklist": []
     },
     "edge": {
