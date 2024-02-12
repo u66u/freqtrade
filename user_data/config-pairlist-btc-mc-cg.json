@@ -1,10 +1,18 @@
 {
-    "exchange": {
-        "pair_whitelist": ["ETH/BTC","SOL/BTC","XRP/BTC","BNB/BTC","WBTC/BTC","MATIC/BTC","ADA/BTC","AVAX/BTC","DOT/BTC","INJ/BTC","LINK/BTC","LTC/BTC","OP/BTC","NEAR/BTC","ICP/BTC","ATOM/BTC","XLM/BTC","BCH/BTC","TRX/BTC","UNI/BTC"],
-        "pair_blacklist": []
-    },
     "pairlists": [
-        {"method": "StaticPairList"},
+        {
+            "method": "MarketCapPairList",
+            "number_assets": 30,
+            "max_rank": 50,
+            "refresh_period": 86400
+        },
+        {
+            "method": "VolumePairList",
+            "number_assets": 20,
+            "sort_key": "quoteVolume",
+            "min_value": 0,
+            "refresh_period": 1800
+        },
         {"method": "FullTradesFilter"},
     ],
 }
