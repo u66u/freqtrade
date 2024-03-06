@@ -1,8 +1,8 @@
 {
     "exchange": {
         "pair_blacklist": [
-            // Exchange
-            // "(BNB|KCS)/.*",
+            // Bad
+            "(DOGE|SHIB)/.*",
             // Leverage
             ".*(_PREMIUM|BEAR|BULL|DOWN|HALF|HEDGE|UP|[1235][SL]|2021)/.*",
             // Timed futures
