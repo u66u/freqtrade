@@ -1,0 +1,13 @@
+[Unit]
+Description=Freqtrade Daemon
+After=network.target
+
+[Service]
+# Set WorkingDirectory and ExecStart to your file paths accordingly
+# NOTE: %h will be resolved to /home/<username>
+WorkingDirectory=%h/freqtrade
+ExecStart=%h/.local/bin/freqtrade trade --logfile user_data/logs/freqtrade3.log --config user_data/config3.json
+Restart=on-failure
+
+[Install]
+WantedBy=default.target
