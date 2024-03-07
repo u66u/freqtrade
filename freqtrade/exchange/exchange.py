@@ -8,7 +8,7 @@ import logging
 import signal
 from copy import deepcopy
 from datetime import datetime, timedelta, timezone
-from math import floor
+from math import floor, isnan
 from threading import Lock
 from typing import Any, Coroutine, Dict, List, Literal, Optional, Tuple, Union
 
@@ -132,7 +132,7 @@ class Exchange:
 
         # Holds candles
         self._klines: Dict[PairWithTimeframe, DataFrame] = {}
-        self._expiring_candle_cache: Dict[str, PeriodicCache] = {}
+        self._expiring_candle_cache: Dict[Tuple[str, int], PeriodicCache] = {}
 
         # Holds all open sell orders for dry_run
         self._dry_run_open_orders: Dict[str, Any] = {}
@@ -1260,11 +1260,43 @@ class Exchange:
         except ccxt.BaseError as e:
             raise OperationalException(e) from e
 
+    def fetch_order_emulated(self, order_id: str, pair: str, params: Dict) -> Dict:
+        """
+        Emulated fetch_order if the exchange doesn't support fetch_order, but requires separate
+        calls for open and closed orders.
+        """
+        try:
+            order = self._api.fetch_open_order(order_id, pair, params=params)
+            self._log_exchange_response('fetch_open_order', order)
+            order = self._order_contracts_to_amount(order)
+            return order
+        except ccxt.OrderNotFound:
+            try:
+                order = self._api.fetch_closed_order(order_id, pair, params=params)
+                self._log_exchange_response('fetch_closed_order', order)
+                order = self._order_contracts_to_amount(order)
+                return order
+            except ccxt.OrderNotFound as e:
+                raise RetryableOrderError(
+                    f'Order not found (pair: {pair} id: {order_id}). Message: {e}') from e
+        except ccxt.InvalidOrder as e:
+            raise InvalidOrderException(
+                f'Tried to get an invalid order (pair: {pair} id: {order_id}). Message: {e}') from e
+        except ccxt.DDoSProtection as e:
+            raise DDosProtection(e) from e
+        except (ccxt.NetworkError, ccxt.ExchangeError) as e:
+            raise TemporaryError(
+                f'Could not get order due to {e.__class__.__name__}. Message: {e}') from e
+        except ccxt.BaseError as e:
+            raise OperationalException(e) from e
+
     @retrier(retries=API_FETCH_ORDER_RETRY_COUNT)
     def fetch_order(self, order_id: str, pair: str, params: Dict = {}) -> Dict:
         if self._config['dry_run']:
             return self.fetch_dry_run_order(order_id)
         try:
+            if not self.exchange_has('fetchOrder'):
+                return self.fetch_order_emulated(order_id, pair, params)
             order = self._api.fetch_order(order_id, pair, params=params)
             self._log_exchange_response('fetch_order', order)
             order = self._order_contracts_to_amount(order)
@@ -2137,18 +2169,18 @@ class Exchange:
         Should only be used for pairlists which need "on time" expirarion, and no longer cache.
         """
 
-        timeframes = [p[1] for p in pairs]
+        timeframes = {p[1] for p in pairs}
         for timeframe in timeframes:
-            if timeframe not in self._expiring_candle_cache:
+            if (timeframe, since_ms) not in self._expiring_candle_cache:
                 timeframe_in_sec = timeframe_to_seconds(timeframe)
                 # Initialise cache
-                self._expiring_candle_cache[timeframe] = PeriodicCache(ttl=timeframe_in_sec,
-                                                                       maxsize=1000)
+                self._expiring_candle_cache[(timeframe, since_ms)] = PeriodicCache(
+                    ttl=timeframe_in_sec, maxsize=1000)
 
         # Get candles from cache
         candles = {
-            c: self._expiring_candle_cache[c[1]].get(c, None) for c in pairs
-            if c in self._expiring_candle_cache[c[1]]
+            c: self._expiring_candle_cache[(c[1], since_ms)].get(c, None) for c in pairs
+            if c in self._expiring_candle_cache[(c[1], since_ms)]
         }
         pairs_to_download = [p for p in pairs if p not in candles]
         if pairs_to_download:
@@ -2156,7 +2188,7 @@ class Exchange:
                 pairs_to_download, since_ms=since_ms, cache=False
             )
             for c, val in candles.items():
-                self._expiring_candle_cache[c[1]][c] = val
+                self._expiring_candle_cache[(c[1], since_ms)][c] = val
         return candles
 
     def _now_is_time_to_refresh(self, pair: str, timeframe: str, candle_type: CandleType) -> bool:
@@ -2855,7 +2887,7 @@ class Exchange:
             else:
                 # Fill up missing funding_rate candles with fallback value
                 combined = mark_rates.merge(
-                    funding_rates, on='date', how="outer", suffixes=["_mark", "_fund"]
+                    funding_rates, on='date', how="left", suffixes=["_mark", "_fund"]
                     )
                 combined['open_fund'] = combined['open_fund'].fillna(futures_funding_rate)
                 return combined
@@ -2884,7 +2916,8 @@ class Exchange:
         if not df.empty:
             df1 = df[(df['date'] >= open_date) & (df['date'] <= close_date)]
             fees = sum(df1['open_fund'] * df1['open_mark'] * amount)
-
+        if isnan(fees):
+            fees = 0.0
         # Negate fees for longs as funding_fees expects it this way based on live endpoints.
         return fees if is_short else -fees
 

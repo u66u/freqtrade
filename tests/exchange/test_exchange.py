@@ -7,6 +7,7 @@ from unittest.mock import MagicMock, Mock, PropertyMock, patch
 
 import ccxt
 import pytest
+from numpy import NaN
 from pandas import DataFrame
 
 from freqtrade.enums import CandleType, MarginMode, RunMode, TradingMode
@@ -3237,6 +3238,7 @@ def test_is_cancel_order_result_suitable(mocker, default_conf, exchange_name, or
 def test_cancel_order_with_result(default_conf, mocker, exchange_name, corder,
                                   call_corder, call_forder):
     default_conf['dry_run'] = False
+    mocker.patch(f"{EXMS}.exchange_has", return_value=True)
     api_mock = MagicMock()
     api_mock.cancel_order = MagicMock(return_value=corder)
     api_mock.fetch_order = MagicMock(return_value={})
@@ -3250,6 +3252,7 @@ def test_cancel_order_with_result(default_conf, mocker, exchange_name, corder,
 @pytest.mark.parametrize("exchange_name", EXCHANGES)
 def test_cancel_order_with_result_error(default_conf, mocker, exchange_name, caplog):
     default_conf['dry_run'] = False
+    mocker.patch(f"{EXMS}.exchange_has", return_value=True)
     api_mock = MagicMock()
     api_mock.cancel_order = MagicMock(side_effect=ccxt.InvalidOrder("Did not find order"))
     api_mock.fetch_order = MagicMock(side_effect=ccxt.InvalidOrder("Did not find order"))
@@ -3347,6 +3350,7 @@ def test_fetch_order(default_conf, mocker, exchange_name, caplog):
     order.myid = 123
     order.symbol = 'TKN/BTC'
 
+    mocker.patch(f"{EXMS}.exchange_has", return_value=True)
     exchange = get_patched_exchange(mocker, default_conf, id=exchange_name)
     exchange._dry_run_open_orders['X'] = order
     assert exchange.fetch_order('X', 'TKN/BTC').myid == 123
@@ -3393,8 +3397,78 @@ def test_fetch_order(default_conf, mocker, exchange_name, caplog):
 
 @pytest.mark.usefixtures("init_persistence")
 @pytest.mark.parametrize("exchange_name", EXCHANGES)
+def test_fetch_order_emulated(default_conf, mocker, exchange_name, caplog):
+    default_conf['dry_run'] = True
+    default_conf['exchange']['log_responses'] = True
+    order = MagicMock()
+    order.myid = 123
+    order.symbol = 'TKN/BTC'
+
+    exchange = get_patched_exchange(mocker, default_conf, id=exchange_name)
+    mocker.patch(f'{EXMS}.exchange_has', return_value=False)
+    exchange._dry_run_open_orders['X'] = order
+    # Dry run - regular fetch_order behavior
+    assert exchange.fetch_order('X', 'TKN/BTC').myid == 123
+
+    with pytest.raises(InvalidOrderException, match=r'Tried to get an invalid dry-run-order.*'):
+        exchange.fetch_order('Y', 'TKN/BTC')
+
+    default_conf['dry_run'] = False
+    mocker.patch(f'{EXMS}.exchange_has', return_value=False)
+    api_mock = MagicMock()
+    api_mock.fetch_open_order = MagicMock(
+        return_value={'id': '123', 'amount': 2, 'symbol': 'TKN/BTC'})
+    api_mock.fetch_closed_order = MagicMock(
+        return_value={'id': '123', 'amount': 2, 'symbol': 'TKN/BTC'})
+    exchange = get_patched_exchange(mocker, default_conf, api_mock, id=exchange_name)
+    assert exchange.fetch_order(
+        'X', 'TKN/BTC') == {'id': '123', 'amount': 2, 'symbol': 'TKN/BTC'}
+    assert log_has(
+        ("API fetch_open_order: {\'id\': \'123\', \'amount\': 2, \'symbol\': \'TKN/BTC\'}"
+         ),
+        caplog
+    )
+    assert api_mock.fetch_open_order.call_count == 1
+    assert api_mock.fetch_closed_order.call_count == 0
+    caplog.clear()
+
+    # open_order doesn't find order
+    api_mock.fetch_open_order = MagicMock(side_effect=ccxt.OrderNotFound("Order not found"))
+    api_mock.fetch_closed_order = MagicMock(
+        return_value={'id': '123', 'amount': 2, 'symbol': 'TKN/BTC'})
+    exchange = get_patched_exchange(mocker, default_conf, api_mock, id=exchange_name)
+    assert exchange.fetch_order(
+        'X', 'TKN/BTC') == {'id': '123', 'amount': 2, 'symbol': 'TKN/BTC'}
+    assert log_has(
+        ("API fetch_closed_order: {\'id\': \'123\', \'amount\': 2, \'symbol\': \'TKN/BTC\'}"
+         ),
+        caplog
+    )
+    assert api_mock.fetch_open_order.call_count == 1
+    assert api_mock.fetch_closed_order.call_count == 1
+    caplog.clear()
+
+    with pytest.raises(InvalidOrderException):
+        api_mock.fetch_open_order = MagicMock(side_effect=ccxt.InvalidOrder("Order not found"))
+        api_mock.fetch_closed_order = MagicMock(side_effect=ccxt.InvalidOrder("Order not found"))
+        exchange = get_patched_exchange(mocker, default_conf, api_mock, id=exchange_name)
+        exchange.fetch_order(order_id='_', pair='TKN/BTC')
+    assert api_mock.fetch_open_order.call_count == 1
+
+    api_mock.fetch_open_order = MagicMock(side_effect=ccxt.OrderNotFound("Order not found"))
+    exchange = get_patched_exchange(mocker, default_conf, api_mock, id=exchange_name)
+
+    ccxt_exceptionhandlers(mocker, default_conf, api_mock, exchange_name,
+                           'fetch_order_emulated', 'fetch_open_order',
+                           retries=1,
+                           order_id='_', pair='TKN/BTC', params={})
+
+
+@pytest.mark.usefixtures("init_persistence")
+@pytest.mark.parametrize("exchange_name", EXCHANGES)
 def test_fetch_stoploss_order(default_conf, mocker, exchange_name):
     default_conf['dry_run'] = True
+    mocker.patch(f"{EXMS}.exchange_has", return_value=True)
     order = MagicMock()
     order.myid = 123
     exchange = get_patched_exchange(mocker, default_conf, id=exchange_name)
@@ -4130,6 +4204,7 @@ def test_get_max_leverage_from_margin(default_conf, mocker, pair, nominal_value,
         (10, 0.0001, 2.0, 1.0, 0.002, 0.002),
         (10, 0.0002, 2.0, 0.01, 0.004, 0.00004),
         (10, 0.0002, 2.5, None, 0.005, None),
+        (10, 0.0002, NaN, None, 0.0, None),
     ])
 def test_calculate_funding_fees(
     default_conf,
@@ -4239,8 +4314,8 @@ def test_combine_funding_and_mark(
         assert len(df) == 1
 
     # Empty funding rates
-    funding_rates = DataFrame([], columns=['date', 'open'])
-    df = exchange.combine_funding_and_mark(funding_rates, mark_rates, futures_funding_rate)
+    funding_rates2 = DataFrame([], columns=['date', 'open'])
+    df = exchange.combine_funding_and_mark(funding_rates2, mark_rates, futures_funding_rate)
     if futures_funding_rate is not None:
         assert len(df) == 3
         assert df.iloc[0]['open_fund'] == futures_funding_rate
@@ -4248,6 +4323,12 @@ def test_combine_funding_and_mark(
         assert df.iloc[2]['open_fund'] == futures_funding_rate
     else:
         assert len(df) == 0
+
+    # Empty mark candles
+    mark_candles = DataFrame([], columns=['date', 'open'])
+    df = exchange.combine_funding_and_mark(funding_rates, mark_candles, futures_funding_rate)
+
+    assert len(df) == 0
 
 
 @pytest.mark.parametrize('exchange,rate_start,rate_end,d1,d2,amount,expected_fees', [
