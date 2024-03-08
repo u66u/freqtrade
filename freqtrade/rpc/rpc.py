@@ -295,6 +295,10 @@ class RPC:
                         profit_str += f" ({fiat_profit:.2f})"
                         fiat_profit_sum = fiat_profit if isnan(fiat_profit_sum) \
                             else fiat_profit_sum + fiat_profit
+                else:
+                    profit_str += f" ({trade_profit:.2f})"
+                    fiat_profit_sum = trade_profit if isnan(fiat_profit_sum) \
+                        else fiat_profit_sum + trade_profit
 
                 active_attempt_side_symbols = [
                     '*' if (oo and oo.ft_order_side == trade.entry_side) else '**'
@@ -323,6 +327,8 @@ class RPC:
             profitcol = "Profit"
             if self._fiat_converter:
                 profitcol += " (" + fiat_display_currency + ")"
+            else:
+                profitcol += " (" + stake_currency + ")"
 
             columns = [
                 'ID L/S' if nonspot else 'ID',
@@ -943,6 +949,7 @@ class RPC:
                                              is_short=is_short,
                                              enter_tag=enter_tag,
                                              leverage_=leverage,
+                                             mode='pos_adjust' if trade else 'initial'
                                              ):
                 Trade.commit()
                 trade = Trade.get_trades([Trade.is_open.is_(True), Trade.pair == pair]).first()
@@ -1014,6 +1021,32 @@ class RPC:
                 'result_msg': f'Deleted trade {trade_id}. Closed {c_count} open orders.',
                 'cancel_order_count': c_count,
             }
+
+    def _rpc_list_custom_data(self, trade_id: int, key: Optional[str]) -> List[Dict[str, Any]]:
+        # Query for trade
+        trade = Trade.get_trades(trade_filter=[Trade.id == trade_id]).first()
+        if trade is None:
+            return []
+        # Query custom_data
+        custom_data = []
+        if key:
+            data = trade.get_custom_data(key=key)
+            if data:
+                custom_data = [data]
+        else:
+            custom_data = trade.get_all_custom_data()
+        return [
+            {
+                'id': data_entry.id,
+                'ft_trade_id': data_entry.ft_trade_id,
+                'cd_key': data_entry.cd_key,
+                'cd_type': data_entry.cd_type,
+                'cd_value': data_entry.cd_value,
+                'created_at': data_entry.created_at,
+                'updated_at': data_entry.updated_at
+            }
+            for data_entry in custom_data
+        ]
 
     def _rpc_performance(self) -> List[Dict[str, Any]]:
         """
