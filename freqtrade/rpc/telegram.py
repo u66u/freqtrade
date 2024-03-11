@@ -1711,7 +1711,9 @@ class Telegram(RPCHandler):
         Shows the last process timestamp
         """
         health = self._rpc.health()
-        message = f"Last process: `{health['last_process_loc']}`"
+        message = f"Last process: `{health['last_process_loc']}`\n"
+        message += f"Initial bot start: `{health['bot_start_loc']}`\n"
+        message += f"Last bot restart: `{health['bot_startup_loc']}`"
         await self._send_msg(message)
 
     @authorized_only
