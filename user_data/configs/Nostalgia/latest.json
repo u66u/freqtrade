@@ -13,6 +13,6 @@
     "pairlist-volume-kucoin-usdt.json",
     "blacklist-kucoin.json",
     "exampleconfig.json",
-    "config-private.json"
+    // "config-private.json"
   ]
 }
