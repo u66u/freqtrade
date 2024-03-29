@@ -10,7 +10,7 @@
   "strategy": "NostalgiaForInfinityX4",
   "add_config_files": [
     "trading_mode-spot.json",
-    "pairlist-volume-kucoin-usdt.json",
+    "pairlist-backtest-static-kucoin-spot-usdt.json",
     // "blacklist-kucoin.json",
     "exampleconfig.json",
     // "config-private.json"
