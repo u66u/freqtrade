@@ -1,0 +1,33 @@
+{
+    "pairlists": [
+      {
+        "method": "StaticPairList"
+      }
+    ],
+    "timeframe": "15m",
+    "tradable_balance_ratio": 0.99,
+    "fiat_display_currency": "USD",
+    "stake_amount": "unlimited",
+    "stake_currency": "USDT",
+    "amend_last_stake_amount": true,
+    "exchange": {
+      "pair_whitelist": [
+        "BTC/USDT",
+        "BCH/USDT",
+        "ETH/USDT",
+        "LINK/USDT",
+        "LTC/USDT",
+        "SOL/USDT",
+        "BNB/USDT",
+        "XRP/USDT",
+        "ADA/USDT",
+        "DOT/USDT",
+        "ETC/USDT",
+        "ALGO/USDT",
+        "LUNA/USDT"
+      ],
+      "name": "binance"
+    },
+    "dry_run_wallet": 100,
+    "max_open_trades": 5
+}

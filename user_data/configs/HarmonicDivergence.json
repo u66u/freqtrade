@@ -1,0 +1,50 @@
+{
+    "pairlists": [
+      {
+        "method": "StaticPairList"
+      }
+    ],
+    "timeframe": "15m",
+    "tradable_balance_ratio": 0.99,
+    "fiat_display_currency": "USD",
+    "stake_amount": "unlimited",
+    "stake_currency": "USDT",
+    "amend_last_stake_amount": true,
+    "exchange": {
+      "pair_whitelist": [
+        "BTC/USDT",
+        "BCH/USDT",
+        "ETH/USDT",
+        "LINK/USDT",
+        "LTC/USDT",
+        "SOL/USDT",
+        "BNB/USDT",
+        "XRP/USDT",
+        "ADA/USDT",
+        "DOT/USDT",
+        "ETC/USDT",
+        "ALGO/USDT",
+        "LUNA/USDT"
+      ],
+      "name": "binance"
+    },
+    "dry_run_wallet": 100,
+    "max_open_trades": 5,
+    "exit_pricing": {
+      "price_side": "other",
+      "use_order_book": false,
+      "order_book_min": 1,
+      "order_book_max": 1
+    },
+    "entry_pricing": {
+        "price_side": "other",
+        "ask_last_balance": 0.0,
+        "use_order_book": false,
+        "order_book_top": 1,
+        "check_depth_of_market": {
+            "enabled": false,
+            "bids_to_ask_delta": 1
+        }
+    },
+
+  }
