@@ -11,7 +11,7 @@
   "add_config_files": [
     "trading_mode-spot.json",
     "pairlist-volume-kucoin-usdt.json",
-    "blacklist-kucoin.json",
+    // "blacklist-kucoin.json",
     "exampleconfig.json",
     // "config-private.json"
   ]
